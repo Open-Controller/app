@@ -25,7 +25,11 @@ val typography = Typography(
         fontSize = 25.sp
     ),
     h6 = Typography().h6.copy(fontFamily = LexendDeca),
-    subtitle1 = Typography().subtitle1.copy(fontFamily = LexendDeca),
+    subtitle1 = TextStyle(
+            fontFamily = LexendDeca,
+            fontWeight = FontWeight.Medium,
+            fontSize = 16.sp
+    ),
     subtitle2 = Typography().subtitle2.copy(fontFamily = LexendDeca),
     body1 = Typography().body1.copy(fontFamily = LexendDeca),
     body2 = Typography().body2.copy(fontFamily = LexendDeca),
