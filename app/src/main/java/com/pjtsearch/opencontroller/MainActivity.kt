@@ -97,8 +97,8 @@ fun SystemUi(windows: Window, house: JSONObject) =
                                 title = {
                                     Crossfade(current = menuOpen.isConcealed) {
                                         when (it) {
-                                            true -> room?.let { Text(it) } ?: Text("Home")
-                                            false -> Text("Menu")
+                                            true -> room?.let { Text(it, style = typography.h5) } ?: Text("Home", style = typography.h5)
+                                            false -> Text("Menu", style = typography.h5)
                                         }
                                     }
                                 }
