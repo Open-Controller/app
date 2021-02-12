@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
     @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val controller = OpenController("""{ "name": "Test house", "rooms": [ { "name": "Room 2", "controllers":[] }, { "name": "Test room", "controllers": [ { "name": "test", "widgets": [ { "type": "Button", "action": { "device": "test", "action": "Test" }, "icon": "icon", "text": "text" } ] } ] } ], "devices": [ { "id": "test", "actions": [ { "type": "HttpAction", "url": "http://example.com", "id": "Test", "method": "GET" }, { "type": "TcpAction", "address": "localhost:2000", "id": "TCP", "command": "test" } ], "dynamic_values": [ { "id": "Test", "resources": [ { "type": "Date" } ], "script": "date + 2" } ] } ] }""")
+        val controller = OpenController("""{ "name": "Test house", "rooms": [ { "name": "Family Room", "controllers":[] }, { "name": "Test room", "controllers": [ { "name": "test", "widgets": [ { "type": "Button", "action": { "device": "test", "action": "Test" }, "icon": "icon", "text": "text" } ] } ] } ], "devices": [ { "id": "test", "actions": [ { "type": "HttpAction", "url": "http://example.com", "id": "Test", "method": "GET" }, { "type": "TcpAction", "address": "localhost:2000", "id": "TCP", "command": "test" } ], "dynamic_values": [ { "id": "Test", "resources": [ { "type": "Date" } ], "script": "date + 2" } ] } ] }""")
         val house = JSONObject(controller.toJson());
         /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             this.window.setDecorFitsSystemWindows(true)
@@ -113,7 +113,7 @@ fun SystemUi(windows: Window, house: JSONObject) =
                         )
                     },
                     backLayerContent = {
-                        Column(modifier = Modifier.padding(10.dp)) {
+                        Column(modifier = Modifier.padding(10.dp).padding(bottom = 20.dp)) {
                             house.getJSONArray("rooms").toList()
                                 ?.map { it.getString("name") }
                                 ?.map { name ->
