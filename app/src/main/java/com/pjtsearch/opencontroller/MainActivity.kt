@@ -8,6 +8,7 @@ import android.view.Window
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import com.pjtsearch.opencontroller.components.ExpandableListItem
 import com.pjtsearch.opencontroller.ui.theme.OpenControllerTheme
 import com.pjtsearch.opencontroller.ui.theme.typography
 import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
@@ -41,6 +43,7 @@ import java.util.stream.Stream
 
 @ExperimentalMaterialApi
 class MainActivity : AppCompatActivity() {
+    @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val controller = OpenController("{ \"name\": \"Test house\", \"rooms\": [ { \"name\": \"Test room\", \"controllers\": [ { \"name\": \"test\", \"widgets\": [ { \"type\": \"Button\", \"action\": { \"device\": \"test\", \"action\": \"Test\" }, \"icon\": \"icon\", \"text\": \"text\" } ] } ] } ], \"devices\": [ { \"id\": \"test\", \"actions\": [ { \"type\": \"HttpAction\", \"url\": \"http://example.com\", \"id\": \"Test\", \"method\": \"GET\" }, { \"type\": \"TcpAction\", \"address\": \"localhost:2000\", \"id\": \"TCP\", \"command\": \"test\" } ], \"dynamic_values\": [ { \"id\": \"Test\", \"resources\": [ { \"type\": \"Date\" } ], \"script\": \"date + 2\" } ] } ] }")
@@ -66,6 +69,7 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+@ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
 fun SystemUi(windows: Window, house: JSONObject) =
@@ -113,12 +117,14 @@ fun SystemUi(windows: Window, house: JSONObject) =
                             house.getJSONArray("rooms").toList()
                                 ?.map { it.getString("name") }
                                 ?.map { name ->
-                                    ListItem(
+                                    ExpandableListItem(
                                         modifier = Modifier
                                                 .fillMaxWidth()
                                                 .padding(5.dp)
-                                                .clickable {  room = name; menuOpen.conceal() },
-                                        text = { Text(name) })
+                                                .padding(start = 10.dp),
+                                        text = { Text(name) }) {
+                                        ListItem(text = { Text("test") }, modifier = Modifier.height(30.dp))
+                                    }
                                 }
                         }
                     },
