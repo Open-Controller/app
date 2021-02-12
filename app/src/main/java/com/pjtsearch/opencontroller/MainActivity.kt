@@ -8,15 +8,24 @@ import android.view.Window
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.text.font.FontWeight.Companion.Black
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.core.view.WindowCompat
@@ -25,13 +34,14 @@ import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
 import dev.chrisbanes.accompanist.insets.statusBarsHeight
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 import com.pjtsearch.opencontroller_lib.OpenController;
+import org.json.JSONObject
 
 @ExperimentalMaterialApi
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val controller = OpenController("{ \"name\": \"Test house\", \"rooms\": [ { \"name\": \"Test room\", \"controllers\": [ { \"name\": \"test\", \"widgets\": [ { \"type\": \"Button\", \"action\": { \"device\": \"test\", \"action\": \"Test\" }, \"icon\": \"icon\", \"text\": \"text\" } ] } ] } ], \"devices\": [ { \"id\": \"test\", \"actions\": [ { \"type\": \"HttpAction\", \"url\": \"http://example.com\", \"id\": \"Test\", \"method\": \"GET\" }, { \"type\": \"TcpAction\", \"address\": \"localhost:2000\", \"id\": \"TCP\", \"command\": \"test\" } ], \"dynamic_values\": [ { \"id\": \"Test\", \"resources\": [ { \"type\": \"Date\" } ], \"script\": \"date + 2\" } ] } ] }")
-        println(controller.toJson());
+        val house = JSONObject(controller.toJson());
         /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             this.window.setDecorFitsSystemWindows(true)
             this.window.statusBarColor = Color.TRANSPARENT
@@ -48,14 +58,14 @@ class MainActivity : AppCompatActivity() {
             //}
         };*/
         setContent {
-            SystemUi(this.window)
+            SystemUi(this.window, house)
         }
     }
 }
 
 @ExperimentalMaterialApi
 @Composable
-fun SystemUi(windows: Window) =
+fun SystemUi(windows: Window, house: JSONObject) =
     OpenControllerTheme {
         windows.statusBarColor = Color.TRANSPARENT
         windows.navigationBarColor = Color.TRANSPARENT
@@ -74,19 +84,32 @@ fun SystemUi(windows: Window) =
             windows.decorView.systemUiVisibility = windows.decorView.systemUiVisibility or
                     View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         }
+        var room:String? by remember { mutableStateOf(null) }
         ProvideWindowInsets {
             BackdropScaffold(
                     modifier = Modifier.statusBarsPadding(),
                     appBar = {
-                        TopAppBar(backgroundColor = MaterialTheme.colors.primary, elevation = Dp(0f)) {
-                            Text(text = "Test")
-                        }
+                        TopAppBar(
+                                backgroundColor = MaterialTheme.colors.primary,
+                                elevation = Dp(0f),
+                                title = {
+                                    Text(text = "Home")
+                                }
+                        )
                     },
                     backLayerContent = {
-                        Text("Back\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+                        Column(modifier = Modifier.padding(Dp(10f))) {
+                            val rooms = house.getJSONArray("rooms")
+                            for (i in 0 until rooms.length()) {
+                                val name = rooms.getJSONObject(i).getString("name")
+                                OutlinedButton(onClick = { room = name }, modifier = Modifier.fillMaxWidth().padding(Dp(5f))) {
+                                    Text(name)
+                                }
+                            }
+                        }
                     },
                     frontLayerContent = {
-                        Text("Front")
+                        room?.let { Text(it) }
                     }
             )
         }
