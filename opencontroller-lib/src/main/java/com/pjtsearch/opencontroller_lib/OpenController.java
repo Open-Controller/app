@@ -36,7 +36,6 @@ public class OpenController {
 
     private static List<Listener> listeners = new ArrayList<Listener>();
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public static void event_cb(String handle, String device, String dynamic_value, String payload) {
         listeners.stream()
                 .filter(l -> l.equals(new Listener(handle, device, dynamic_value)))
@@ -58,7 +57,6 @@ public class OpenController {
         execute_action(handle, device, action);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public Runnable subscribeDynamicValue(String device, String dynamic_value, Consumer<String> cb) {
         Listener listener = listeners.stream()
                 .filter(l -> l.equals(new Listener(handle, device, dynamic_value)))
@@ -81,7 +79,6 @@ public class OpenController {
         };
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public static void main(String[] args) throws InterruptedException {
         // String handle = OpenController.from_json(
         //         "{ \"name\": \"Test house\", \"rooms\": [ { \"name\": \"Test room\", \"controllers\": [ { \"name\": \"test\", \"widgets\": [ { \"type\": \"Button\", \"action\": { \"device\": \"test\", \"action\": \"Test\" }, \"icon\": \"icon\", \"text\": \"text\" } ] } ] } ], \"devices\": [ { \"id\": \"test\", \"actions\": [ { \"type\": \"HttpAction\", \"url\": \"http://example.com\", \"id\": \"Test\", \"method\": \"GET\" }, { \"type\": \"TcpAction\", \"address\": \"localhost:2000\", \"id\": \"TCP\", \"command\": \"test\" } ], \"dynamic_values\": [ { \"id\": \"Test\", \"resources\": [ { \"type\": \"Date\" } ], \"script\": \"date + 2\" } ] } ] }");
