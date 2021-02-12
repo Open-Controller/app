@@ -9,6 +9,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -112,9 +113,12 @@ fun SystemUi(windows: Window, house: JSONObject) =
                             house.getJSONArray("rooms").toList()
                                 ?.map { it.getString("name") }
                                 ?.map { name ->
-                                    OutlinedButton(onClick = { room = name; menuOpen.conceal() }, modifier = Modifier.fillMaxWidth().padding(5.dp)) {
-                                        Text(name)
-                                    }
+                                    ListItem(
+                                        modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(5.dp)
+                                                .clickable {  room = name; menuOpen.conceal() },
+                                        text = { Text(name) })
                                 }
                         }
                     },
