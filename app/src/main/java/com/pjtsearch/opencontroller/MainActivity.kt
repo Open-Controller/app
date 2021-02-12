@@ -33,7 +33,10 @@ import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
 import dev.chrisbanes.accompanist.insets.statusBarsHeight
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 import com.pjtsearch.opencontroller_lib.OpenController;
+import com.pjtsearch.opencontroller.extensions.toList
+import org.json.JSONArray
 import org.json.JSONObject
+import java.util.stream.Stream
 
 @ExperimentalMaterialApi
 class MainActivity : AppCompatActivity() {
@@ -106,13 +109,13 @@ fun SystemUi(windows: Window, house: JSONObject) =
                     },
                     backLayerContent = {
                         Column(modifier = Modifier.padding(10.dp)) {
-                            val rooms = house.getJSONArray("rooms")
-                            for (i in 0 until rooms.length()) {
-                                val name = rooms.getJSONObject(i).getString("name")
-                                OutlinedButton(onClick = { room = name; menuOpen.conceal() }, modifier = Modifier.fillMaxWidth().padding(5.dp)) {
-                                    Text(name)
+                            house.getJSONArray("rooms").toList()
+                                ?.map { it.getString("name") }
+                                ?.map { name ->
+                                    OutlinedButton(onClick = { room = name; menuOpen.conceal() }, modifier = Modifier.fillMaxWidth().padding(5.dp)) {
+                                        Text(name)
+                                    }
                                 }
-                            }
                         }
                     },
                     frontLayerContent = {
