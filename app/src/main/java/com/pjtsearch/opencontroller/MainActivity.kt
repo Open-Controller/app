@@ -7,6 +7,7 @@ import android.view.View
 import android.view.Window
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -97,10 +98,11 @@ fun SystemUi(windows: Window, house: JSONObject) =
                                 backgroundColor = MaterialTheme.colors.primary,
                                 elevation = Dp(0f),
                                 title = {
-                                    if (menuOpen.isConcealed) {
-                                        room?.let { Text(it) } ?: Text("Home")
-                                    } else {
-                                        Text("Menu")
+                                    Crossfade(current = menuOpen.isConcealed) {
+                                        when (it) {
+                                            true -> room?.let { Text(it) } ?: Text("Home")
+                                            false -> Text("Menu")
+                                        }
                                     }
                                 }
                         )
