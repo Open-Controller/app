@@ -9,10 +9,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -28,7 +25,7 @@ import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.text.font.FontWeight.Companion.Black
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import com.pjtsearch.opencontroller.ui.theme.OpenControllerTheme
 import com.pjtsearch.opencontroller.ui.theme.typography
@@ -91,12 +88,12 @@ fun SystemUi(windows: Window, house: JSONObject) =
         ProvideWindowInsets {
             BackdropScaffold(
                     scaffoldState = menuOpen,
-                    headerHeight = Dp(100f),
+                    headerHeight = 100.dp,
                     modifier = Modifier.statusBarsPadding(),
                     appBar = {
                         TopAppBar(
                                 backgroundColor = MaterialTheme.colors.primary,
-                                elevation = Dp(0f),
+                                elevation = 0.dp,
                                 title = {
                                     Crossfade(current = menuOpen.isConcealed) {
                                         when (it) {
@@ -108,11 +105,11 @@ fun SystemUi(windows: Window, house: JSONObject) =
                         )
                     },
                     backLayerContent = {
-                        Column(modifier = Modifier.padding(Dp(10f))) {
+                        Column(modifier = Modifier.padding(10.dp)) {
                             val rooms = house.getJSONArray("rooms")
                             for (i in 0 until rooms.length()) {
                                 val name = rooms.getJSONObject(i).getString("name")
-                                OutlinedButton(onClick = { room = name; menuOpen.conceal() }, modifier = Modifier.fillMaxWidth().padding(Dp(5f))) {
+                                OutlinedButton(onClick = { room = name; menuOpen.conceal() }, modifier = Modifier.fillMaxWidth().padding(5.dp)) {
                                     Text(name)
                                 }
                             }
