@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.core.view.WindowCompat
 import com.pjtsearch.opencontroller.ui.theme.OpenControllerTheme
+import com.pjtsearch.opencontroller.ui.theme.typography
 import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
 import dev.chrisbanes.accompanist.insets.statusBarsHeight
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
@@ -84,16 +85,23 @@ fun SystemUi(windows: Window, house: JSONObject) =
             windows.decorView.systemUiVisibility = windows.decorView.systemUiVisibility or
                     View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         }
-        var room:String? by remember { mutableStateOf(null) }
+        var room: String? by remember { mutableStateOf(null) }
+        var menuOpen by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
         ProvideWindowInsets {
             BackdropScaffold(
+                    scaffoldState = menuOpen,
+                    headerHeight = Dp(100f),
                     modifier = Modifier.statusBarsPadding(),
                     appBar = {
                         TopAppBar(
                                 backgroundColor = MaterialTheme.colors.primary,
                                 elevation = Dp(0f),
                                 title = {
-                                    Text(text = "Home")
+                                    if (menuOpen.isConcealed) {
+                                        room?.let { Text(it) } ?: Text("Home")
+                                    } else {
+                                        Text("Menu")
+                                    }
                                 }
                         )
                     },
@@ -102,14 +110,14 @@ fun SystemUi(windows: Window, house: JSONObject) =
                             val rooms = house.getJSONArray("rooms")
                             for (i in 0 until rooms.length()) {
                                 val name = rooms.getJSONObject(i).getString("name")
-                                OutlinedButton(onClick = { room = name }, modifier = Modifier.fillMaxWidth().padding(Dp(5f))) {
+                                OutlinedButton(onClick = { room = name; menuOpen.conceal() }, modifier = Modifier.fillMaxWidth().padding(Dp(5f))) {
                                     Text(name)
                                 }
                             }
                         }
                     },
                     frontLayerContent = {
-                        room?.let { Text(it) }
+                        Text(menuOpen.isConcealed.toString())
                     }
             )
         }
