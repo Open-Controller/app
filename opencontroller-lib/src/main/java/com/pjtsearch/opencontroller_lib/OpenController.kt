@@ -39,8 +39,8 @@ class OpenController(json: String) {
     }
 
     private val handle: String
-    fun getHouse(): House {
-        return Klaxon().parse<House>(to_json(handle))!!
+    fun getHouse(): House? {
+        return Klaxon().parse<House>(to_json(handle))
     }
 
     fun executeAction(device: String, action: String) {
