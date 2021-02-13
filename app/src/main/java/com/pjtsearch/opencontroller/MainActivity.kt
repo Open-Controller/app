@@ -107,10 +107,10 @@ fun SystemUi(windows: Window, house: JSONObject) =
                                 backgroundColor = MaterialTheme.colors.background,
                                 elevation = 0.dp,
                                 title = {
-                                    Crossfade(current = menuOpen.isConcealed) {
+                                    Crossfade(current = menuOpen.targetValue) {
                                         when (it) {
-                                            true -> room?.let { Text(it, style = typography.h5) } ?: Text("Home", style = typography.h5)
-                                            false -> Text("Menu", style = typography.h5)
+                                            BackdropValue.Concealed -> room?.let { Text(it, style = typography.h5) } ?: Text("Home", style = typography.h5)
+                                            BackdropValue.Revealed -> Text("Menu", style = typography.h5)
                                         }
                                     }
                                 }
@@ -133,7 +133,14 @@ fun SystemUi(windows: Window, house: JSONObject) =
                         }
                     },
                     frontLayerContent = {
-                        Text(menuOpen.isConcealed.toString())
+                        Crossfade(current = menuOpen.targetValue) {
+                            when (it) {
+                                BackdropValue.Concealed -> Text("Controller", style = typography.h5)
+                                BackdropValue.Revealed -> {
+                                    room?.let { Text(it, style = typography.h5) } ?: Text("Home", style = typography.h5)
+                                }
+                            }
+                        }
                     }
             )
         }
