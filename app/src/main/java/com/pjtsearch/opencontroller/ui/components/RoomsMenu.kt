@@ -9,19 +9,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.components.ExpandableListItem
-import com.pjtsearch.opencontroller_lib.Controller
-import com.pjtsearch.opencontroller_lib.House
+import com.pjtsearch.opencontroller_lib_proto.ControllerOrBuilder
+import com.pjtsearch.opencontroller_lib_proto.HouseOrBuilder
 
 @ExperimentalAnimationApi
 @Composable
-fun RoomsMenu(house: House, onControllerClick: (Controller) -> Unit) =
+fun RoomsMenu(house: HouseOrBuilder, onControllerClick: (ControllerOrBuilder) -> Unit) =
     Column(modifier = Modifier.padding(10.dp).padding(bottom = 20.dp).fillMaxHeight()) {
-        house.rooms
+        house.roomsList
                 ?.map { room ->
                     ExpandableListItem(
                             modifier = Modifier.fillMaxWidth().padding(5.dp).padding(start = 10.dp),
                             text = { Text(room.name) }) {
-                        room.controllers.map { controller ->
+                        room.controllersList.map { controller ->
                             ListItem(
                                     text = { Text(controller.name) },
                                     modifier = Modifier

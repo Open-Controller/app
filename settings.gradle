@@ -1,3 +1,5 @@
 rootProject.name = "OpenController"
 include ':app'
 include ':opencontroller-lib'
+include ':open-controller-lib-proto'
+include ':opencontroller-lib-proto'

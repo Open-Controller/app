@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+option java_package = "com.pjtsearch.opencontroller_lib_proto";
+option java_multiple_files = true;
+
+package model;
+
+message House {
+  string name = 1;
+  repeated Room rooms = 2;
+  repeated Device devices = 3;
+}
+
+message Room {
+  string name = 1;
+  repeated Controller controllers = 2;
+}
+
+message Controller {
+  string name = 1;
+  repeated Widget widgets = 2;
+}
+
+message Device {
+  string id = 1;
+  repeated Action actions = 2;
+  repeated DynamicValue dynamic_values = 3;
+}
+
+message Widget {
+  oneof inner {
+    Button button = 1;
+  }
+}
+
+message Button {
+  ActionRef action = 1;
+  string icon = 2;
+  string text = 3;
+}
+
+message ActionRef {
+  string device = 1;
+  string action = 2;
+}
+
+message Action {
+  oneof inner {
+    HttpAction http_action = 1;
+    TCPAction tcp_action = 2;
+  }
+}
+
+message HttpAction {
+  string id = 1;
+  string url = 2;
+  string method = 3;
+}
+
+message TCPAction {
+  string id = 1;
+  string address = 2;
+  string command = 3;
+}
+
+message DynamicValue {
+  string id = 1;
+  string script = 2;
+  repeated DynamicResource dynamic_resources = 3;
+}
+
+message DynamicResource {
+  oneof inner {
+    DateResource date_resource = 1;
+  }
+}
+
+message DateResource {}
