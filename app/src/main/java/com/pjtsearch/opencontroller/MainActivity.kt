@@ -92,7 +92,7 @@ fun SystemUi(windows: Window, house: JSONObject) =
             windows.decorView.systemUiVisibility = windows.decorView.systemUiVisibility or
                     View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         }
-        var room: String? by remember { mutableStateOf(null) }
+        var selectedController: List<String>? by remember { mutableStateOf(null) }
         var menuOpen by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
         ProvideWindowInsets {
             BackdropScaffold(
@@ -109,7 +109,7 @@ fun SystemUi(windows: Window, house: JSONObject) =
                                 title = {
                                     Crossfade(current = menuOpen.targetValue) {
                                         when (it) {
-                                            BackdropValue.Concealed -> room?.let { Text(it, style = typography.h5) } ?: Text("Home", style = typography.h5)
+                                            BackdropValue.Concealed -> selectedController?.let { Text(it[1], style = typography.h5) } ?: Text("Home", style = typography.h5)
                                             BackdropValue.Revealed -> Text("Menu", style = typography.h5)
                                         }
                                     }
@@ -119,15 +119,20 @@ fun SystemUi(windows: Window, house: JSONObject) =
                     backLayerContent = {
                         Column(modifier = Modifier.padding(10.dp).padding(bottom = 20.dp).fillMaxHeight()) {
                             house.getJSONArray("rooms").toList()
-                                ?.map { it.getString("name") }
-                                ?.map { name ->
+                                ?.map { room ->
                                     ExpandableListItem(
-                                        modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(5.dp)
-                                                .padding(start = 10.dp),
-                                        text = { Text(name) }) {
-                                        ListItem(text = { Text("test") }, modifier = Modifier.height(30.dp))
+                                        modifier = Modifier.fillMaxWidth().padding(5.dp).padding(start = 10.dp),
+                                        text = { Text(room.getString("name")) }) {
+                                            room.getJSONArray("controllers").toList().map { controller ->
+                                                ListItem(
+                                                        text = { Text(controller.getString("name")) },
+                                                        modifier = Modifier
+                                                                .height(30.dp)
+                                                                .clickable {
+                                                                    selectedController = listOf(room.getString("name"), controller.getString("name"))
+                                                                    menuOpen.conceal()
+                                                                })
+                                            }
                                     }
                                 }
                         }
@@ -137,7 +142,7 @@ fun SystemUi(windows: Window, house: JSONObject) =
                             when (it) {
                                 BackdropValue.Concealed -> Text("Controller", style = typography.h5)
                                 BackdropValue.Revealed -> {
-                                    room?.let { Text(it, style = typography.h5) } ?: Text("Home", style = typography.h5)
+                                    selectedController?.let { Text(it[1], style = typography.h5) } ?: Text("Home", style = typography.h5)
                                 }
                             }
                         }
