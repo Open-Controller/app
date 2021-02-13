@@ -8,13 +8,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.beust.klaxon.JsonArray
-import com.beust.klaxon.JsonObject
-import com.beust.klaxon.JsonValue
-import com.pjtsearch.opencontroller.House
 import com.pjtsearch.opencontroller.components.ExpandableListItem
-import com.pjtsearch.opencontroller.extensions.toList
-import org.json.JSONObject
+import com.pjtsearch.opencontroller_lib.House
 
 @ExperimentalAnimationApi
 @Composable
