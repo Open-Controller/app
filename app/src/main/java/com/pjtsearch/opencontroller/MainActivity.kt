@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import com.beust.klaxon.JsonObject
+import com.beust.klaxon.Klaxon
 import com.beust.klaxon.Parser
 import com.pjtsearch.opencontroller.components.ExpandableListItem
 import com.pjtsearch.opencontroller.components.SystemUi
@@ -48,16 +49,22 @@ import org.json.JSONObject
 import java.lang.StringBuilder
 import java.util.stream.Stream
 
+data class House(val name: String, val rooms: List<Room>, val devices: List<Device>)
+data class Room(val name: String, val controllers: List<Controller>)
+data class Controller(val name: String, val widgets: List<Any>)
+data class Device(val id: String, val actions: List<Any>, val dynamic_values: List<Any>)
+
+
 @ExperimentalMaterialApi
 class MainActivity : AppCompatActivity() {
     @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val controller = OpenController("""{ "name": "Test house", "rooms": [ { "name": "Family Room", "controllers":[] }, { "name": "Test room", "controllers": [ { "name": "test", "widgets": [ { "type": "Button", "action": { "device": "test", "action": "Test" }, "icon": "icon", "text": "text" } ] } ] } ], "devices": [ { "id": "test", "actions": [ { "type": "HttpAction", "url": "http://example.com", "id": "Test", "method": "GET" }, { "type": "TcpAction", "address": "localhost:2000", "id": "TCP", "command": "test" } ], "dynamic_values": [ { "id": "Test", "resources": [ { "type": "Date" } ], "script": "date + 2" } ] } ] }""")
-        val house = Parser.default().parse(rawValue = StringBuilder(controller.toJson())) as JsonObject;
+        val house = Klaxon().parse<House>(controller.toJson());
         setContent {
             SystemUi(this.window) {
-                MainActivityView(house)
+                MainActivityView(house!!)
             }
         }
     }
@@ -66,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
-fun MainActivityView(house: JsonObject) {
+fun MainActivityView(house: House) {
     var selectedController: Pair<String, String>? by remember { mutableStateOf(null) }
     var menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
     BackdropScaffold(

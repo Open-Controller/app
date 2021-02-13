@@ -11,26 +11,27 @@ import androidx.compose.ui.unit.dp
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.JsonValue
+import com.pjtsearch.opencontroller.House
 import com.pjtsearch.opencontroller.components.ExpandableListItem
 import com.pjtsearch.opencontroller.extensions.toList
 import org.json.JSONObject
 
 @ExperimentalAnimationApi
 @Composable
-fun RoomsMenu(house: JsonObject, onControllerClick: (Pair<String, String>) -> Unit) =
+fun RoomsMenu(house: House, onControllerClick: (Pair<String, String>) -> Unit) =
     Column(modifier = Modifier.padding(10.dp).padding(bottom = 20.dp).fillMaxHeight()) {
-        (house["rooms"] as JsonArray<JsonObject>)
+        house.rooms
                 ?.map { room ->
                     ExpandableListItem(
                             modifier = Modifier.fillMaxWidth().padding(5.dp).padding(start = 10.dp),
-                            text = { Text(room["name"] as String) }) {
-                        (room["controllers"] as JsonArray<JsonObject>).map { controller ->
+                            text = { Text(room.name) }) {
+                        room.controllers.map { controller ->
                             ListItem(
-                                    text = { Text(controller["name"] as String) },
+                                    text = { Text(controller.name) },
                                     modifier = Modifier
                                             .height(30.dp)
                                             .clickable {
-                                                onControllerClick(Pair(room["name"] as String, controller["name"] as String))
+                                                onControllerClick(Pair(room.name, controller.name))
                                             })
                         }
                     }
