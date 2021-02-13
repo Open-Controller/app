@@ -37,6 +37,7 @@ import dev.chrisbanes.accompanist.insets.statusBarsHeight
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 import com.pjtsearch.opencontroller_lib.OpenController;
 import com.pjtsearch.opencontroller.extensions.toList
+import com.pjtsearch.opencontroller.ui.theme.shapes
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.stream.Stream
@@ -100,6 +101,7 @@ fun SystemUi(windows: Window, house: JSONObject) =
                     modifier = Modifier.statusBarsPadding(),
                     backLayerBackgroundColor = MaterialTheme.colors.background,
                     frontLayerElevation = if (MaterialTheme.colors.isLight) 18.dp else 1.dp,
+                    frontLayerShape = shapes.large,
                     appBar = {
                         TopAppBar(
                                 backgroundColor = MaterialTheme.colors.background,
