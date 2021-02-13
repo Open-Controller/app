@@ -1,6 +1,8 @@
 package com.pjtsearch.opencontroller_lib
 
-import com.beust.klaxon.Klaxon
+import com.google.gson.Gson
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.pjtsearch.opencontroller_lib.OpenController
 import java.util.*
 import java.util.function.Consumer
@@ -9,8 +11,8 @@ import kotlin.Throws
 import kotlin.jvm.JvmStatic
 data class House(val name: String, val rooms: List<Room>, val devices: List<Device>)
 data class Room(val name: String, val controllers: List<Controller>)
-data class Controller(val name: String, val widgets: List<Any>)
-data class Device(val id: String, val actions: List<Any>, val dynamic_values: List<Any>)
+data class Controller(val name: String, val widgets: List<JsonObject>)
+data class Device(val id: String, val actions: List<JsonObject>, val dynamic_values: List<JsonObject>)
 
 class OpenController(json: String) {
     private external fun from_json(json: String): String
@@ -40,7 +42,7 @@ class OpenController(json: String) {
 
     private val handle: String
     fun getHouse(): House? {
-        return Klaxon().parse<House>(to_json(handle))
+        return Gson().fromJson(to_json(handle), House::class.java)
     }
 
     fun executeAction(device: String, action: String) {

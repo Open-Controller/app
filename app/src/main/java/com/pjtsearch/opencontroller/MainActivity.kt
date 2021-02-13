@@ -19,6 +19,7 @@ import dev.chrisbanes.accompanist.insets.statusBarsPadding
 import com.pjtsearch.opencontroller_lib.OpenController
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller.ui.components.AppBar
+import com.pjtsearch.opencontroller.ui.components.ControllerView
 import com.pjtsearch.opencontroller.ui.components.RoomsMenu
 import com.pjtsearch.opencontroller_lib.Controller
 import com.pjtsearch.opencontroller_lib.House
@@ -32,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         val house = instance.getHouse()
         setContent {
             SystemUi(this.window) {
-                MainActivityView(house!!)
+                MainActivityView(house!!, instance)
             }
         }
     }
@@ -41,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
-fun MainActivityView(house: House) {
+fun MainActivityView(house: House, instance: OpenController) {
     var selectedController: Controller? by remember { mutableStateOf(null) }
     var menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
     BackdropScaffold(
@@ -68,11 +69,12 @@ fun MainActivityView(house: House) {
             frontLayerContent = {
                 Crossfade(current = menuState.targetValue) {
                     when (it) {
-                        BackdropValue.Concealed -> Text("Controller", style = typography.h5)
-                        BackdropValue.Revealed -> {
+                        BackdropValue.Concealed ->
+                            selectedController?.let { it1 -> ControllerView(it1, instance) }
+                                ?:Text("Home", style = typography.h5)
+                        BackdropValue.Revealed ->
                             selectedController?.let { controller -> Text(controller.name, style = typography.h5) }
                                     ?: Text("Home", style = typography.h5)
-                        }
                     }
                 }
             }
