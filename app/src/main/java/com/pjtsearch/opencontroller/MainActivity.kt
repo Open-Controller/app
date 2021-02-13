@@ -20,6 +20,7 @@ import com.pjtsearch.opencontroller_lib.OpenController
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller.ui.components.AppBar
 import com.pjtsearch.opencontroller.ui.components.RoomsMenu
+import com.pjtsearch.opencontroller_lib.Controller
 import com.pjtsearch.opencontroller_lib.House
 
 @ExperimentalMaterialApi
@@ -41,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 @ExperimentalMaterialApi
 @Composable
 fun MainActivityView(house: House) {
-    var selectedController: Pair<String, String>? by remember { mutableStateOf(null) }
+    var selectedController: Controller? by remember { mutableStateOf(null) }
     var menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
     BackdropScaffold(
             scaffoldState = menuState,
@@ -53,7 +54,7 @@ fun MainActivityView(house: House) {
             appBar = {
                 AppBar(
                     menuState = menuState,
-                    concealedTitle = { selectedController?.let { Text(it.second, style = typography.h5) }
+                    concealedTitle = { selectedController?.let { Text(it.name, style = typography.h5) }
                             ?: Text("Home", style = typography.h5) },
                     revealedTitle = { Text("Menu", style = typography.h5) }
                 )
@@ -69,7 +70,7 @@ fun MainActivityView(house: House) {
                     when (it) {
                         BackdropValue.Concealed -> Text("Controller", style = typography.h5)
                         BackdropValue.Revealed -> {
-                            selectedController?.let { Text(it.second, style = typography.h5) }
+                            selectedController?.let { controller -> Text(controller.name, style = typography.h5) }
                                     ?: Text("Home", style = typography.h5)
                         }
                     }
