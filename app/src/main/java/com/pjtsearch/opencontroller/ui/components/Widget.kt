@@ -4,19 +4,20 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import com.google.gson.JsonObject
-import com.pjtsearch.opencontroller_lib.OpenController
+import com.pjtsearch.opencontroller_lib_proto.WidgetOrBuilder
+import com.pjtsearch.opencontroller_lib_proto.Widget.InnerCase
 
 @Composable
-fun Widget(widget: JsonObject, instance: OpenController) =
-    when (widget["type"].asString) {
-        "Button" -> Button(
+fun Widget(widget: WidgetOrBuilder) =
+    when (widget.innerCase) {
+        InnerCase.BUTTON -> Button(
             onClick = {
-                instance.executeAction(
-                    widget["action"].asJsonObject["device"].asString,
-                    widget["action"].asJsonObject["action"].asString
-                )
+//                instance.executeAction(
+//                    widget["action"].asJsonObject["device"].asString,
+//                    widget["action"].asJsonObject["action"].asString
+//                )
             }) {
-            Text(widget["text"].asString)
+            Text(widget.button.text)
         }
-        else -> Text("Widget type " + widget["type"].asString + " not supported")
+        InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
     }

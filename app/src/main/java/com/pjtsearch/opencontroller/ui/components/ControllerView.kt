@@ -1,13 +1,11 @@
 package com.pjtsearch.opencontroller.ui.components
 
-import androidx.compose.material.Button
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import com.pjtsearch.opencontroller_lib.Controller
 import com.pjtsearch.opencontroller_lib.OpenController
+import com.pjtsearch.opencontroller_lib_proto.ControllerOrBuilder
 
 @Composable
-fun ControllerView(controller: Controller, instance: OpenController) =
-    controller.widgets.map {
-        Widget(it, instance)
+fun ControllerView(controller: ControllerOrBuilder) =
+    controller.widgetsList.map {
+        Widget(it)
     }

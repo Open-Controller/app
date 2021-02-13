@@ -85,16 +85,16 @@ fun MainActivityView(house: HouseOrBuilder) {
                 }
             },
             frontLayerContent = {
-//                Crossfade(current = menuState.targetValue) {
-//                    when (it) {
-//                        BackdropValue.Concealed ->
-//                            selectedController?.let { it1 -> ControllerView(it1, instance) }
-//                                ?:Text("Home", style = typography.h5)
-//                        BackdropValue.Revealed ->
-//                            selectedController?.let { controller -> Text(controller.name, style = typography.h5) }
-//                                    ?: Text("Home", style = typography.h5)
-//                    }
-//                }
+                Crossfade(current = menuState.targetValue) {
+                    when (it) {
+                        BackdropValue.Concealed ->
+                            selectedController?.let { controller -> ControllerView(controller) }
+                                ?:Text("Home", style = typography.h5)
+                        BackdropValue.Revealed ->
+                            selectedController?.let { controller -> Text(controller.name, style = typography.h5) }
+                                    ?: Text("Home", style = typography.h5)
+                    }
+                }
             }
     )
 }
