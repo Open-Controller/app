@@ -81,13 +81,13 @@ fun SystemUi(windows: Window, house: JSONObject) =
         }
 
         @Suppress("DEPRECATION")
-        if (MaterialTheme.colors.primary.luminance() > 0.5f) {
+        if (MaterialTheme.colors.background.luminance() > 0.5f) {
             windows.decorView.systemUiVisibility = windows.decorView.systemUiVisibility or
                     View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         }
 
         @Suppress("DEPRECATION")
-        if (MaterialTheme.colors.primary.luminance() > 0.5f) {
+        if (MaterialTheme.colors.background.luminance() > 0.5f) {
             windows.decorView.systemUiVisibility = windows.decorView.systemUiVisibility or
                     View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         }
@@ -98,9 +98,11 @@ fun SystemUi(windows: Window, house: JSONObject) =
                     scaffoldState = menuOpen,
                     headerHeight = 100.dp,
                     modifier = Modifier.statusBarsPadding(),
+                    backLayerBackgroundColor = MaterialTheme.colors.background,
+                    frontLayerElevation = if (MaterialTheme.colors.isLight) 18.dp else 1.dp,
                     appBar = {
                         TopAppBar(
-                                backgroundColor = MaterialTheme.colors.primary,
+                                backgroundColor = MaterialTheme.colors.background,
                                 elevation = 0.dp,
                                 title = {
                                     Crossfade(current = menuOpen.isConcealed) {
