@@ -117,7 +117,7 @@ fun SystemUi(windows: Window, house: JSONObject) =
                         )
                     },
                     backLayerContent = {
-                        Column(modifier = Modifier.padding(10.dp).padding(bottom = 20.dp)) {
+                        Column(modifier = Modifier.padding(10.dp).padding(bottom = 20.dp).fillMaxHeight()) {
                             house.getJSONArray("rooms").toList()
                                 ?.map { it.getString("name") }
                                 ?.map { name ->
