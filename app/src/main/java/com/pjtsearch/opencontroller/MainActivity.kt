@@ -29,6 +29,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import com.beust.klaxon.JsonObject
+import com.beust.klaxon.Parser
 import com.pjtsearch.opencontroller.components.ExpandableListItem
 import com.pjtsearch.opencontroller.components.SystemUi
 import com.pjtsearch.opencontroller.ui.theme.OpenControllerTheme
@@ -43,6 +45,7 @@ import com.pjtsearch.opencontroller.ui.components.AppBar
 import com.pjtsearch.opencontroller.ui.components.RoomsMenu
 import org.json.JSONArray
 import org.json.JSONObject
+import java.lang.StringBuilder
 import java.util.stream.Stream
 
 @ExperimentalMaterialApi
@@ -51,7 +54,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val controller = OpenController("""{ "name": "Test house", "rooms": [ { "name": "Family Room", "controllers":[] }, { "name": "Test room", "controllers": [ { "name": "test", "widgets": [ { "type": "Button", "action": { "device": "test", "action": "Test" }, "icon": "icon", "text": "text" } ] } ] } ], "devices": [ { "id": "test", "actions": [ { "type": "HttpAction", "url": "http://example.com", "id": "Test", "method": "GET" }, { "type": "TcpAction", "address": "localhost:2000", "id": "TCP", "command": "test" } ], "dynamic_values": [ { "id": "Test", "resources": [ { "type": "Date" } ], "script": "date + 2" } ] } ] }""")
-        val house = JSONObject(controller.toJson());
+        val house = Parser.default().parse(rawValue = StringBuilder(controller.toJson())) as JsonObject;
         setContent {
             SystemUi(this.window) {
                 MainActivityView(house)
@@ -63,8 +66,8 @@ class MainActivity : AppCompatActivity() {
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
-fun MainActivityView(house: JSONObject) {
-    var selectedController: List<String>? by remember { mutableStateOf(null) }
+fun MainActivityView(house: JsonObject) {
+    var selectedController: Pair<String, String>? by remember { mutableStateOf(null) }
     var menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
     BackdropScaffold(
             scaffoldState = menuState,
@@ -76,7 +79,7 @@ fun MainActivityView(house: JSONObject) {
             appBar = {
                 AppBar(
                     menuState = menuState,
-                    concealedTitle = { selectedController?.let { Text(it[1], style = typography.h5) }
+                    concealedTitle = { selectedController?.let { Text(it.second, style = typography.h5) }
                             ?: Text("Home", style = typography.h5) },
                     revealedTitle = { Text("Menu", style = typography.h5) }
                 )
@@ -92,7 +95,7 @@ fun MainActivityView(house: JSONObject) {
                     when (it) {
                         BackdropValue.Concealed -> Text("Controller", style = typography.h5)
                         BackdropValue.Revealed -> {
-                            selectedController?.let { Text(it[1], style = typography.h5) }
+                            selectedController?.let { Text(it.second, style = typography.h5) }
                                     ?: Text("Home", style = typography.h5)
                         }
                     }
