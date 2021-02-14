@@ -16,12 +16,12 @@ import com.pjtsearch.opencontroller_lib_proto.HouseOrBuilder
 @Composable
 fun RoomsMenu(house: HouseOrBuilder, onControllerClick: (ControllerOrBuilder) -> Unit) =
     Column(modifier = Modifier.padding(10.dp).padding(bottom = 20.dp).fillMaxHeight()) {
-        house.roomsList
+        house.roomList
                 ?.map { room ->
                     ExpandableListItem(
                             modifier = Modifier.fillMaxWidth().padding(5.dp).padding(start = 10.dp),
                             text = { Text(room.name) }) {
-                        room.controllersList.map { controller ->
+                        room.controllerList.map { controller ->
                             ListItem(
                                     text = { Text(controller.name) },
                                     modifier = Modifier

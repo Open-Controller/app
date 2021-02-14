@@ -7,24 +7,24 @@ package model;
 
 message House {
   string name = 1;
-  repeated Room rooms = 2;
-  repeated Device devices = 3;
+  repeated Room room = 2;
+  repeated Device device = 3;
 }
 
 message Room {
   string name = 1;
-  repeated Controller controllers = 2;
+  repeated Controller controller = 2;
 }
 
 message Controller {
   string name = 1;
-  repeated Widget widgets = 2;
+  repeated Widget widget = 2;
 }
 
 message Device {
   string id = 1;
-  repeated Action actions = 2;
-  repeated DynamicValue dynamic_values = 3;
+  repeated Action action = 2;
+  repeated DynamicValue dynamic_value = 3;
 }
 
 message Widget {
@@ -80,7 +80,7 @@ message DynamicValueRef {
 message DynamicValue {
   string id = 1;
   string script = 2;
-  repeated DynamicResource dynamic_resources = 3;
+  repeated DynamicResource dynamic_resource = 3;
 }
 
 message DynamicResource {

@@ -21,20 +21,20 @@ fun executeAction(action: ActionOrBuilder): Any =
     }
 
 fun resolveActionRef(actionRef: ActionRefOrBuilder, house: HouseOrBuilder): ActionOrBuilder? =
-    house.devicesList
+    house.deviceList
         .find { it.id == actionRef.device }
-        ?.actionsList
+        ?.actionList
         ?.find { it.id == actionRef.action }
 
 fun resolveDynamicValueRef(dynamicValueRef: DynamicValueRefOrBuilder, house: HouseOrBuilder): DynamicValueOrBuilder? =
-    house.devicesList
+    house.deviceList
         .find { it.id == dynamicValueRef.device }
-        ?.dynamicValuesList
+        ?.dynamicValueList
         ?.find { it.id == dynamicValueRef.dynamicValue }
 
 fun subscribeDynamicValue(dynamicValue: DynamicValueOrBuilder, cb: (Any) -> Unit): () -> Unit {
     var running = true
-    dynamicValue.dynamicResourcesList.forEach {
+    dynamicValue.dynamicResourceList.forEach {
         when (it.innerCase) {
             DynamicResource.InnerCase.DATE_RESOURCE -> thread{ while (running) {
                 Thread.sleep(100)

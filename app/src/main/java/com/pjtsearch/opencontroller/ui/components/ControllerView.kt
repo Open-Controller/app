@@ -6,6 +6,6 @@ import com.pjtsearch.opencontroller_lib_proto.HouseOrBuilder
 
 @Composable
 fun ControllerView(controller: ControllerOrBuilder, house: HouseOrBuilder) =
-    controller.widgetsList.map {
+    controller.widgetList.map {
         Widget(it, house)
     }
