@@ -45,16 +45,16 @@ message ActionRef {
 }
 
 message Action {
+  string id = 1;
   oneof inner {
-    HttpAction http_action = 1;
-    TCPAction tcp_action = 2;
+    HttpAction http_action = 2;
+    TCPAction tcp_action = 3;
   }
 }
 
 message HttpAction {
-  string id = 1;
-  string url = 2;
-  HttpMethod method = 3;
+  string url = 1;
+  HttpMethod method = 2;
 }
 
 enum HttpMethod {
@@ -67,9 +67,8 @@ enum HttpMethod {
 }
 
 message TCPAction {
-  string id = 1;
-  string address = 2;
-  string command = 3;
+  string address = 1;
+  string command = 2;
 }
 
 message DynamicValue {

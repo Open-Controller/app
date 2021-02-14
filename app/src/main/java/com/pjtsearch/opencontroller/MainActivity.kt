@@ -43,10 +43,11 @@ class MainActivity : AppCompatActivity() {
                         ))
                     .addDevices(Device.newBuilder()
                         .setId("Test")
-                        .addActions(Action.newBuilder().setHttpAction(HttpAction.newBuilder()
+                        .addActions(Action.newBuilder()
                             .setId("test")
-                            .setMethod("GET")
-                            .setUrl("http://example.com")
+                            .setHttpAction(HttpAction.newBuilder()
+                            .setMethod(HttpMethod.GET)
+                            .setUrl("https://example.com")
                         ))
                     )
         setContent {
@@ -88,7 +89,7 @@ fun MainActivityView(house: HouseOrBuilder) {
                 Crossfade(current = menuState.targetValue) {
                     when (it) {
                         BackdropValue.Concealed ->
-                            selectedController?.let { controller -> ControllerView(controller) }
+                            selectedController?.let { controller -> ControllerView(controller, house) }
                                 ?:Text("Home", style = typography.h5)
                         BackdropValue.Revealed ->
                             selectedController?.let { controller -> Text(controller.name, style = typography.h5) }
