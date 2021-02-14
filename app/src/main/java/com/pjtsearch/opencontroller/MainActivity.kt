@@ -20,7 +20,10 @@ import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller.ui.components.AppBar
 import com.pjtsearch.opencontroller.ui.components.ControllerView
 import com.pjtsearch.opencontroller.ui.components.RoomsMenu
+import com.pjtsearch.opencontroller_lib_android.subscribeDynamicValue
 import com.pjtsearch.opencontroller_lib_proto.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 
 @ExperimentalMaterialApi
 class MainActivity : AppCompatActivity() {
@@ -49,6 +52,12 @@ class MainActivity : AppCompatActivity() {
                             .setMethod(HttpMethod.GET)
                             .setUrl("https://example.com")
                         ))
+                        .addDynamicValues(DynamicValue.newBuilder()
+                            .setId("test")
+                            .addDynamicResources(DynamicResource.newBuilder()
+                                .setDateResource(DateResource.newBuilder()))
+                            .setScript("")
+                        )
                     )
         setContent {
             SystemUi(this.window) {

@@ -3,6 +3,7 @@ package com.pjtsearch.opencontroller_lib_android
 import com.github.kittinunf.fuel.*
 import com.github.kittinunf.fuel.core.awaitUnit
 import com.pjtsearch.opencontroller_lib_proto.*
+import kotlin.concurrent.thread
 
 fun executeAction(action: ActionOrBuilder): Any =
     when (action.innerCase) {
@@ -24,3 +25,23 @@ fun resolveActionRef(actionRef: ActionRefOrBuilder, house: HouseOrBuilder): Acti
         .find { it.id == actionRef.device }
         ?.actionsList
         ?.find { it.id == actionRef.action }
+
+fun resolveDynamicValueRef(dynamicValueRef: DynamicValueRefOrBuilder, house: HouseOrBuilder): DynamicValueOrBuilder? =
+    house.devicesList
+        .find { it.id == dynamicValueRef.device }
+        ?.dynamicValuesList
+        ?.find { it.id == dynamicValueRef.dynamicValue }
+
+fun subscribeDynamicValue(dynamicValue: DynamicValueOrBuilder, cb: (Any) -> Unit): () -> Unit {
+    var running = true
+    dynamicValue.dynamicResourcesList.forEach {
+        when (it.innerCase) {
+            DynamicResource.InnerCase.DATE_RESOURCE -> thread{ while (running) {
+                Thread.sleep(100)
+                cb(System.currentTimeMillis())
+            }}
+            DynamicResource.InnerCase.INNER_NOT_SET -> TODO()
+        }
+    }
+    return { running = false }
+}
