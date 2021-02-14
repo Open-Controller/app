@@ -20,10 +20,8 @@ import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller.ui.components.AppBar
 import com.pjtsearch.opencontroller.ui.components.ControllerView
 import com.pjtsearch.opencontroller.ui.components.RoomsMenu
-import com.pjtsearch.opencontroller_lib_android.subscribeDynamicValue
+import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 
 @ExperimentalMaterialApi
 class MainActivity : AppCompatActivity() {
@@ -78,6 +76,7 @@ class MainActivity : AppCompatActivity() {
 fun MainActivityView(house: HouseOrBuilder) {
     var selectedController: ControllerOrBuilder? by remember { mutableStateOf(null) }
     var menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
+    var executor = remember(house) { OpenControllerLibExecutor(house) }
     BackdropScaffold(
             scaffoldState = menuState,
             headerHeight = 100.dp,
@@ -103,7 +102,7 @@ fun MainActivityView(house: HouseOrBuilder) {
                 Crossfade(current = menuState.targetValue) {
                     when (it) {
                         BackdropValue.Concealed ->
-                            selectedController?.let { controller -> ControllerView(controller, house) }
+                            selectedController?.let { controller -> ControllerView(controller, executor) }
                                 ?:Text("Home", style = typography.h5)
                         BackdropValue.Revealed ->
                             selectedController?.let { controller -> Text(controller.name, style = typography.h5) }
