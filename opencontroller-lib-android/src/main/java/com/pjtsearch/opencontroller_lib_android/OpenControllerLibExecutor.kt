@@ -5,6 +5,7 @@ import com.pjtsearch.opencontroller_lib_proto.*
 import kotlin.concurrent.thread
 
 import org.luaj.vm2.lib.jse.JsePlatform
+import java.net.Socket
 
 class OpenControllerLibExecutor(val house: HouseOrBuilder) {
     fun executeAction(actionRef: ActionRefOrBuilder): Any {
@@ -19,7 +20,14 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
                 HttpMethod.DELETE -> action.httpAction.url.httpDelete().response()
                 HttpMethod.UNRECOGNIZED -> TODO()
             }
-            Action.InnerCase.TCP_ACTION -> TODO()
+            Action.InnerCase.TCP_ACTION -> {
+                val (host, port) = action.tcpAction.address.split(":")
+                val client = Socket(host, port.toInt())
+                client.outputStream.write(action.tcpAction.command.toByteArray())
+                val scanner = client.getInputStream()
+                scanner.read()
+                client.close()
+            }
             Action.InnerCase.MACRO_ACTION -> action.macroAction.actionList.map {
                 executeAction(it)
             }
