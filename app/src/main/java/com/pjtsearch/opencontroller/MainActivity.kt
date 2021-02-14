@@ -84,11 +84,16 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+sealed class Page {
+    object Home : Page()
+    data class Controller(val controller: ControllerOrBuilder) : Page()
+}
+
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
 fun MainActivityView(house: HouseOrBuilder) {
-    var selectedController: ControllerOrBuilder? by remember { mutableStateOf(null) }
+    var page: Page by remember { mutableStateOf(Page.Home) }
     var menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
     var executor = remember(house) { OpenControllerLibExecutor(house) }
     BackdropScaffold(
@@ -102,15 +107,17 @@ fun MainActivityView(house: HouseOrBuilder) {
             AppBar(
                 menuState = menuState,
                 concealedTitle = {
-                    selectedController?.let { Text(it.name, style = typography.h5) }
-                        ?: Text("Home", style = typography.h5)
+                    when (page) {
+                        is Page.Home -> Text("Home", style = typography.h5)
+                        is Page.Controller -> Text((page as Page.Controller).controller.name, style = typography.h5)
+                    }
                 },
                 revealedTitle = { Text("Menu", style = typography.h5) }
             )
         },
         backLayerContent = {
             RoomsMenu(house) {
-                selectedController = it
+                page = Page.Controller(it)
                 menuState.conceal()
             }
         },
@@ -118,20 +125,21 @@ fun MainActivityView(house: HouseOrBuilder) {
             Box(Modifier.padding(16.dp)) {
                 Crossfade(current = menuState.targetValue) {
                     when (it) {
-                        BackdropValue.Concealed ->
-                            selectedController?.let { controller ->
-                                ControllerView(
-                                    controller,
-                                    executor
-                                )
-                            } ?: Text("Home", style = typography.h5)
+                        BackdropValue.Concealed -> when (page) {
+                            is Page.Home -> Text("Home", style = typography.h5)
+                            is Page.Controller -> ControllerView(
+                                (page as Page.Controller).controller,
+                                executor
+                            )
+                        }
                         BackdropValue.Revealed -> Box(Modifier.fillMaxWidth()) {
-                            selectedController?.let { controller ->
-                                Text(
-                                    controller.name,
+                            when (page) {
+                                is Page.Home -> Text("Home", style = typography.h5)
+                                is Page.Controller -> Text(
+                                    (page as Page.Controller).controller.name,
                                     style = typography.h5
                                 )
-                            } ?: Text("Home", style = typography.h5)
+                            }
                             Icon(
                                 Icons.Outlined.KeyboardArrowUp,
                                 "Close menu",
