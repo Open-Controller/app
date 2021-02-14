@@ -49,6 +49,7 @@ message Action {
   oneof inner {
     HttpAction http_action = 2;
     TCPAction tcp_action = 3;
+    MacroAction macro_action = 4;
   }
 }
 
@@ -69,6 +70,10 @@ enum HttpMethod {
 message TCPAction {
   string address = 1;
   string command = 2;
+}
+
+message MacroAction {
+  repeated ActionRef action = 1;
 }
 
 

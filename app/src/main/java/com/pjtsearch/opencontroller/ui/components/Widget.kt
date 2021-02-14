@@ -4,7 +4,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import com.pjtsearch.opencontroller_lib_android.executeAction
-import com.pjtsearch.opencontroller_lib_android.resolveActionRef
 import com.pjtsearch.opencontroller_lib_proto.HouseOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.WidgetOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.Widget.InnerCase
@@ -17,7 +16,7 @@ fun Widget(widget: WidgetOrBuilder, house: HouseOrBuilder) =
         InnerCase.BUTTON -> Button(
             onClick = {
                 thread {
-                    executeAction(resolveActionRef(widget.button.action, house)!!)
+                    executeAction(widget.button.action, house)
                 }
             }) {
             Text(widget.button.text)
