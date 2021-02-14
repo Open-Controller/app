@@ -71,6 +71,12 @@ message TCPAction {
   string command = 2;
 }
 
+
+message DynamicValueRef {
+  string device = 1;
+  string dynamic_value = 2;
+}
+
 message DynamicValue {
   string id = 1;
   string script = 2;
