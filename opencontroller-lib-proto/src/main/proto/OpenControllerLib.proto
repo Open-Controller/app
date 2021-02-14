@@ -50,6 +50,7 @@ message Action {
     HttpAction http_action = 2;
     TCPAction tcp_action = 3;
     MacroAction macro_action = 4;
+    DelayAction delay_action = 5;
   }
 }
 
@@ -74,6 +75,10 @@ message TCPAction {
 
 message MacroAction {
   repeated ActionRef action = 1;
+}
+
+message DelayAction {
+  int32 time = 1;
 }
 
 

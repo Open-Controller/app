@@ -31,6 +31,9 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
             Action.InnerCase.MACRO_ACTION -> action.macroAction.actionList.map {
                 executeAction(it)
             }
+            Action.InnerCase.DELAY_ACTION -> {
+                Thread.sleep(action.delayAction.time.toLong())
+            }
             Action.InnerCase.INNER_NOT_SET -> TODO()
             null -> TODO()
         }
