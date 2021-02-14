@@ -30,6 +30,7 @@ message Device {
 message Widget {
   oneof inner {
     Button button = 1;
+    DynamicText dynamic_text = 2;
   }
 }
 
@@ -37,6 +38,10 @@ message Button {
   ActionRef action = 1;
   string icon = 2;
   string text = 3;
+}
+
+message DynamicText {
+  DynamicValueRef value = 1;
 }
 
 message ActionRef {

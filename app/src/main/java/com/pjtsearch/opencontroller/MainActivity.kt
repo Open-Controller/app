@@ -45,6 +45,8 @@ class MainActivity : AppCompatActivity() {
                                 .setIcon("icon")
                                 .setAction(ActionRef.newBuilder().setDevice("Test").setAction("macro"))
                             ))
+                            .addWidget(Widget.newBuilder().setDynamicText(DynamicText.newBuilder()
+                                .setValue(DynamicValueRef.newBuilder().setDevice("Test").setDynamicValue("test"))))
                         ))
                     .addDevice(Device.newBuilder()
                         .setId("Test")
