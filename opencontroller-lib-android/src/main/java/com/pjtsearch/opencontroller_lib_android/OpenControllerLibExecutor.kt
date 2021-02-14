@@ -20,8 +20,8 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
                 HttpMethod.UNRECOGNIZED -> TODO()
             }
             Action.InnerCase.TCP_ACTION -> TODO()
-            Action.InnerCase.MACRO_ACTION -> action.macroAction.actionList.forEach {
-                thread { executeAction(it) }
+            Action.InnerCase.MACRO_ACTION -> action.macroAction.actionList.map {
+                executeAction(it)
             }
             Action.InnerCase.INNER_NOT_SET -> TODO()
             null -> TODO()
