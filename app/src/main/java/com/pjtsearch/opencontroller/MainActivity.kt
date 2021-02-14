@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
                             .setId("test")
                             .addDynamicResource(DynamicResource.newBuilder()
                                 .setDateResource(DateResource.newBuilder()))
-                            .setScript("")
+                            .setScript("return date .. ':test'")
                         )
                     )
         setContent {

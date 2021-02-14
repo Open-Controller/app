@@ -4,6 +4,17 @@ import com.github.kittinunf.fuel.*
 import com.github.kittinunf.fuel.core.awaitUnit
 import com.pjtsearch.opencontroller_lib_proto.*
 import kotlin.concurrent.thread
+import org.luaj.vm2.LuaValue
+
+import org.luaj.vm2.lib.jse.JsePlatform
+
+import org.luaj.vm2.Globals
+
+
+
+
+
+
 
 fun executeAction(action: ActionOrBuilder): Any =
     when (action.innerCase) {
@@ -34,12 +45,17 @@ fun resolveDynamicValueRef(dynamicValueRef: DynamicValueRefOrBuilder, house: Hou
 
 fun subscribeDynamicValue(dynamicValue: DynamicValueOrBuilder, cb: (Any) -> Unit): () -> Unit {
     var running = true
+    val globals = JsePlatform.standardGlobals()
+    val chunk = globals.load(dynamicValue.script)
     dynamicValue.dynamicResourceList.forEach {
         when (it.innerCase) {
-            DynamicResource.InnerCase.DATE_RESOURCE -> thread{ while (running) {
-                Thread.sleep(100)
-                cb(System.currentTimeMillis())
-            }}
+            DynamicResource.InnerCase.DATE_RESOURCE -> thread {
+                while (running) {
+                    Thread.sleep(100)
+                    globals.set("date", System.currentTimeMillis().toInt() * -1)
+                    cb(chunk.call().toString())
+                }
+            }
             DynamicResource.InnerCase.INNER_NOT_SET -> TODO()
         }
     }
