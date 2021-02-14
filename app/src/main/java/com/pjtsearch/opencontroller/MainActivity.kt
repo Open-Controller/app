@@ -4,13 +4,17 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.components.SystemUi
@@ -88,37 +92,54 @@ fun MainActivityView(house: HouseOrBuilder) {
     var menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
     var executor = remember(house) { OpenControllerLibExecutor(house) }
     BackdropScaffold(
-            scaffoldState = menuState,
-            headerHeight = 100.dp,
-            modifier = Modifier.statusBarsPadding(),
-            backLayerBackgroundColor = MaterialTheme.colors.background,
-            frontLayerElevation = if (MaterialTheme.colors.isLight) 18.dp else 1.dp,
-            frontLayerShape = shapes.large,
-            appBar = {
-                AppBar(
-                    menuState = menuState,
-                    concealedTitle = { selectedController?.let { Text(it.name, style = typography.h5) }
-                            ?: Text("Home", style = typography.h5) },
-                    revealedTitle = { Text("Menu", style = typography.h5) }
-                )
-            },
-            backLayerContent = {
-                RoomsMenu(house) {
-                    selectedController = it
-                    menuState.conceal()
-                }
-            },
-            frontLayerContent = {
+        scaffoldState = menuState,
+        headerHeight = 100.dp,
+        modifier = Modifier.statusBarsPadding(),
+        backLayerBackgroundColor = MaterialTheme.colors.background,
+        frontLayerElevation = if (MaterialTheme.colors.isLight) 18.dp else 1.dp,
+        frontLayerShape = shapes.large,
+        appBar = {
+            AppBar(
+                menuState = menuState,
+                concealedTitle = {
+                    selectedController?.let { Text(it.name, style = typography.h5) }
+                        ?: Text("Home", style = typography.h5)
+                },
+                revealedTitle = { Text("Menu", style = typography.h5) }
+            )
+        },
+        backLayerContent = {
+            RoomsMenu(house) {
+                selectedController = it
+                menuState.conceal()
+            }
+        },
+        frontLayerContent = {
+            Box(Modifier.padding(16.dp)) {
                 Crossfade(current = menuState.targetValue) {
                     when (it) {
                         BackdropValue.Concealed ->
-                            selectedController?.let { controller -> ControllerView(controller, executor) }
-                                ?:Text("Home", style = typography.h5)
-                        BackdropValue.Revealed ->
-                            selectedController?.let { controller -> Text(controller.name, style = typography.h5) }
-                                    ?: Text("Home", style = typography.h5)
+                            selectedController?.let { controller ->
+                                ControllerView(
+                                    controller,
+                                    executor
+                                )
+                            } ?: Text("Home", style = typography.h5)
+                        BackdropValue.Revealed -> Box(Modifier.fillMaxWidth()) {
+                            selectedController?.let { controller ->
+                                Text(
+                                    controller.name,
+                                    style = typography.h5
+                                )
+                            } ?: Text("Home", style = typography.h5)
+                            Icon(
+                                Icons.Outlined.KeyboardArrowUp,
+                                "Close menu",
+                                modifier = Modifier.align(alignment = Alignment.CenterEnd))
+                        }
                     }
                 }
             }
+        }
     )
 }
