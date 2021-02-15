@@ -31,6 +31,9 @@ message Widget {
   oneof inner {
     Button button = 1;
     DynamicText dynamic_text = 2;
+    Row row = 3;
+    Column column = 4;
+    ArrowLayout arrow_layout = 5;
   }
 }
 
@@ -42,6 +45,22 @@ message Button {
 
 message DynamicText {
   DynamicValueRef value = 1;
+}
+
+message Row {
+  repeated Widget child = 1;
+}
+
+message Column {
+  repeated Widget child = 1;
+}
+
+message ArrowLayout {
+  Widget top = 1;
+  Widget bottom = 2;
+  Widget left = 3;
+  Widget right = 4;
+  Widget center = 5;
 }
 
 message ActionRef {
