@@ -1,6 +1,7 @@
 package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Button
@@ -37,7 +38,11 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                 Widget(it, executor)
             }
         }
-        InnerCase.COLUMN -> TODO()
+        InnerCase.COLUMN -> Column(modifier.fillMaxWidth(), Arrangement.Top) {
+            widget.column.childList.map {
+                Widget(it, executor)
+            }
+        }
         InnerCase.ARROW_LAYOUT -> TODO()
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
     }

@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
                         .setName("Test room")
                         .addController(Controller.newBuilder()
                             .setName("test")
-                            .addWidget(Widget.newBuilder().setRow(Row.newBuilder()
+                            .addWidget(Widget.newBuilder().setColumn(Column.newBuilder()
                                     .addChild(Widget.newBuilder().setButton(Button.newBuilder()
                                             .setText("text")
                                             .setIcon("icon")
