@@ -1,9 +1,6 @@
 package com.pjtsearch.opencontroller.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -57,6 +54,7 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                 Widget(widget.arrowLayout.bottom, executor)
             }
         }
+        InnerCase.SPACE -> Spacer(modifier)
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
     }
 }
