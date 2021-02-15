@@ -1,11 +1,15 @@
 package com.pjtsearch.opencontroller.ui.components
 
+import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.AmbientContext
+import androidx.compose.ui.platform.AmbientView
+import androidx.compose.ui.platform.ContextAmbient
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.WidgetOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.Widget.InnerCase
@@ -13,10 +17,12 @@ import kotlin.concurrent.thread
 
 @Composable
 fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifier: Modifier = Modifier) {
+    val view = AmbientView.current
     when (widget.innerCase) {
         InnerCase.BUTTON -> Button(
                 modifier = modifier,
                 onClick = {
+                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                     thread {
                         executor.executeAction(widget.button.action)
                     }
