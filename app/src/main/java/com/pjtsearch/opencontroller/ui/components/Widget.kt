@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.WidgetOrBuilder
@@ -33,17 +34,29 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
             }
             Text(value.toString(), modifier)
         }
-        InnerCase.ROW -> Row(modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+        InnerCase.ROW -> Row(modifier, Arrangement.SpaceBetween) {
             widget.row.childList.map {
                 Widget(it, executor)
             }
         }
-        InnerCase.COLUMN -> Column(modifier.fillMaxWidth(), Arrangement.Top) {
+        InnerCase.COLUMN -> Column(modifier, Arrangement.Top) {
             widget.column.childList.map {
                 Widget(it, executor)
             }
         }
-        InnerCase.ARROW_LAYOUT -> TODO()
+        InnerCase.ARROW_LAYOUT -> Column(modifier, Arrangement.Top) {
+            Row(Modifier.align(Alignment.CenterHorizontally)) {
+                Widget(widget.arrowLayout.top, executor)
+            }
+            Row {
+                Widget(widget.arrowLayout.left, executor)
+                Widget(widget.arrowLayout.center, executor)
+                Widget(widget.arrowLayout.right, executor)
+            }
+            Row(Modifier.align(Alignment.CenterHorizontally)) {
+                Widget(widget.arrowLayout.bottom, executor)
+            }
+        }
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
     }
 }
