@@ -1,5 +1,6 @@
 package com.pjtsearch.opencontroller.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -12,6 +13,6 @@ import com.pjtsearch.opencontroller_lib_proto.ControllerOrBuilder
 fun ControllerView(controller: ControllerOrBuilder, executor: OpenControllerLibExecutor) =
     Column(Modifier.fillMaxWidth()) {
         controller.widgetList.map {
-            Widget(it, executor, Modifier.align(Alignment.CenterHorizontally))
+            Widget(it, executor, Modifier.fillMaxWidth())
         }
     }
