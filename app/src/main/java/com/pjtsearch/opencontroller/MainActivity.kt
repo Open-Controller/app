@@ -46,6 +46,13 @@ class MainActivity : AppCompatActivity() {
                         .addController(Controller.newBuilder()
                             .setName("test")
                             .addWidget(Widget.newBuilder().setRow(Row.newBuilder()
+                                    .addChild(btn)
+                                    .addChild(Widget.newBuilder().setRow(Row.newBuilder()
+                                            .addChild(btn)
+                                            .addChild(btn)
+                                    ))
+                            ))
+                            .addWidget(Widget.newBuilder().setRow(Row.newBuilder()
                                     .addChild(Widget.newBuilder().setColumn(Column.newBuilder()
                                             .addChild(btn)
                                             .addChild(btn)
@@ -58,7 +65,8 @@ class MainActivity : AppCompatActivity() {
                                             .setRight(btn)
                                             .setCenter(btn)
                                     ))
-                                    .addChild(Widget.newBuilder().setRow(Row.newBuilder()
+                                    .addChild(Widget.newBuilder().setColumn(Column.newBuilder()
+                                            .addChild(btn)
                                             .addChild(btn)
                                             .addChild(btn)
                                     ))
@@ -86,7 +94,11 @@ class MainActivity : AppCompatActivity() {
                                     ))
                             ))
                             .addWidget(Widget.newBuilder().setRow(Row.newBuilder()
-                                    .addChild(Widget.newBuilder().setSpace(Space.newBuilder()))
+                                    .addChild(Widget.newBuilder().setColumn(Column.newBuilder()
+                                            .addChild(btn)
+                                            .addChild(btn)
+                                            .addChild(btn)
+                                    ))
                                     .addChild(Widget.newBuilder().setColumn(Column.newBuilder()
                                             .addChild(Widget.newBuilder().setRow(Row.newBuilder()
                                                     .addChild(btn)
@@ -103,8 +115,17 @@ class MainActivity : AppCompatActivity() {
                                                     .addChild(btn)
                                                     .addChild(btn)
                                             ))
+                                            .addChild(Widget.newBuilder().setRow(Row.newBuilder()
+                                                    .addChild(btn)
+                                                    .addChild(btn)
+                                                    .addChild(btn)
+                                            ))
                                     ))
-                                    .addChild(Widget.newBuilder().setSpace(Space.newBuilder()))
+                                    .addChild(Widget.newBuilder().setColumn(Column.newBuilder()
+                                            .addChild(btn)
+                                            .addChild(btn)
+                                            .addChild(btn)
+                                    ))
                             ))
                         ))
                     .addDevice(Device.newBuilder()
@@ -183,7 +204,7 @@ fun MainActivityView(house: HouseOrBuilder) {
             }
         },
         frontLayerContent = {
-            Box(Modifier.padding(16.dp)) {
+            Box(Modifier.padding(20.dp)) {
                 Crossfade(current = menuState.targetValue) {
                     when (it) {
                         BackdropValue.Concealed -> when (page) {
