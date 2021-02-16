@@ -1,45 +1,51 @@
 package com.pjtsearch.opencontroller.ui.components
 
 import android.view.HapticFeedbackConstants
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.platform.AmbientView
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.material.AmbientContentColor;
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.WidgetOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.Widget.InnerCase
+import com.pjtsearch.opencontroller_lib_proto.Button.OptionalIconCase
 import kotlin.concurrent.thread
 
 @Composable
 fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifier: Modifier = Modifier) {
     val view = AmbientView.current
     when (widget.innerCase) {
-        InnerCase.BUTTON -> Box(Modifier
+        InnerCase.BUTTON ->
+            Providers(AmbientContentColor provides MaterialTheme.colors.primary) {
+                Box(Modifier
                 .widthIn(65.dp, 70.dp)
                 .heightIn(65.dp, 75.dp)
                 .padding(2.dp)
                 .clip(shapes.medium)
                 .border(2.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.3f), shapes.medium)
-                .clickable {
+                .clickable (role = Role.Button){
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                     thread {
                         executor.executeAction(widget.button.action)
                     }
                 }, Alignment.Center) {
-                Text(widget.button.text)
+                    when (widget.button.optionalIconCase) {
+                        OptionalIconCase.ICON -> Icon(Icons.Outlined.Star, widget.button.text)
+                        OptionalIconCase.OPTIONALICON_NOT_SET -> Text(widget.button.text)
+                    }
+                }
             }
         InnerCase.DYNAMIC_TEXT -> {
             var value: Any? by remember { mutableStateOf(null) }

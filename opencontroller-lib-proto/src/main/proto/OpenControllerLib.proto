@@ -40,8 +40,10 @@ message Widget {
 
 message Button {
   ActionRef action = 1;
-  string icon = 2;
   string text = 3;
+  oneof optional_icon {
+    string icon = 2;
+  }
 }
 
 message DynamicText {
