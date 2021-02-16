@@ -2,6 +2,8 @@ package com.pjtsearch.opencontroller.ui.components
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -25,21 +27,20 @@ import kotlin.concurrent.thread
 fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifier: Modifier = Modifier) {
     val view = AmbientView.current
     when (widget.innerCase) {
-        InnerCase.BUTTON -> OutlinedButton(
-                modifier = modifier
-                        .preferredWidthIn(65.dp, 70.dp)
-                        .preferredHeightIn(65.dp, 75.dp)
-                        .padding(2.dp)
-                        .clip(shapes.medium),
-                border = BorderStroke(2.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.3f)),
-                onClick = {
+        InnerCase.BUTTON -> Box(Modifier
+                .widthIn(65.dp, 70.dp)
+                .heightIn(65.dp, 75.dp)
+                .padding(2.dp)
+                .clip(shapes.medium)
+                .border(2.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.3f), shapes.medium)
+                .clickable {
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                     thread {
                         executor.executeAction(widget.button.action)
                     }
-                }) {
-            Text(widget.button.text)
-        }
+                }, Alignment.Center) {
+                Text(widget.button.text)
+            }
         InnerCase.DYNAMIC_TEXT -> {
             var value: Any? by remember { mutableStateOf(null) }
             DisposableEffect(widget.dynamicText.value) {
