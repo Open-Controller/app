@@ -42,7 +42,7 @@ message Button {
   ActionRef action = 1;
   string text = 3;
   oneof optional_icon {
-    string icon = 2;
+    Icon icon = 2;
   }
 }
 
@@ -129,3 +129,7 @@ message DynamicResource {
 }
 
 message DateResource {}
+
+enum Icon {
+  STAR = 0;
+}

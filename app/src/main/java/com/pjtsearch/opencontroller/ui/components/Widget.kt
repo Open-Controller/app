@@ -16,6 +16,7 @@ import androidx.compose.material.AmbientContentColor;
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.pjtsearch.opencontroller.extensions.icons
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.WidgetOrBuilder
@@ -42,7 +43,9 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                     }
                 }, Alignment.Center) {
                     when (widget.button.optionalIconCase) {
-                        OptionalIconCase.ICON -> Icon(Icons.Outlined.Star, widget.button.text)
+                        OptionalIconCase.ICON -> Icon(
+                            icons[widget.button.icon]!!,
+                            widget.button.text)
                         OptionalIconCase.OPTIONALICON_NOT_SET -> Text(widget.button.text)
                     }
                 }
