@@ -15,7 +15,7 @@ import com.pjtsearch.opencontroller_lib_proto.HouseOrBuilder
 @ExperimentalAnimationApi
 @Composable
 fun RoomsMenu(house: HouseOrBuilder, onControllerClick: (ControllerOrBuilder) -> Unit) =
-    Column(modifier = Modifier.padding(10.dp).padding(bottom = 20.dp).fillMaxHeight()) {
+    Column(modifier = Modifier.fillMaxHeight()) {
         house.roomList
                 ?.map { room ->
                     ExpandableListItem(
