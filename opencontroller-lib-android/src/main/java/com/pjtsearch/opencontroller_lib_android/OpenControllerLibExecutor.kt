@@ -1,6 +1,8 @@
 package com.pjtsearch.opencontroller_lib_android
 
 import com.github.kittinunf.fuel.*
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.runCatching
 import com.pjtsearch.opencontroller_lib_proto.*
 import kotlin.concurrent.thread
 
@@ -8,16 +10,16 @@ import org.luaj.vm2.lib.jse.JsePlatform
 import java.net.Socket
 
 class OpenControllerLibExecutor(val house: HouseOrBuilder) {
-    fun executeAction(actionRef: ActionRefOrBuilder): Any {
+    fun executeAction(actionRef: ActionRefOrBuilder): Result<Any, Throwable> = runCatching{
         val action = resolveActionRef(actionRef)!!
-        return when (action.innerCase) {
+        when (action.innerCase) {
             Action.InnerCase.HTTP_ACTION -> when (action.httpAction.method) {
-                HttpMethod.GET -> action.httpAction.url.httpGet().response()
-                HttpMethod.HEAD -> action.httpAction.url.httpHead().response()
-                HttpMethod.POST -> action.httpAction.url.httpPost().response()
-                HttpMethod.PUT -> action.httpAction.url.httpPut().response()
-                HttpMethod.PATCH -> action.httpAction.url.httpPatch().response()
-                HttpMethod.DELETE -> action.httpAction.url.httpDelete().response()
+                HttpMethod.GET -> action.httpAction.url.httpGet().response().third.get()
+                HttpMethod.HEAD -> action.httpAction.url.httpHead().response().third.get()
+                HttpMethod.POST -> action.httpAction.url.httpPost().response().third.get()
+                HttpMethod.PUT -> action.httpAction.url.httpPut().response().third.get()
+                HttpMethod.PATCH -> action.httpAction.url.httpPatch().response().third.get()
+                HttpMethod.DELETE -> action.httpAction.url.httpDelete().response().third.get()
                 HttpMethod.UNRECOGNIZED -> TODO()
             }
             Action.InnerCase.TCP_ACTION -> {

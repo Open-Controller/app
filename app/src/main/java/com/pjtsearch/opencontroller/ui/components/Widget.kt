@@ -16,6 +16,7 @@ import androidx.compose.material.AmbientContentColor;
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.github.michaelbull.result.mapError
 import com.pjtsearch.opencontroller.extensions.icons
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
@@ -25,7 +26,7 @@ import com.pjtsearch.opencontroller_lib_proto.Button.OptionalIconCase
 import kotlin.concurrent.thread
 
 @Composable
-fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifier: Modifier = Modifier) {
+fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifier: Modifier = Modifier, onError: (Throwable) -> Unit) {
     val view = AmbientView.current
     when (widget.innerCase) {
         InnerCase.BUTTON ->
@@ -39,7 +40,7 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                 .clickable (role = Role.Button){
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                     thread {
-                        executor.executeAction(widget.button.action)
+                        executor.executeAction(widget.button.action).mapError(onError)
                     }
                 }, Alignment.Center) {
                     when (widget.button.optionalIconCase) {
@@ -60,25 +61,25 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
         }
         InnerCase.ROW -> Row(modifier, Arrangement.SpaceBetween) {
             widget.row.childList.map {
-                Widget(it, executor)
+                Widget(it, executor, onError = onError)
             }
         }
         InnerCase.COLUMN -> Column(modifier, Arrangement.Top) {
             widget.column.childList.map {
-                Widget(it, executor)
+                Widget(it, executor, onError = onError)
             }
         }
         InnerCase.ARROW_LAYOUT -> Column(modifier, Arrangement.Top) {
             Row(Modifier.align(Alignment.CenterHorizontally)) {
-                Widget(widget.arrowLayout.top, executor)
+                Widget(widget.arrowLayout.top, executor, onError = onError)
             }
             Row {
-                Widget(widget.arrowLayout.left, executor)
-                Widget(widget.arrowLayout.center, executor)
-                Widget(widget.arrowLayout.right, executor)
+                Widget(widget.arrowLayout.left, executor, onError = onError)
+                Widget(widget.arrowLayout.center, executor, onError = onError)
+                Widget(widget.arrowLayout.right, executor, onError = onError)
             }
             Row(Modifier.align(Alignment.CenterHorizontally)) {
-                Widget(widget.arrowLayout.bottom, executor)
+                Widget(widget.arrowLayout.bottom, executor, onError = onError)
             }
         }
         InnerCase.SPACE -> Spacer(modifier)

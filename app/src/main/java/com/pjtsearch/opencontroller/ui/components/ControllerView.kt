@@ -9,9 +9,9 @@ import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.ControllerOrBuilder
 
 @Composable
-fun ControllerView(controller: ControllerOrBuilder, executor: OpenControllerLibExecutor) =
+fun ControllerView(controller: ControllerOrBuilder, executor: OpenControllerLibExecutor, onError: (Throwable) -> Unit) =
     Column(Modifier.fillMaxSize()) {
         controller.widgetList.map {
-            Widget(it, executor, Modifier.fillMaxWidth().padding(bottom = 10.dp))
+            Widget(it, executor, Modifier.fillMaxWidth().padding(bottom = 10.dp), onError)
         }
     }
