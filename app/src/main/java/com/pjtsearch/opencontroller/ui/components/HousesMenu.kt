@@ -7,7 +7,7 @@ import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.github.michaelbull.result.mapError
+import androidx.compose.ui.tooling.preview.Preview
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.pjtsearch.opencontroller.extensions.HouseRef
@@ -18,7 +18,7 @@ import kotlin.concurrent.thread
 @ExperimentalMaterialApi
 @Composable
 fun HousesMenu(houseRefs: List<HouseRef>, onError: (Throwable) -> Unit, onChoose: (HouseOrBuilder) -> Unit) =
-    Box {
+    Column {
         houseRefs.map {
             ListItem(Modifier.clickable { thread {
                 resolveHouseRef(it).onFailure(onError).onSuccess(onChoose)
@@ -27,3 +27,9 @@ fun HousesMenu(houseRefs: List<HouseRef>, onError: (Throwable) -> Unit, onChoose
             }
         }
     }
+
+@ExperimentalMaterialApi
+@Preview
+@Composable
+fun HousesMenuPreview() =
+    HousesMenu(listOf(HouseRef("Test"), HouseRef("Test 2")), {}, {})
