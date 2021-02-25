@@ -1,5 +1,8 @@
 package com.pjtsearch.opencontroller
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.Crossfade
@@ -11,10 +14,12 @@ import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.unit.dp
 import com.github.kittinunf.fuel.httpGet
 import com.pjtsearch.opencontroller.components.SystemUi
+import com.pjtsearch.opencontroller.extensions.copy
 import com.pjtsearch.opencontroller.ui.theme.typography
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 import com.pjtsearch.opencontroller.ui.theme.shapes
@@ -53,9 +58,17 @@ fun MainActivityView() {
     var menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
     var executor = remember(house) { house?.let { OpenControllerLibExecutor(it) } }
     val scope = rememberCoroutineScope()
+    val ctx = AmbientContext.current
     SideEffect { thread {
         house = House.parseFrom("http://10.0.2.105:3612/".httpGet().response().third.get())
     }}
+    val onError = { err: Throwable ->
+        scope.launch {
+            when (menuState.snackbarHostState.showSnackbar(err.message!!, "Copy")) {
+                SnackbarResult.ActionPerformed -> copy(err.localizedMessage!!, err.toString(), ctx)
+            }
+        }
+    }
     BackdropScaffold(
         scaffoldState = menuState,
         headerHeight = 100.dp,
@@ -100,11 +113,7 @@ fun MainActivityView() {
                             is Page.Controller -> ControllerView(
                                     (page as Page.Controller).controller,
                                     executor!!,
-                                    onError = { err ->
-                                        scope.launch {
-                                            menuState.snackbarHostState.showSnackbar(err.message!!)
-                                        }
-                                    }
+                                    onError = { onError(it) }
                                 )
                         }
                         BackdropValue.Revealed -> Box(Modifier.fillMaxWidth()) {
