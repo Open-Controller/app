@@ -17,7 +17,7 @@ fun AppBar(
                 backgroundColor = MaterialTheme.colors.background,
                 elevation = 0.dp,
                 title = {
-                    Crossfade(current = menuState.targetValue, content = {
+                    Crossfade(menuState.targetValue, content = {
                         when (it) {
                             BackdropValue.Concealed -> Box(content = concealedTitle)
                             BackdropValue.Revealed -> Box(content = revealedTitle)

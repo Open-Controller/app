@@ -106,7 +106,7 @@ fun MainActivityView() {
         },
         frontLayerContent = {
             Box(Modifier.padding(20.dp)) {
-                Crossfade(current = menuState.targetValue) {
+                Crossfade(menuState.targetValue) {
                     when (it) {
                         BackdropValue.Concealed -> when (page) {
                             is Page.Home -> Text("Home", style = typography.h5)

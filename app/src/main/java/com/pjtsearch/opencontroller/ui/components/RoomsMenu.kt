@@ -3,6 +3,7 @@ package com.pjtsearch.opencontroller.ui.components
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -12,6 +13,7 @@ import com.pjtsearch.opencontroller.components.ExpandableListItem
 import com.pjtsearch.opencontroller_lib_proto.ControllerOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.HouseOrBuilder
 
+@ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
 fun RoomsMenu(house: HouseOrBuilder, onControllerClick: (ControllerOrBuilder) -> Unit) =
