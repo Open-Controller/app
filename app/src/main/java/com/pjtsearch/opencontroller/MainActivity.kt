@@ -16,12 +16,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.github.kittinunf.fuel.httpGet
 import com.pjtsearch.opencontroller.components.SystemUi
+import com.pjtsearch.opencontroller.extensions.HouseRef
 import com.pjtsearch.opencontroller.extensions.copy
 import com.pjtsearch.opencontroller.ui.theme.typography
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller.ui.components.AppBar
 import com.pjtsearch.opencontroller.ui.components.ControllerView
+import com.pjtsearch.opencontroller.ui.components.HousesMenu
 import com.pjtsearch.opencontroller.ui.components.RoomsMenu
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.*
@@ -56,14 +58,12 @@ fun MainActivityView() {
     val executor = remember(house) { house?.let { OpenControllerLibExecutor(it) } }
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
-    SideEffect { thread {
-        house = House.parseFrom("http://10.0.2.105:3612/".httpGet().response().third.get())
-    }}
+    val houseRefs = listOf(HouseRef("http://10.0.2.105:3612/"))
     val onError = { err: Throwable ->
         scope.launch {
-            val result = menuState.snackbarHostState.showSnackbar(err.message!!, "Copy")
+            val result = menuState.snackbarHostState.showSnackbar(err.message ?: "Unknown error occurred", "Copy")
             if (result == SnackbarResult.ActionPerformed) {
-                copy(err.localizedMessage!!, err.toString(), ctx)
+                copy(err.localizedMessage ?: "Unknown error", err.toString(), ctx)
             }
         }
     }
@@ -99,7 +99,7 @@ fun MainActivityView() {
                         page = Page.Controller(it)
                         menuState.conceal()
                     }
-                }
+                } ?: HousesMenu(houseRefs, { onError(it) }) { house = it }
             }
         },
         frontLayerContent = {
