@@ -4,16 +4,11 @@ import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.AmbientContext
-import androidx.compose.ui.platform.AmbientView
-import androidx.compose.material.AmbientContentColor;
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.github.michaelbull.result.mapError
@@ -27,10 +22,10 @@ import kotlin.concurrent.thread
 
 @Composable
 fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifier: Modifier = Modifier, onError: (Throwable) -> Unit) {
-    val view = AmbientView.current
+    val view = LocalView.current
     when (widget.innerCase) {
         InnerCase.BUTTON ->
-            Providers(AmbientContentColor provides MaterialTheme.colors.primary) {
+            Providers(LocalContentColor provides MaterialTheme.colors.primary) {
                 Box(Modifier
                 .widthIn(65.dp, 70.dp)
                 .heightIn(65.dp, 75.dp)

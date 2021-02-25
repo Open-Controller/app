@@ -1,9 +1,7 @@
 package com.pjtsearch.opencontroller
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -14,8 +12,7 @@ import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.AmbientContext
-import androidx.compose.ui.platform.setContent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.github.kittinunf.fuel.httpGet
 import com.pjtsearch.opencontroller.components.SystemUi
@@ -55,17 +52,18 @@ sealed class Page {
 fun MainActivityView() {
     var house: HouseOrBuilder? by remember { mutableStateOf(null) }
     var page: Page by remember { mutableStateOf(Page.Home) }
-    var menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
-    var executor = remember(house) { house?.let { OpenControllerLibExecutor(it) } }
+    val menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
+    val executor = remember(house) { house?.let { OpenControllerLibExecutor(it) } }
     val scope = rememberCoroutineScope()
-    val ctx = AmbientContext.current
+    val ctx = LocalContext.current
     SideEffect { thread {
         house = House.parseFrom("http://10.0.2.105:3612/".httpGet().response().third.get())
     }}
     val onError = { err: Throwable ->
         scope.launch {
-            when (menuState.snackbarHostState.showSnackbar(err.message!!, "Copy")) {
-                SnackbarResult.ActionPerformed -> copy(err.localizedMessage!!, err.toString(), ctx)
+            val result = menuState.snackbarHostState.showSnackbar(err.message!!, "Copy")
+            if (result == SnackbarResult.ActionPerformed) {
+                copy(err.localizedMessage!!, err.toString(), ctx)
             }
         }
     }
@@ -96,8 +94,8 @@ fun MainActivityView() {
                 Modifier
                     .padding(10.dp)
                     .padding(bottom = 20.dp)) {
-                house?.let {
-                    RoomsMenu(it) {
+                house?.let { house ->
+                    RoomsMenu(house) {
                         page = Page.Controller(it)
                         menuState.conceal()
                     }
@@ -113,7 +111,7 @@ fun MainActivityView() {
                             is Page.Controller -> ControllerView(
                                     (page as Page.Controller).controller,
                                     executor!!,
-                                    onError = { onError(it) }
+                                    onError = { e -> onError(e) }
                                 )
                         }
                         BackdropValue.Revealed -> Box(Modifier.fillMaxWidth()) {
