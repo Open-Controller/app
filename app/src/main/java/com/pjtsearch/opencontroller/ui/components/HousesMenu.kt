@@ -11,7 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.pjtsearch.opencontroller.extensions.HouseRef
-import com.pjtsearch.opencontroller.extensions.resolveHouseRef
+import com.pjtsearch.opencontroller.extensions.NetworkHouseRef
 import com.pjtsearch.opencontroller_lib_proto.HouseOrBuilder
 import kotlin.concurrent.thread
 
@@ -21,9 +21,9 @@ fun HousesMenu(houseRefs: List<HouseRef>, onError: (Throwable) -> Unit, onChoose
     Column {
         houseRefs.map {
             ListItem(Modifier.clickable { thread {
-                resolveHouseRef(it).onFailure(onError).onSuccess(onChoose)
+                it.resolve().onFailure(onError).onSuccess(onChoose)
             }}) {
-                Text(it.url)
+                Text(it.displayName)
             }
         }
     }
@@ -32,4 +32,7 @@ fun HousesMenu(houseRefs: List<HouseRef>, onError: (Throwable) -> Unit, onChoose
 @Preview
 @Composable
 fun HousesMenuPreview() =
-    HousesMenu(listOf(HouseRef("Test"), HouseRef("Test 2")), {}, {})
+    HousesMenu(listOf(
+        NetworkHouseRef("Test", "https://google.com"),
+        NetworkHouseRef("Test2", "https://google.com")
+    ), {}, {})

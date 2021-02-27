@@ -5,8 +5,13 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.runCatching
 import com.pjtsearch.opencontroller_lib_proto.House
 
-data class HouseRef(val url: String)
+interface HouseRef {
+    val displayName: String
+    fun resolve(): Result<House, Throwable>
+}
 
-fun resolveHouseRef(ref: HouseRef): Result<House, Throwable> = runCatching {
-    House.parseFrom(ref.url.httpGet().response().third.get())
+class NetworkHouseRef(override val displayName: String, private val url: String) : HouseRef {
+    override fun resolve(): Result<House, Throwable> = runCatching {
+        House.parseFrom(url.httpGet().response().third.get())
+    }
 }

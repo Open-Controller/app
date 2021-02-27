@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.github.kittinunf.fuel.httpGet
 import com.pjtsearch.opencontroller.components.SystemUi
 import com.pjtsearch.opencontroller.extensions.HouseRef
+import com.pjtsearch.opencontroller.extensions.NetworkHouseRef
 import com.pjtsearch.opencontroller.extensions.copy
 import com.pjtsearch.opencontroller.ui.theme.typography
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
@@ -58,7 +59,7 @@ fun MainActivityView() {
     val executor = remember(house) { house?.let { OpenControllerLibExecutor(it) } }
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
-    val houseRefs = listOf(HouseRef("http://10.0.2.105:3612/"))
+    val houseRefs = listOf(NetworkHouseRef("Home","http://10.0.2.105:3612/"))
     val onError = { err: Throwable ->
         scope.launch {
             val result = menuState.snackbarHostState.showSnackbar(err.message ?: "Unknown error occurred", "Copy")
