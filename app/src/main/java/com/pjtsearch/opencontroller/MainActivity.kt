@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
 
 sealed class Page {
     object Home : Page()
+    object Settings : Page()
     data class Controller(val controller: ProtoController) : Page()
 }
 
@@ -64,12 +65,14 @@ fun MainActivityView() {
         saver = Saver({
           when (val page = it.value) {
               is Page.Home -> listOf("Home")
+              is Page.Settings -> listOf("Settings")
               is Page.Controller -> listOf("Controller", page.controller.toByteArray())
           }
         }, {
             when (it[0]) {
                 "Home" -> mutableStateOf(Page.Home)
                 "Controller" -> mutableStateOf(Page.Controller(ProtoController.parseFrom(it[1] as ByteArray)))
+                "Settings" -> mutableStateOf(Page.Settings)
                 else -> mutableStateOf(Page.Home)
             }
         })
@@ -100,6 +103,7 @@ fun MainActivityView() {
                 concealedTitle = {
                     when (page) {
                         is Page.Home -> Text("Home", style = typography.h5)
+                        is Page.Settings -> Text("Settings", style = typography.h5)
                         is Page.Controller -> Text(
                             (page as Page.Controller).controller.name,
                             style = typography.h5
@@ -115,7 +119,7 @@ fun MainActivityView() {
                     .padding(10.dp)
                     .padding(bottom = 20.dp)) {
                 Row(Modifier.padding(start = 8.dp, bottom = 20.dp)) {
-                    Button({}) {
+                    Button({ page = Page.Settings; menuState.conceal() }) {
                         Text("Settings")
                     }
                     Crossfade(house) {
@@ -142,6 +146,7 @@ fun MainActivityView() {
                     when (it) {
                         BackdropValue.Concealed -> when (page) {
                             is Page.Home -> Text("Home", style = typography.h5)
+                            is Page.Settings -> Text("Settings", style = typography.h5)
                             is Page.Controller -> ControllerView(
                                     (page as Page.Controller).controller,
                                     executor!!,
@@ -151,6 +156,7 @@ fun MainActivityView() {
                         BackdropValue.Revealed -> Box(Modifier.fillMaxWidth()) {
                             when (page) {
                                 is Page.Home -> Text("Home", style = typography.h5)
+                                is Page.Settings -> Text("Settings", style = typography.h5)
                                 is Page.Controller -> Text(
                                     (page as Page.Controller).controller.name,
                                     style = typography.h5
