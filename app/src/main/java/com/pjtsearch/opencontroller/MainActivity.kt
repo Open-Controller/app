@@ -3,8 +3,8 @@ package com.pjtsearch.opencontroller
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.github.kittinunf.fuel.httpGet
 import com.pjtsearch.opencontroller.components.SystemUi
@@ -91,16 +92,30 @@ fun MainActivityView() {
             )
         },
         backLayerContent = {
-            Box(
+            Column(
                 Modifier
                     .padding(10.dp)
                     .padding(bottom = 20.dp)) {
-                house?.let { house ->
-                    RoomsMenu(house) {
-                        page = Page.Controller(it)
-                        menuState.conceal()
+                Row(Modifier.padding(start = 8.dp, bottom = 20.dp)) {
+                    Button({}) {
+                        Text("Settings")
                     }
-                } ?: HousesMenu(houseRefs, { onError(it) }) { house = it }
+                    Crossfade(house) {
+                        if (it != null) {
+                            Button({ house = null; page = Page.Home }, Modifier.padding(start = 8.dp)) {
+                                Text("Exit house")
+                            }
+                        }
+                    }
+                }
+                Crossfade(house) {
+                    it?.let { house ->
+                        RoomsMenu(house) {
+                            page = Page.Controller(it)
+                            menuState.conceal()
+                        }
+                    } ?: HousesMenu(houseRefs, { e -> onError(e) }) { newHouse -> house = newHouse }
+                }
             }
         },
         frontLayerContent = {
