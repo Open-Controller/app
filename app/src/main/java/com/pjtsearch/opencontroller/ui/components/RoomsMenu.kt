@@ -10,13 +10,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.components.ExpandableListItem
+import com.pjtsearch.opencontroller_lib_proto.Controller
 import com.pjtsearch.opencontroller_lib_proto.ControllerOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.HouseOrBuilder
 
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
-fun RoomsMenu(house: HouseOrBuilder, onControllerClick: (ControllerOrBuilder) -> Unit) =
+fun RoomsMenu(house: HouseOrBuilder, onControllerClick: (Controller) -> Unit) =
     Column(modifier = Modifier.fillMaxHeight()) {
         house.roomList
                 ?.map { room ->

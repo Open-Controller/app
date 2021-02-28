@@ -33,6 +33,7 @@ import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.*
 import kotlinx.coroutines.launch
 import kotlin.concurrent.thread
+import com.pjtsearch.opencontroller_lib_proto.Controller as ProtoController
 
 @ExperimentalMaterialApi
 class MainActivity : AppCompatActivity() {
@@ -49,7 +50,7 @@ class MainActivity : AppCompatActivity() {
 
 sealed class Page {
     object Home : Page()
-    data class Controller(val controller: ControllerOrBuilder) : Page()
+    data class Controller(val controller: ProtoController) : Page()
 }
 
 @ExperimentalAnimationApi
@@ -60,7 +61,18 @@ fun MainActivityView() {
         saver = Saver({it.value?.toByteArray()}, {mutableStateOf(House.parseFrom(it))})
     ) { mutableStateOf(null) }
     var page: Page by rememberSaveable(
-        saver = Saver({1}, {mutableStateOf(Page.Home)})
+        saver = Saver({
+          when (val page = it.value) {
+              is Page.Home -> listOf("Home")
+              is Page.Controller -> listOf("Controller", page.controller.toByteArray())
+          }
+        }, {
+            when (it[0]) {
+                "Home" -> mutableStateOf(Page.Home)
+                "Controller" -> mutableStateOf(Page.Controller(ProtoController.parseFrom(it[1] as ByteArray)))
+                else -> mutableStateOf(Page.Home)
+            }
+        })
     ) { mutableStateOf(Page.Home) }
     val menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
     val executor = remember(house) { house?.let { OpenControllerLibExecutor(it) } }
