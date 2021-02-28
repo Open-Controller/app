@@ -49,9 +49,11 @@ class MainActivity : AppCompatActivity() {
 }
 
 sealed class Page {
-    object Home : Page()
-    object Settings : Page()
-    data class Controller(val controller: ProtoController) : Page()
+    abstract val title: String
+
+    object Home : Page() { override val title = "Home"}
+    object Settings : Page() { override val title = "Settings"}
+    data class Controller(val controller: ProtoController) : Page() { override val title: String = controller.name }
 }
 
 @ExperimentalAnimationApi
@@ -100,16 +102,7 @@ fun MainActivityView() {
         appBar = {
             AppBar(
                 menuState = menuState,
-                concealedTitle = {
-                    when (page) {
-                        is Page.Home -> Text("Home", style = typography.h5)
-                        is Page.Settings -> Text("Settings", style = typography.h5)
-                        is Page.Controller -> Text(
-                            (page as Page.Controller).controller.name,
-                            style = typography.h5
-                        )
-                    }
-                },
+                concealedTitle = { Text(page.title, style = typography.h5) },
                 revealedTitle = { Text("Menu", style = typography.h5) }
             )
         },
@@ -144,24 +137,17 @@ fun MainActivityView() {
             Box(Modifier.padding(20.dp)) {
                 Crossfade(menuState.targetValue) {
                     when (it) {
-                        BackdropValue.Concealed -> when (page) {
+                        BackdropValue.Concealed -> when (val page = page) {
                             is Page.Home -> Text("Home", style = typography.h5)
                             is Page.Settings -> Text("Settings", style = typography.h5)
                             is Page.Controller -> ControllerView(
-                                    (page as Page.Controller).controller,
+                                    page.controller,
                                     executor!!,
                                     onError = { e -> onError(e) }
                                 )
                         }
                         BackdropValue.Revealed -> Box(Modifier.fillMaxWidth()) {
-                            when (page) {
-                                is Page.Home -> Text("Home", style = typography.h5)
-                                is Page.Settings -> Text("Settings", style = typography.h5)
-                                is Page.Controller -> Text(
-                                    (page as Page.Controller).controller.name,
-                                    style = typography.h5
-                                )
-                            }
+                            Text(page.title, style = typography.h5)
                             Icon(
                                 Icons.Outlined.KeyboardArrowUp,
                                 "Close menu",
