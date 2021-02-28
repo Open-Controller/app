@@ -21,7 +21,7 @@ fun RoomsMenu(house: HouseOrBuilder, onControllerClick: (ControllerOrBuilder) ->
         house.roomList
                 ?.map { room ->
                     ExpandableListItem(
-                            modifier = Modifier.fillMaxWidth().padding(5.dp).padding(start = 10.dp),
+                            modifier = Modifier.fillMaxWidth().padding(5.dp).padding(start = 20.dp),
                             text = { Text(room.name) }) {
                         room.controllerList.map { controller ->
                             ListItem(

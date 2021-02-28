@@ -7,11 +7,14 @@ import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.pjtsearch.opencontroller.extensions.HouseRef
 import com.pjtsearch.opencontroller.extensions.NetworkHouseRef
+import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_proto.HouseOrBuilder
 import kotlin.concurrent.thread
 
@@ -20,7 +23,7 @@ import kotlin.concurrent.thread
 fun HousesMenu(houseRefs: List<HouseRef>, onError: (Throwable) -> Unit, onChoose: (HouseOrBuilder) -> Unit) =
     Column {
         houseRefs.map {
-            ListItem(Modifier.clickable { thread {
+            ListItem(Modifier.padding(5.dp).padding(start = 20.dp).clip(shapes.medium).clickable { thread {
                 it.resolve().onFailure(onError).onSuccess(onChoose)
             }}) {
                 Text(it.displayName)
