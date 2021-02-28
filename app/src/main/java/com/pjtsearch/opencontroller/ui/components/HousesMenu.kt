@@ -15,12 +15,13 @@ import com.github.michaelbull.result.onSuccess
 import com.pjtsearch.opencontroller.extensions.HouseRef
 import com.pjtsearch.opencontroller.extensions.NetworkHouseRef
 import com.pjtsearch.opencontroller.ui.theme.shapes
+import com.pjtsearch.opencontroller_lib_proto.House
 import com.pjtsearch.opencontroller_lib_proto.HouseOrBuilder
 import kotlin.concurrent.thread
 
 @ExperimentalMaterialApi
 @Composable
-fun HousesMenu(houseRefs: List<HouseRef>, onError: (Throwable) -> Unit, onChoose: (HouseOrBuilder) -> Unit) =
+fun HousesMenu(houseRefs: List<HouseRef>, onError: (Throwable) -> Unit, onChoose: (House) -> Unit) =
     Column {
         houseRefs.map {
             ListItem(Modifier.padding(5.dp).padding(start = 20.dp).clip(shapes.medium).clickable { thread {

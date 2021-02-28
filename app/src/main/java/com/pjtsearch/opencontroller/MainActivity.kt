@@ -10,6 +10,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
@@ -54,8 +56,12 @@ sealed class Page {
 @ExperimentalMaterialApi
 @Composable
 fun MainActivityView() {
-    var house: HouseOrBuilder? by remember { mutableStateOf(null) }
-    var page: Page by remember { mutableStateOf(Page.Home) }
+    var house: House? by rememberSaveable(
+        saver = Saver({it.value?.toByteArray()}, {mutableStateOf(House.parseFrom(it))})
+    ) { mutableStateOf(null) }
+    var page: Page by rememberSaveable(
+        saver = Saver({1}, {mutableStateOf(Page.Home)})
+    ) { mutableStateOf(Page.Home) }
     val menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
     val executor = remember(house) { house?.let { OpenControllerLibExecutor(it) } }
     val scope = rememberCoroutineScope()
