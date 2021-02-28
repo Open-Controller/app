@@ -28,7 +28,7 @@ val typography = Typography(
     subtitle1 = TextStyle(
             fontFamily = LexendDeca,
             fontWeight = FontWeight.Medium,
-            fontSize = 16.sp
+            fontSize = 17.sp
     ),
     subtitle2 = Typography().subtitle2.copy(fontFamily = LexendDeca),
     body1 = Typography().body1.copy(fontFamily = LexendDeca),
