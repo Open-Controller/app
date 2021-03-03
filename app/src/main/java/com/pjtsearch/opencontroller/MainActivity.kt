@@ -32,6 +32,7 @@ import com.pjtsearch.opencontroller.ui.components.RoomsMenu
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.*
 import kotlinx.coroutines.launch
+import java.io.Serializable
 import kotlin.concurrent.thread
 import com.pjtsearch.opencontroller_lib_proto.Controller as ProtoController
 
@@ -54,6 +55,21 @@ sealed class Page {
     object Home : Page() { override val title = "Home"}
     object Settings : Page() { override val title = "Settings"}
     data class Controller(val controller: ProtoController) : Page() { override val title: String = controller.name }
+    fun serialize() =
+        when (val page = this) {
+            is Home -> listOf("Home")
+            is Settings -> listOf("Settings")
+            is Controller -> listOf("Controller", page.controller.toByteArray())
+        }
+    companion object {
+        fun deserialize(from: List<Serializable>) =
+            when (from[0]) {
+                "Home" -> Home
+                "Controller" -> Controller(ProtoController.parseFrom(from[1] as ByteArray))
+                "Settings" -> Settings
+                else -> Home
+            }
+    }
 }
 
 @ExperimentalAnimationApi
@@ -61,23 +77,10 @@ sealed class Page {
 @Composable
 fun MainActivityView() {
     var house: House? by rememberSaveable(
-        saver = Saver({it.value?.toByteArray()}, {mutableStateOf(House.parseFrom(it))})
+        saver = Saver({it.value?.toByteArray()}, { mutableStateOf(House.parseFrom(it)) })
     ) { mutableStateOf(null) }
     var page: Page by rememberSaveable(
-        saver = Saver({
-          when (val page = it.value) {
-              is Page.Home -> listOf("Home")
-              is Page.Settings -> listOf("Settings")
-              is Page.Controller -> listOf("Controller", page.controller.toByteArray())
-          }
-        }, {
-            when (it[0]) {
-                "Home" -> mutableStateOf(Page.Home)
-                "Controller" -> mutableStateOf(Page.Controller(ProtoController.parseFrom(it[1] as ByteArray)))
-                "Settings" -> mutableStateOf(Page.Settings)
-                else -> mutableStateOf(Page.Home)
-            }
-        })
+        saver = Saver({ it.value.serialize() }, { mutableStateOf(Page.deserialize(it)) })
     ) { mutableStateOf(Page.Home) }
     val menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
     val executor = remember(house) { house?.let { OpenControllerLibExecutor(it) } }
