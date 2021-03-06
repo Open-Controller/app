@@ -122,13 +122,13 @@ fun MainActivityView() {
                 Modifier
                     .padding(10.dp)
                     .padding(bottom = 20.dp)) {
-                Row(Modifier.padding(start = 8.dp, bottom = 20.dp)) {
+                Row(Modifier.padding(start = 8.dp, bottom = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button({ page = Page.Settings; menuState.conceal() }) {
                         Text("Settings")
                     }
                     Crossfade(house) {
                         if (it != null) {
-                            Button({ house = null; page = Page.Home }, Modifier.padding(start = 8.dp)) {
+                            Button({ house = null; page = Page.Home }) {
                                 Text("Exit house")
                             }
                         }
