@@ -24,18 +24,17 @@ import com.pjtsearch.opencontroller.extensions.copy
 import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.NetworkHouseRef
 import com.pjtsearch.opencontroller.settings.Settings
+import com.pjtsearch.opencontroller.ui.components.*
 import com.pjtsearch.opencontroller.ui.theme.typography
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 import com.pjtsearch.opencontroller.ui.theme.shapes
-import com.pjtsearch.opencontroller.ui.components.AppBar
-import com.pjtsearch.opencontroller.ui.components.ControllerView
-import com.pjtsearch.opencontroller.ui.components.HousesMenu
-import com.pjtsearch.opencontroller.ui.components.RoomsMenu
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.*
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.Serializable
+import kotlin.concurrent.thread
 import com.pjtsearch.opencontroller_lib_proto.Controller as ProtoController
 
 val Context.settingsDataStore: DataStore<Settings> by dataStore(
@@ -151,7 +150,9 @@ fun MainActivityView() {
                     when (it) {
                         BackdropValue.Concealed -> when (val page = page) {
                             is Page.Home -> Text("Home", style = typography.h5)
-                            is Page.Settings -> Text("Settings", style = typography.h5)
+                            is Page.Settings -> SettingsView(
+                                    onError = { e -> onError(e) }
+                                )
                             is Page.Controller -> ControllerView(
                                     page.controller,
                                     executor!!,
