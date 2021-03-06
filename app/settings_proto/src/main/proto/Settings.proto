@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_package = "com.pjtsearch.opencontroller.settings";
+option java_multiple_files = true;
+
+message Settings {
+  repeated HouseRef house_refs = 1;
+}
+
+message HouseRef {
+  string displayName = 1;
+  oneof inner {
+    NetworkHouseRef network_house_ref = 2;
+  }
+}
+
+message NetworkHouseRef {
+  string url = 1;
+}
