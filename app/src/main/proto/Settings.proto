@@ -17,3 +17,4 @@ message HouseRef {
 message NetworkHouseRef {
   string url = 1;
 }
+

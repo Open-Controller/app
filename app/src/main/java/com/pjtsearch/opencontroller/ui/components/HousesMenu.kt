@@ -12,11 +12,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
-import com.pjtsearch.opencontroller.extensions.HouseRef
-import com.pjtsearch.opencontroller.extensions.NetworkHouseRef
+import com.pjtsearch.opencontroller.extensions.resolveHouseRef
+import com.pjtsearch.opencontroller.settings.HouseRef
+import com.pjtsearch.opencontroller.settings.NetworkHouseRef
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_proto.House
-import com.pjtsearch.opencontroller_lib_proto.HouseOrBuilder
 import kotlin.concurrent.thread
 
 @ExperimentalMaterialApi
@@ -25,7 +25,7 @@ fun HousesMenu(houseRefs: List<HouseRef>, onError: (Throwable) -> Unit, onChoose
     Column {
         houseRefs.map {
             ListItem(Modifier.padding(5.dp).padding(start = 20.dp).clip(shapes.medium).clickable { thread {
-                it.resolve().onFailure(onError).onSuccess(onChoose)
+                resolveHouseRef(it).onFailure(onError).onSuccess(onChoose)
             }}) {
                 Text(it.displayName)
             }
@@ -37,6 +37,10 @@ fun HousesMenu(houseRefs: List<HouseRef>, onError: (Throwable) -> Unit, onChoose
 @Composable
 fun HousesMenuPreview() =
     HousesMenu(listOf(
-        NetworkHouseRef("Test", "https://google.com"),
-        NetworkHouseRef("Test2", "https://google.com")
+        HouseRef.newBuilder().setDisplayName("Test")
+            .setNetworkHouseRef(NetworkHouseRef.newBuilder().setUrl("http://10.0.2.105:3612/"))
+            .build(),
+        HouseRef.newBuilder().setDisplayName("Test2")
+            .setNetworkHouseRef(NetworkHouseRef.newBuilder().setUrl("http://10.0.2.105:3612/"))
+            .build()
     ), {}, {})

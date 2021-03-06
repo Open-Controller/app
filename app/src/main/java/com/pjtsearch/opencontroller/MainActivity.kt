@@ -1,10 +1,10 @@
 package com.pjtsearch.opencontroller
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -15,13 +15,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.github.kittinunf.fuel.httpGet
+import androidx.datastore.core.DataStore
+import androidx.datastore.dataStore
 import com.pjtsearch.opencontroller.components.SystemUi
-import com.pjtsearch.opencontroller.extensions.HouseRef
-import com.pjtsearch.opencontroller.extensions.NetworkHouseRef
+import com.pjtsearch.opencontroller.extensions.SettingsSerializer
 import com.pjtsearch.opencontroller.extensions.copy
+import com.pjtsearch.opencontroller.settings.HouseRef
+import com.pjtsearch.opencontroller.settings.NetworkHouseRef
+import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.ui.theme.typography
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 import com.pjtsearch.opencontroller.ui.theme.shapes
@@ -31,10 +33,15 @@ import com.pjtsearch.opencontroller.ui.components.HousesMenu
 import com.pjtsearch.opencontroller.ui.components.RoomsMenu
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.*
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.Serializable
-import kotlin.concurrent.thread
 import com.pjtsearch.opencontroller_lib_proto.Controller as ProtoController
+
+val Context.settingsDataStore: DataStore<Settings> by dataStore(
+    fileName = "Settings.proto",
+    serializer = SettingsSerializer
+)
 
 @ExperimentalMaterialApi
 class MainActivity : AppCompatActivity() {
@@ -86,7 +93,9 @@ fun MainActivityView() {
     val executor = remember(house) { house?.let { OpenControllerLibExecutor(it) } }
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
-    val houseRefs = listOf(NetworkHouseRef("Home","http://10.0.2.105:3612/"))
+    val houseRefs = ctx.settingsDataStore.data.map {
+        it.houseRefsList
+    }.collectAsState(listOf())
     val onError = { err: Throwable ->
         scope.launch {
             val result = menuState.snackbarHostState.showSnackbar(err.message ?: "Unknown error occurred", "Copy")
@@ -132,7 +141,7 @@ fun MainActivityView() {
                             page = Page.Controller(it)
                             menuState.conceal()
                         }
-                    } ?: HousesMenu(houseRefs, { e -> onError(e) }) { newHouse -> house = newHouse }
+                    } ?: HousesMenu(houseRefs.value, { e -> onError(e) }) { newHouse -> house = newHouse }
                 }
             }
         },
