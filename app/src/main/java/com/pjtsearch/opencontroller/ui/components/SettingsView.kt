@@ -56,7 +56,7 @@ fun SettingsView(onError: (Throwable) -> Unit) {
                 }
             }
         }
-        ExpandableListItem(text = { Row {
+        ExpandableListItem(text = { Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Outlined.Add, "Add a house")
             Text("Add house")
         }}) {
