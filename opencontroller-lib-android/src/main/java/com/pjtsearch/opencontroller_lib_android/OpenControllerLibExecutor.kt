@@ -11,7 +11,7 @@ import java.net.Socket
 
 class OpenControllerLibExecutor(val house: HouseOrBuilder) {
     fun executeAction(actionRef: ActionRefOrBuilder): Result<Any, Throwable> = runCatching{
-        val action = resolveActionRef(actionRef)!!
+        val action = resolveActionRef(actionRef) ?: throw Exception("Could not find $actionRef")
         when (action.innerCase) {
             Action.InnerCase.HTTP_ACTION -> when (action.httpAction.method) {
                 HttpMethod.GET -> action.httpAction.url.httpGet().response().third.get()
@@ -25,9 +25,12 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
             Action.InnerCase.TCP_ACTION -> {
                 val (host, port) = action.tcpAction.address.split(":")
                 val client = Socket(host, port.toInt())
-                client.outputStream.write(action.tcpAction.command.toByteArray())
-                val scanner = client.getInputStream()
-                scanner.read()
+                client.outputStream.write((action.tcpAction.command+"\r\n").toByteArray())
+//                val scanner = client.getInputStream()
+//                println("$host:$port")
+//                println(action.tcpAction.command)
+//                println(scanner.read())
+                Thread.sleep(300)
                 client.close()
             }
             Action.InnerCase.MACRO_ACTION -> action.macroAction.actionList.map {
