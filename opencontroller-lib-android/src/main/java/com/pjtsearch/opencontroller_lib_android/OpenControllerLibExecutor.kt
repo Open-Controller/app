@@ -33,7 +33,7 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
                 Thread.sleep(300)
                 client.close()
             }
-            Action.InnerCase.MACRO_ACTION -> action.macroAction.actionList.map {
+            Action.InnerCase.MACRO_ACTION -> action.macroAction.actionsList.map {
                 executeAction(it)
             }
             Action.InnerCase.DELAY_ACTION -> {
@@ -47,9 +47,9 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
     private fun resolveActionRef(
         actionRef: ActionRefOrBuilder,
     ): ActionOrBuilder? =
-        house.deviceList
+        house.devicesList
             .find { it.id == actionRef.device }
-            ?.actionList
+            ?.actionsList
             ?.find { it.id == actionRef.action }
 
     fun subscribeDynamicValue(
@@ -60,7 +60,7 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
         var running = true
         val globals = JsePlatform.standardGlobals()
         val chunk = globals.load(dynamicValue.script)
-        dynamicValue.dynamicResourceList.forEach {
+        dynamicValue.dynamicResourcesList.forEach {
             when (it.innerCase) {
                 DynamicResource.InnerCase.DATE_RESOURCE -> thread {
                     while (running) {
@@ -78,8 +78,8 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
     private fun resolveDynamicValueRef(
         dynamicValueRef: DynamicValueRefOrBuilder,
     ): DynamicValueOrBuilder? =
-        house.deviceList
+        house.devicesList
             .find { it.id == dynamicValueRef.device }
-            ?.dynamicValueList
+            ?.dynamicValuesList
             ?.find { it.id == dynamicValueRef.dynamicValue }
 }

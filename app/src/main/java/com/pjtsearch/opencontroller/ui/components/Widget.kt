@@ -55,12 +55,12 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
             Text(value.toString(), modifier)
         }
         InnerCase.ROW -> Row(modifier, Arrangement.SpaceBetween) {
-            widget.row.childList.map {
+            widget.row.childrenList.map {
                 Widget(it, executor, onError = onError)
             }
         }
         InnerCase.COLUMN -> Column(modifier, Arrangement.Top) {
-            widget.column.childList.map {
+            widget.column.childrenList.map {
                 Widget(it, executor, onError = onError)
             }
         }

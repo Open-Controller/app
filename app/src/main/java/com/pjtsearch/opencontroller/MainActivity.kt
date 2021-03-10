@@ -60,7 +60,7 @@ sealed class Page {
 
     object Home : Page() { override val title = "Home"}
     object Settings : Page() { override val title = "Settings"}
-    data class Controller(val controller: ProtoController) : Page() { override val title: String = controller.name }
+    data class Controller(val controller: ProtoController) : Page() { override val title: String = controller.displayName }
     fun serialize() =
         when (val page = this) {
             is Home -> listOf("Home")
