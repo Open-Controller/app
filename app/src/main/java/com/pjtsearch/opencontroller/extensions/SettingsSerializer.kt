@@ -8,7 +8,7 @@ import java.io.OutputStream
 import androidx.datastore.core.Serializer;
 
 object SettingsSerializer : Serializer<Settings> {
-    override fun readFrom(input: InputStream): Settings {
+    override suspend fun readFrom(input: InputStream): Settings {
         try {
             return Settings.parseFrom(input)
         } catch (exception: InvalidProtocolBufferException) {
@@ -16,7 +16,7 @@ object SettingsSerializer : Serializer<Settings> {
         }
     }
 
-    override fun writeTo(t: Settings, output: OutputStream) = t.writeTo(output)
+    override suspend fun writeTo(t: Settings, output: OutputStream) = t.writeTo(output)
 
     override val defaultValue: Settings = Settings.getDefaultInstance()
 }

@@ -8,7 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.luminance
 import com.pjtsearch.opencontroller.ui.theme.OpenControllerTheme
-import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.ProvideWindowInsets
 
 @Composable
 fun SystemUi(window: Window, content: @Composable () -> Unit) =

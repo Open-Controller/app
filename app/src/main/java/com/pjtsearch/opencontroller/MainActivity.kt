@@ -26,7 +26,7 @@ import com.pjtsearch.opencontroller.settings.NetworkHouseRef
 import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.ui.components.*
 import com.pjtsearch.opencontroller.ui.theme.typography
-import dev.chrisbanes.accompanist.insets.statusBarsPadding
+import com.google.accompanist.insets.statusBarsPadding
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.*
@@ -124,7 +124,7 @@ fun MainActivityView() {
                     .padding(10.dp)
                     .padding(bottom = 20.dp)) {
                 Row(Modifier.padding(start = 8.dp, bottom = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button({ page = Page.Settings; menuState.conceal() }) {
+                    Button({ page = Page.Settings; scope.launch { menuState.conceal()} }) {
                         Text("Settings")
                     }
                     Crossfade(house) {
@@ -139,7 +139,7 @@ fun MainActivityView() {
                     it?.let { house ->
                         RoomsMenu(house) {
                             page = Page.Controller(it)
-                            menuState.conceal()
+                            scope.launch { menuState.conceal() }
                         }
                     } ?: HousesMenu(houseRefs.value, { e -> onError(e) }) { newHouse -> house = newHouse }
                 }

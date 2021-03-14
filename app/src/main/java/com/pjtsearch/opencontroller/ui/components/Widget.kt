@@ -25,7 +25,7 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
     val view = LocalView.current
     when (widget.innerCase) {
         InnerCase.BUTTON ->
-            Providers(LocalContentColor provides MaterialTheme.colors.primary) {
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colors.primary) {
                 Box(Modifier
                 .widthIn(65.dp, 70.dp)
                 .heightIn(65.dp, 75.dp)
