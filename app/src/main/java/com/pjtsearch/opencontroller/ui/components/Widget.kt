@@ -40,7 +40,7 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                 }, Alignment.Center) {
                     when (widget.button.optionalIconCase) {
                         OptionalIconCase.ICON -> Icon(
-                            icons[widget.button.icon]!!,
+                            icons[widget.button.icon] ?: throw Error("Could not find icon " + widget.button.icon.toString()),
                             widget.button.text)
                         OptionalIconCase.OPTIONALICON_NOT_SET -> Text(widget.button.text)
                     }
