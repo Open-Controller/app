@@ -8,7 +8,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.github.michaelbull.result.mapError
@@ -39,9 +41,16 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                     }
                 }, Alignment.Center) {
                     when (widget.button.optionalIconCase) {
-                        OptionalIconCase.ICON -> Icon(
-                            icons[widget.button.icon] ?: throw Error("Could not find icon " + widget.button.icon.toString()),
-                            widget.button.text)
+                        OptionalIconCase.ICON -> when (val icon = icons[widget.button.icon] ?: throw Error("Could not find icon " + widget.button.icon.toString())) {
+                            is Int -> Icon(
+                                painterResource(icon),
+                                widget.button.text
+                            )
+                            is ImageVector -> Icon(
+                                icon,
+                                widget.button.text
+                            )
+                        }
                         OptionalIconCase.OPTIONALICON_NOT_SET -> Text(widget.button.text)
                     }
                 }

@@ -3,6 +3,8 @@ package com.pjtsearch.opencontroller.extensions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import com.pjtsearch.opencontroller.R
 import com.pjtsearch.opencontroller_lib_proto.Icon
 
 var icons = hashMapOf(
@@ -16,8 +18,8 @@ var icons = hashMapOf(
         Icon.VOLUME_DOWN to Icons.Outlined.VolumeDown,
         Icon.VOLUME_MUTE to Icons.Outlined.VolumeOff,
         Icon.BACK to Icons.Outlined.Undo,
-        Icon.ON to Icons.Outlined.Power,
-        Icon.OFF to Icons.Outlined.PowerOff,
+        Icon.ON to R.drawable.power_on,
+        Icon.OFF to R.drawable.power_off,
         Icon.FORWARD to Icons.Outlined.FastForward,
         Icon.REVERSE to Icons.Outlined.FastRewind,
         Icon.INFO to Icons.Outlined.Info,
@@ -37,17 +39,17 @@ var icons = hashMapOf(
         Icon.MENU to Icons.Outlined.Menu,
         Icon.EXIT to Icons.Outlined.ExitToApp,
         Icon.OPTIONS to Icons.Outlined.Settings,
-        Icon.NUMBER0 to Icons.Outlined.ExposureZero,
-        Icon.NUMBER1 to Icons.Outlined.Filter1,
-        Icon.NUMBER2 to Icons.Outlined.Filter2,
-        Icon.NUMBER3 to Icons.Outlined.Filter3,
-        Icon.NUMBER4 to Icons.Outlined.Filter4,
-        Icon.NUMBER5 to Icons.Outlined.Filter5,
-        Icon.NUMBER6 to Icons.Outlined.Filter6,
-        Icon.NUMBER7 to Icons.Outlined.Filter7,
-        Icon.NUMBER8 to Icons.Outlined.Filter8,
-        Icon.NUMBER9 to Icons.Outlined.Filter9,
-        Icon.ASTERISK to Icons.Outlined.Star,
-        Icon.POUND to Icons.Outlined.Tag,
+        Icon.NUMBER0 to R.drawable.numeric_0,
+        Icon.NUMBER1 to R.drawable.numeric_1,
+        Icon.NUMBER2 to R.drawable.numeric_2,
+        Icon.NUMBER3 to R.drawable.numeric_3,
+        Icon.NUMBER4 to R.drawable.numeric_4,
+        Icon.NUMBER5 to R.drawable.numeric_5,
+        Icon.NUMBER6 to R.drawable.numeric_6,
+        Icon.NUMBER7 to R.drawable.numeric_7,
+        Icon.NUMBER8 to R.drawable.numeric_8,
+        Icon.NUMBER9 to R.drawable.numeric_9,
+        Icon.ASTERISK to R.drawable.asterisk,
+        Icon.POUND to R.drawable.pound,
 )
 
