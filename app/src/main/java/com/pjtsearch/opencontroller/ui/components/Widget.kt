@@ -37,7 +37,7 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                 .clickable (role = Role.Button){
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                     thread {
-                        executor.executeAction(widget.button.action).mapError(onError)
+                        executor.executeAction(widget.button.action, listOf()).mapError(onError)
                     }
                 }, Alignment.Center) {
                     when (widget.button.optionalIconCase) {
@@ -55,14 +55,6 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                     }
                 }
             }
-        InnerCase.DYNAMIC_TEXT -> {
-            var value: Any? by remember { mutableStateOf(null) }
-            DisposableEffect(widget.dynamicText.value) {
-                val unsub = executor.subscribeDynamicValue(widget.dynamicText.value) { value = it }
-                onDispose { unsub() }
-            }
-            Text(value.toString(), modifier)
-        }
         InnerCase.ROW -> Row(modifier, Arrangement.SpaceBetween) {
             widget.row.childrenList.map {
                 Widget(it, executor, onError = onError)
