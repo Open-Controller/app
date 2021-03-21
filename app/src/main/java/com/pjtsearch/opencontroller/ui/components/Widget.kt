@@ -37,7 +37,7 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                 .clickable (role = Role.Button){
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                     thread {
-                        executor.executeAction(widget.button.action, listOf()).mapError(onError)
+                        executor.executeFunc(widget.button.func, listOf()).mapError(onError)
                     }
                 }, Alignment.Center) {
                     when (widget.button.optionalIconCase) {
