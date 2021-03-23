@@ -78,8 +78,9 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
 //                listOf(args[func.argsList.indexOf(func.getArgFunc.arg)])
 //            }
 
-            Func.InnerCase.CONCATENATE_FUNC -> listOf(capturedArgs.reduce {last, curr -> last.toString() + curr})
+            Func.InnerCase.CONCATENATE_FUNC -> listOf(capturedArgs.reduce { last, curr -> last.toString() + curr })
             Func.InnerCase.PUSH_STACK_FUNC -> capturedArgs + executeFunc(func.pushStackFunc.func, capturedArgs).unwrap()
+            Func.InnerCase.PREPEND_STACK_FUNC -> executeFunc(func.prependStackFunc.func, capturedArgs).unwrap() + capturedArgs
             Func.InnerCase.STRING_FUNC -> listOf(func.stringFunc.string)
             Func.InnerCase.INNER_NOT_SET -> TODO()
             null -> TODO()
