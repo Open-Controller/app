@@ -3,6 +3,7 @@ package com.pjtsearch.opencontroller.ui.components
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,18 +29,25 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
     when (widget.innerCase) {
         InnerCase.BUTTON ->
             CompositionLocalProvider(LocalContentColor provides MaterialTheme.colors.primary) {
-                Box(Modifier
-                .widthIn(65.dp, 70.dp)
-                .heightIn(65.dp, 75.dp)
-                .padding(2.dp)
-                .clip(shapes.medium)
-                .border(2.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.3f), shapes.medium)
-                .clickable (role = Role.Button){
-                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                    thread {
-                        executor.executeFunc(widget.button.func, listOf()).mapError(onError)
-                    }
-                }, Alignment.Center) {
+                Box(
+                    Modifier
+                        .widthIn(65.dp, 70.dp)
+                        .heightIn(65.dp, 75.dp)
+                        .padding(2.dp)
+                        .clip(shapes.medium)
+                        .border(
+                            2.dp,
+                            MaterialTheme.colors.onSurface.copy(alpha = 0.3f),
+                            shapes.medium
+                        )
+                        .clickable(role = Role.Button) {
+                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                            thread {
+                                executor
+                                    .executeFunc(widget.button.onClick, listOf())
+                                    .mapError(onError)
+                            }
+                        }, Alignment.Center) {
                     when (widget.button.optionalIconCase) {
                         OptionalIconCase.ICON -> when (val icon = icons[widget.button.icon] ?: throw Error("Could not find icon " + widget.button.icon.toString())) {
                             is Int -> Icon(
@@ -80,5 +88,8 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
         }
         InnerCase.SPACE -> Spacer(modifier)
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
+        InnerCase.TEXT_INPUT -> BasicTextField("", {
+            thread { executor.executeFunc(widget.textInput.onInput, listOf(it.last())) }
+        })
     }
 }
