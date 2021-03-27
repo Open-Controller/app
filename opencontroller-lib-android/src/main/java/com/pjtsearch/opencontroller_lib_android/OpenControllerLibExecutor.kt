@@ -77,7 +77,7 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
                 val newItem = if (lambda.prependStack.hasLambda()) lambda.prependStack.lambda else capturedArgs[nextArg++] as Lambda
                 executeFunc(newItem, capturedArgs).unwrap() + capturedArgs
             }
-            Lambda.InnerCase.STRING -> listOf(lambda.string.string)
+            Lambda.InnerCase.STRING -> listOf(lambda.string)
             Lambda.InnerCase.INNER_NOT_SET -> TODO()
             null -> TODO()
         }
