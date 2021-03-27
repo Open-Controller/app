@@ -20,7 +20,6 @@ import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.WidgetOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.Widget.InnerCase
-import com.pjtsearch.opencontroller_lib_proto.Button.OptionalIconCase
 import kotlin.concurrent.thread
 
 @Composable
@@ -48,8 +47,8 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                                     .mapError(onError)
                             }
                         }, Alignment.Center) {
-                    when (widget.button.optionalIconCase) {
-                        OptionalIconCase.ICON -> when (val icon = icons[widget.button.icon] ?: throw Error("Could not find icon " + widget.button.icon.toString())) {
+                    when (widget.button.hasIcon()) {
+                        true -> when (val icon = icons[widget.button.icon] ?: throw Error("Could not find icon " + widget.button.icon.toString())) {
                             is Int -> Icon(
                                 painterResource(icon),
                                 widget.button.text
@@ -59,7 +58,7 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                                 widget.button.text
                             )
                         }
-                        OptionalIconCase.OPTIONALICON_NOT_SET -> Text(widget.button.text)
+                        false -> Text(widget.button.text)
                     }
                 }
             }
