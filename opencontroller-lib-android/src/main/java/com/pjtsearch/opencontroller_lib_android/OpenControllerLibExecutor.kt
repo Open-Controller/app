@@ -80,6 +80,22 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
                 executeFunc(newItem, capturedArgs).unwrap() + capturedArgs
             }
             Lambda.InnerCase.STRING -> listOf(lambda.string)
+            Lambda.InnerCase.SWITCH -> with(lambda.switch) {
+                val then = this.conditionsList.first {
+                    executeFunc(it.`if`, capturedArgs).unwrap()[0] as Boolean
+                }.then ?: this.`else`
+                executeFunc(then, capturedArgs).unwrap()
+            }
+            Lambda.InnerCase.IS_EQUAL -> with(lambda.isEqual) {
+                listOf(when (this.fromCase) {
+                    IsEqualFunc.FromCase.FROM_BOOL -> this.fromBool == this.toBool
+                    IsEqualFunc.FromCase.FROM_STRING -> this.fromString.equals(this.toString)
+                    IsEqualFunc.FromCase.FROM_FLOAT -> this.fromFloat == this.toFloat
+                    IsEqualFunc.FromCase.FROM_INT64 -> this.fromInt64 == this.toInt64
+                    IsEqualFunc.FromCase.FROM_INT32 -> this.fromInt32 == this.toInt32
+                    IsEqualFunc.FromCase.FROM_NOT_SET -> TODO()
+                })
+            }
             Lambda.InnerCase.INNER_NOT_SET -> TODO()
             null -> TODO()
         }
