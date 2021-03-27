@@ -23,7 +23,7 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
 
                 println(url)
 
-                when (lambda.http.method) {
+                when (if (lambda.http.hasMethod()) lambda.http.method else capturedArgs[nextArg++] as HttpMethod) {
                     HttpMethod.GET -> listOf(url.httpGet().response().third.get())
                     HttpMethod.HEAD -> listOf(url.httpHead().response().third.get())
                     HttpMethod.POST -> listOf(url.httpPost().response().third.get())
@@ -69,8 +69,14 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
 
             Lambda.InnerCase.CONCATENATE ->
                 listOf((lambda.concatenate.stringsList + capturedArgs).reduce { last, curr -> last.toString() + curr })
-            Lambda.InnerCase.PUSH_STACK -> capturedArgs + executeFunc(lambda.pushStack.lambda, capturedArgs).unwrap()
-            Lambda.InnerCase.PREPEND_STACK -> executeFunc(lambda.prependStack.lambda, capturedArgs).unwrap() + capturedArgs
+            Lambda.InnerCase.PUSH_STACK -> {
+                val newItem = if (lambda.pushStack.hasLambda()) lambda.pushStack.lambda else capturedArgs[nextArg++] as Lambda
+                capturedArgs + executeFunc(newItem, capturedArgs).unwrap()
+            }
+            Lambda.InnerCase.PREPEND_STACK -> {
+                val newItem = if (lambda.prependStack.hasLambda()) lambda.prependStack.lambda else capturedArgs[nextArg++] as Lambda
+                executeFunc(newItem, capturedArgs).unwrap() + capturedArgs
+            }
             Lambda.InnerCase.STRING -> listOf(lambda.string.string)
             Lambda.InnerCase.INNER_NOT_SET -> TODO()
             null -> TODO()
