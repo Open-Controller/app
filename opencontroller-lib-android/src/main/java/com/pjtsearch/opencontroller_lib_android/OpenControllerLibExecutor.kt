@@ -2,17 +2,14 @@ package com.pjtsearch.opencontroller_lib_android
 
 import com.github.kittinunf.fuel.*
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.get
 import com.github.michaelbull.result.runCatching
 import com.github.michaelbull.result.unwrap
 import com.pjtsearch.opencontroller_lib_proto.*
-import kotlin.concurrent.thread
 
-import org.luaj.vm2.lib.jse.JsePlatform
 import java.net.Socket
 
-class OpenControllerLibExecutor(val house: HouseOrBuilder) {
-    fun executeFunc(lambda: LambdaOrBuilder, args: List<Any?>): Result<List<Any?>, Throwable> = runCatching {
+class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
+    fun executeLambda(lambda: LambdaOrBuilder, args: List<Any?>): Result<List<Any?>, Throwable> = runCatching {
         if (args.size < lambda.argsList.size) throw Error("${lambda.id} Expected ${lambda.argsList.size} args, but got ${args.size}")
         val capturedArgs = args.subList(0, lambda.argsList.size)
         val availableArgs = ArrayDeque(capturedArgs);
@@ -48,20 +45,20 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
             }
             Lambda.InnerCase.MACRO -> with(lambda.macro){
                 this.lambdasList.forEach {
-                    executeFunc(it, listOf())
+                    executeLambda(it, listOf())
                 }
                 listOf()
             }
             Lambda.InnerCase.FOLD_ARGS ->
                 lambda.foldArgs.lambdasList.fold(capturedArgs) { lastResult, curr ->
-                    executeFunc(curr, lastResult).unwrap()
+                    executeLambda(curr, lastResult).unwrap()
                 }
             Lambda.InnerCase.DELAY -> with(lambda.delay){
                 Thread.sleep(if (this.hasTime()) this.time.toLong() else availableArgs.removeFirst() as Long)
                 listOf()
             }
             Lambda.InnerCase.REF -> with(lambda.ref) {
-                executeFunc(house.devicesList
+                executeLambda(house.devicesList
                     .find { it.id == if (this.hasDevice()) this.device else availableArgs.removeFirst() }
                     ?.lambdasList
                     ?.find { it.id == if (this.hasLambda()) this.lambda else availableArgs.removeFirst() }!!,
@@ -73,18 +70,18 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
                 listOf((lambda.concatenate.stringsList + capturedArgs).reduce { last, curr -> last.toString() + curr })
             Lambda.InnerCase.PUSH_STACK -> with(lambda.pushStack) {
                 val newItem = if (this.hasLambda()) this.lambda else availableArgs.removeFirst() as Lambda
-                capturedArgs + executeFunc(newItem, capturedArgs).unwrap()
+                capturedArgs + executeLambda(newItem, capturedArgs).unwrap()
             }
             Lambda.InnerCase.PREPEND_STACK -> with(lambda.prependStack) {
                 val newItem = if (this.hasLambda()) this.lambda else availableArgs.removeFirst() as Lambda
-                executeFunc(newItem, capturedArgs).unwrap() + capturedArgs
+                executeLambda(newItem, capturedArgs).unwrap() + capturedArgs
             }
             Lambda.InnerCase.STRING -> listOf(lambda.string)
             Lambda.InnerCase.SWITCH -> with(lambda.switch) {
                 val then = this.conditionsList.first {
-                    executeFunc(it.`if`, capturedArgs).unwrap()[0] as Boolean
+                    executeLambda(it.`if`, capturedArgs).unwrap()[0] as Boolean
                 }.then ?: this.`else`
-                executeFunc(then, capturedArgs).unwrap()
+                executeLambda(then, capturedArgs).unwrap()
             }
             Lambda.InnerCase.IS_EQUAL -> with(lambda.isEqual) {
                 listOf(when (this.fromCase) {
@@ -93,7 +90,18 @@ class OpenControllerLibExecutor(val house: HouseOrBuilder) {
                     IsEqualFunc.FromCase.FROM_FLOAT -> this.fromFloat == this.toFloat
                     IsEqualFunc.FromCase.FROM_INT64 -> this.fromInt64 == this.toInt64
                     IsEqualFunc.FromCase.FROM_INT32 -> this.fromInt32 == this.toInt32
-                    IsEqualFunc.FromCase.FROM_NOT_SET -> TODO()
+                    IsEqualFunc.FromCase.FROM_NOT_SET -> {
+                        when (this.toCase) {
+                            IsEqualFunc.ToCase.TO_BOOL -> availableArgs.removeFirst() as Boolean == this.toBool
+                            IsEqualFunc.ToCase.TO_STRING -> (availableArgs.removeFirst() as String).equals(this.toString)
+                            IsEqualFunc.ToCase.TO_FLOAT -> availableArgs.removeFirst() as Float == this.toFloat
+                            IsEqualFunc.ToCase.TO_INT64 -> availableArgs.removeFirst() as Long == this.toInt64
+                            IsEqualFunc.ToCase.TO_INT32 -> availableArgs.removeFirst() as Int == this.toInt32
+                            IsEqualFunc.ToCase.TO_NOT_SET -> {
+                                availableArgs.removeFirst()?.equals(availableArgs.removeFirst())
+                            }
+                        }
+                    }
                 })
             }
             Lambda.InnerCase.INNER_NOT_SET -> TODO()

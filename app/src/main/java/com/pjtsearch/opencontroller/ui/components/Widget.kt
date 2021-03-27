@@ -43,7 +43,7 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                             thread {
                                 executor
-                                    .executeFunc(widget.button.onClick, listOf())
+                                    .executeLambda(widget.button.onClick, listOf())
                                     .mapError(onError)
                             }
                         }, Alignment.Center) {
@@ -88,7 +88,7 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
         InnerCase.SPACE -> Spacer(modifier)
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
         InnerCase.TEXT_INPUT -> BasicTextField("", {
-            thread { executor.executeFunc(widget.textInput.onInput, listOf(it.last())) }
+            thread { executor.executeLambda(widget.textInput.onInput, listOf(it.last())) }
         })
     }
 }
