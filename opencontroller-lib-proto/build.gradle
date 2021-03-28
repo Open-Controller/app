@@ -8,29 +8,21 @@ protobuf {
     protoc {
         artifact = 'com.google.protobuf:protoc:3.6.1'
     }
-    plugins {
-        javalite {
-            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
-        }
-    }
     generateProtoTasks {
         all().each { task ->
             task.builtins {
-                remove java
-            }
-            task.plugins {
-                javalite {}
+                java { }
             }
         }
     }
 }
 
 dependencies {
-    implementation 'com.google.protobuf:protobuf-lite:3.0.1'
+    implementation 'com.google.protobuf:protobuf-java:3.15.6'
 }
 
 sourceSets {
-    main.java.srcDirs += "${protobuf.generatedFilesBaseDir}/main/javalite"
+    main.java.srcDirs += "${protobuf.generatedFilesBaseDir}/main/java"
     main.java.srcDirs += "$projectDir/src/main/proto"
 }
 
