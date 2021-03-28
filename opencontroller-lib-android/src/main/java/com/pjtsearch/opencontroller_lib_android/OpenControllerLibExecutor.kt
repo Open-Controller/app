@@ -4,6 +4,7 @@ import com.github.kittinunf.fuel.*
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.runCatching
 import com.github.michaelbull.result.unwrap
+import com.google.protobuf.Message
 import com.pjtsearch.opencontroller_lib_proto.*
 
 import java.net.Socket
@@ -103,6 +104,18 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
                         }
                     }
                 })
+            }
+            Lambda.InnerCase.GET_PROP -> with(lambda.getProp){
+                when (val target = availableArgs.removeFirst()) {
+                    is Message -> {
+                        val descriptor = target.descriptorForType.findFieldByName(this.prop)
+                        listOf(target.getField(descriptor))
+                    }
+                    is Map<*, *> -> {
+                        listOf(target[this.prop])
+                    }
+                    else -> TODO()
+                }
             }
             Lambda.InnerCase.INNER_NOT_SET -> TODO()
             null -> TODO()
