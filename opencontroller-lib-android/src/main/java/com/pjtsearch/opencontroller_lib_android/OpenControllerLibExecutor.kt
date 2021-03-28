@@ -14,11 +14,10 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
         if (args.size < lambda.argsList.size) throw Error("${lambda.id} Expected ${lambda.argsList.size} args, but got ${args.size}")
         val capturedArgs = args.subList(0, lambda.argsList.size)
         val availableArgs = ArrayDeque(capturedArgs);
+//        println(lambda.innerCase)
         when (lambda.innerCase) {
             Lambda.InnerCase.HTTP -> with(lambda.http){
                 val url = (if (this.hasUrl()) this.url else availableArgs.removeFirst() as String)
-                                .replace(" ", "%20")
-
                 println(url)
 
                 when (if (this.hasMethod()) this.method else availableArgs.removeFirst() as HttpMethod) {
@@ -79,12 +78,13 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
             }
             Lambda.InnerCase.STRING -> listOf(lambda.string)
             Lambda.InnerCase.SWITCH -> with(lambda.switch) {
-                val then = this.conditionsList.first {
+                val then = this.conditionsList.firstOrNull {
                     executeLambda(it.`if`, capturedArgs).unwrap()[0] as Boolean
-                }.then ?: this.`else`
+                }?.then ?: this.`else`
                 executeLambda(then, capturedArgs).unwrap()
             }
             Lambda.InnerCase.IS_EQUAL -> with(lambda.isEqual) {
+                val arg = availableArgs.removeFirst()
                 listOf(when (this.fromCase) {
                     IsEqualFunc.FromCase.FROM_BOOL -> this.fromBool == this.toBool
                     IsEqualFunc.FromCase.FROM_STRING -> this.fromString.equals(this.toString)
@@ -93,13 +93,13 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
                     IsEqualFunc.FromCase.FROM_INT32 -> this.fromInt32 == this.toInt32
                     IsEqualFunc.FromCase.FROM_NOT_SET -> {
                         when (this.toCase) {
-                            IsEqualFunc.ToCase.TO_BOOL -> availableArgs.removeFirst() as Boolean == this.toBool
-                            IsEqualFunc.ToCase.TO_STRING -> (availableArgs.removeFirst() as String).equals(this.toString)
-                            IsEqualFunc.ToCase.TO_FLOAT -> availableArgs.removeFirst() as Float == this.toFloat
-                            IsEqualFunc.ToCase.TO_INT64 -> availableArgs.removeFirst() as Long == this.toInt64
-                            IsEqualFunc.ToCase.TO_INT32 -> availableArgs.removeFirst() as Int == this.toInt32
+                            IsEqualFunc.ToCase.TO_BOOL -> arg as Boolean == this.toBool
+                            IsEqualFunc.ToCase.TO_STRING -> (arg as String).equals(this.toString)
+                            IsEqualFunc.ToCase.TO_FLOAT -> arg as Float == this.toFloat
+                            IsEqualFunc.ToCase.TO_INT64 -> arg as Long == this.toInt64
+                            IsEqualFunc.ToCase.TO_INT32 -> arg as Int == this.toInt32
                             IsEqualFunc.ToCase.TO_NOT_SET -> {
-                                availableArgs.removeFirst()?.equals(availableArgs.removeFirst())
+                                arg?.equals(availableArgs.removeFirst())
                             }
                         }
                     }
