@@ -40,6 +40,6 @@ var icons = hashMapOf(
         Icon.EXIT to Icons.Outlined.ExitToApp,
         Icon.OPTIONS to Icons.Outlined.Settings,
         Icon.ASTERISK to R.drawable.asterisk,
-        Icon.POUND to R.drawable.pound,
+        Icon.POUND to Icons.Outlined.Tag,
 )
 
