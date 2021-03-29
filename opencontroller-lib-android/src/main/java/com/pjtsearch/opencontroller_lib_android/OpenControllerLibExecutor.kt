@@ -16,11 +16,11 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
         val availableArgs = ArrayDeque(capturedArgs);
 //        println(lambda.innerCase)
         when (lambda.innerCase) {
-            Lambda.InnerCase.HTTP -> with(lambda.http){
-                val url = (if (this.hasUrl()) this.url else availableArgs.removeFirst() as String)
+            Lambda.InnerCase.HTTP -> lambda.http.let {
+                val url = (if (it.hasUrl()) it.url else availableArgs.removeFirst() as String)
                 println(url)
 
-                when (if (this.hasMethod()) this.method else availableArgs.removeFirst() as HttpMethod) {
+                when (if (it.hasMethod()) it.method else availableArgs.removeFirst() as HttpMethod) {
                     HttpMethod.GET -> listOf(url.httpGet().response().third.get())
                     HttpMethod.HEAD -> listOf(url.httpHead().response().third.get())
                     HttpMethod.POST -> listOf(url.httpPost().response().third.get())
@@ -29,11 +29,11 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
                     HttpMethod.DELETE -> listOf(url.httpDelete().response().third.get())
                 }
             }
-            Lambda.InnerCase.TCP -> with(lambda.tcp){
-                val (host, port) = (if (this.hasAddress()) this.address else availableArgs.removeFirst() as String)
+            Lambda.InnerCase.TCP -> lambda.tcp.let {
+                val (host, port) = (if (it.hasAddress()) it.address else availableArgs.removeFirst() as String)
                     .split(":")
                 val client = Socket(host, port.toInt())
-                val command = if (this.hasCommand()) this.command else availableArgs.removeFirst() as String
+                val command = if (it.hasCommand()) it.command else availableArgs.removeFirst() as String
                 client.outputStream.write((command+"\r\n").toByteArray())
 //                val scanner = client.getInputStream()
 //                println("$host:$port")
@@ -43,9 +43,9 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
                 client.close()
                 listOf()
             }
-            Lambda.InnerCase.MACRO -> with(lambda.macro){
-                this.lambdasList.forEach {
-                    executeLambda(it, listOf())
+            Lambda.InnerCase.MACRO -> lambda.macro.let {
+                it.lambdasList.forEach { l ->
+                    executeLambda(l, listOf())
                 }
                 listOf()
             }
@@ -53,51 +53,51 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
                 lambda.foldArgs.lambdasList.fold(capturedArgs) { lastResult, curr ->
                     executeLambda(curr, lastResult).unwrap()
                 }
-            Lambda.InnerCase.DELAY -> with(lambda.delay){
-                Thread.sleep(if (this.hasTime()) this.time.toLong() else availableArgs.removeFirst() as Long)
+            Lambda.InnerCase.DELAY -> lambda.delay.let {
+                Thread.sleep(if (it.hasTime()) it.time.toLong() else availableArgs.removeFirst() as Long)
                 listOf()
             }
-            Lambda.InnerCase.REF -> with(lambda.ref) {
+            Lambda.InnerCase.REF -> lambda.ref.let { ref ->
                 executeLambda(house.devicesList
-                    .find { it.id == if (this.hasDevice()) this.device else availableArgs.removeFirst() }
+                    .find { it.id == if (ref.hasDevice()) ref.device else availableArgs.removeFirst() }
                     ?.lambdasList
-                    ?.find { it.id == if (this.hasLambda()) this.lambda else availableArgs.removeFirst() }!!,
+                    ?.find { it.id == if (ref.hasLambda()) ref.lambda else availableArgs.removeFirst() }!!,
                     capturedArgs
                 ).unwrap()
             }
 
             Lambda.InnerCase.CONCATENATE ->
                 listOf((lambda.concatenate.stringsList + capturedArgs).reduce { last, curr -> last.toString() + curr })
-            Lambda.InnerCase.PUSH_STACK -> with(lambda.pushStack) {
-                val newItem = if (this.hasLambda()) this.lambda else availableArgs.removeFirst() as Lambda
+            Lambda.InnerCase.PUSH_STACK -> lambda.pushStack.let {
+                val newItem = if (it.hasLambda()) it.lambda else availableArgs.removeFirst() as Lambda
                 capturedArgs + executeLambda(newItem, capturedArgs).unwrap()
             }
-            Lambda.InnerCase.PREPEND_STACK -> with(lambda.prependStack) {
-                val newItem = if (this.hasLambda()) this.lambda else availableArgs.removeFirst() as Lambda
+            Lambda.InnerCase.PREPEND_STACK -> lambda.prependStack.let {
+                val newItem = if (it.hasLambda()) it.lambda else availableArgs.removeFirst() as Lambda
                 executeLambda(newItem, capturedArgs).unwrap() + capturedArgs
             }
             Lambda.InnerCase.STRING -> listOf(lambda.string)
-            Lambda.InnerCase.SWITCH -> with(lambda.switch) {
-                val then = this.conditionsList.firstOrNull {
+            Lambda.InnerCase.SWITCH -> lambda.switch.let {
+                val then = it.conditionsList.firstOrNull {
                     executeLambda(it.`if`, capturedArgs).unwrap()[0] as Boolean
-                }?.then ?: this.`else`
+                }?.then ?: it.`else`
                 executeLambda(then, capturedArgs).unwrap()
             }
-            Lambda.InnerCase.IS_EQUAL -> with(lambda.isEqual) {
+            Lambda.InnerCase.IS_EQUAL -> lambda.isEqual.let {
                 val arg = availableArgs.removeFirst()
-                listOf(when (this.fromCase) {
-                    IsEqualFunc.FromCase.FROM_BOOL -> this.fromBool == this.toBool
-                    IsEqualFunc.FromCase.FROM_STRING -> this.fromString.equals(this.toString)
-                    IsEqualFunc.FromCase.FROM_FLOAT -> this.fromFloat == this.toFloat
-                    IsEqualFunc.FromCase.FROM_INT64 -> this.fromInt64 == this.toInt64
-                    IsEqualFunc.FromCase.FROM_INT32 -> this.fromInt32 == this.toInt32
+                listOf(when (it.fromCase) {
+                    IsEqualFunc.FromCase.FROM_BOOL -> it.fromBool == it.toBool
+                    IsEqualFunc.FromCase.FROM_STRING -> it.fromString.equals(it.toString)
+                    IsEqualFunc.FromCase.FROM_FLOAT -> it.fromFloat == it.toFloat
+                    IsEqualFunc.FromCase.FROM_INT64 -> it.fromInt64 == it.toInt64
+                    IsEqualFunc.FromCase.FROM_INT32 -> it.fromInt32 == it.toInt32
                     IsEqualFunc.FromCase.FROM_NOT_SET -> {
-                        when (this.toCase) {
-                            IsEqualFunc.ToCase.TO_BOOL -> arg as Boolean == this.toBool
-                            IsEqualFunc.ToCase.TO_STRING -> (arg as String).equals(this.toString)
-                            IsEqualFunc.ToCase.TO_FLOAT -> arg as Float == this.toFloat
-                            IsEqualFunc.ToCase.TO_INT64 -> arg as Long == this.toInt64
-                            IsEqualFunc.ToCase.TO_INT32 -> arg as Int == this.toInt32
+                        when (it.toCase) {
+                            IsEqualFunc.ToCase.TO_BOOL -> arg as Boolean == it.toBool
+                            IsEqualFunc.ToCase.TO_STRING -> (arg as String).equals(it.toString)
+                            IsEqualFunc.ToCase.TO_FLOAT -> arg as Float == it.toFloat
+                            IsEqualFunc.ToCase.TO_INT64 -> arg as Long == it.toInt64
+                            IsEqualFunc.ToCase.TO_INT32 -> arg as Int == it.toInt32
                             IsEqualFunc.ToCase.TO_NOT_SET -> {
                                 arg?.equals(availableArgs.removeFirst())
                             }
@@ -105,14 +105,14 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
                     }
                 })
             }
-            Lambda.InnerCase.GET_PROP -> with(lambda.getProp){
+            Lambda.InnerCase.GET_PROP -> lambda.getProp.let {
                 when (val target = availableArgs.removeFirst()) {
                     is Message -> {
-                        val descriptor = target.descriptorForType.findFieldByName(this.prop)
+                        val descriptor = target.descriptorForType.findFieldByName(it.prop)
                         listOf(target.getField(descriptor))
                     }
                     is Map<*, *> -> {
-                        listOf(target[this.prop])
+                        listOf(target[it.prop])
                     }
                     else -> TODO()
                 }
