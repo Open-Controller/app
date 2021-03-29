@@ -25,7 +25,7 @@ fun ExpandableListItem(
         content: @Composable ColumnScope.() -> Unit
 ) {
     var opened by remember { mutableStateOf(false) }
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+    Column(modifier = modifier) {
         ListItem(
                 modifier = Modifier
                         .clip(shape = shapes.small)
