@@ -24,7 +24,7 @@ import kotlin.concurrent.thread
 fun HousesMenu(houseRefs: List<HouseRef>, onError: (Throwable) -> Unit, onChoose: (House) -> Unit) =
     Column {
         houseRefs.map {
-            ListItem(Modifier.padding(5.dp).padding(start = 20.dp).clip(shapes.medium).clickable { thread {
+            ListItem(Modifier.padding(5.dp).padding(start = 20.dp).clip(shapes.small).clickable { thread {
                 resolveHouseRef(it).onFailure(onError).onSuccess(onChoose)
             }}) {
                 Text(it.displayName)
