@@ -47,7 +47,8 @@ fun RoomsMenu(house: HouseOrBuilder, onControllerClick: (Controller) -> Unit) =
                                 icon,
                                 room.displayName
                             )
-                        }}) { Row(Modifier.clip(shapes.small).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        }}) { Row(Modifier.clip(shapes.small).horizontalScroll(rememberScrollState()),
+                                  horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             room.controllersList.map { controller ->
                                 (if (controller.hasBrandColor()) Color(AndroidColor.parseColor(controller.brandColor))
                                 else MaterialTheme.colors.primary).let { color ->
