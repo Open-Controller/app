@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.components.ExpandableListItem
+import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.extensions.icons
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_proto.Controller
@@ -38,16 +39,8 @@ fun RoomsMenu(house: HouseOrBuilder, onControllerClick: (Controller) -> Unit) =
                             .fillMaxWidth()
                             .padding(5.dp),
                         {Text(room.displayName)},
-                        {when (val icon = icons[room.icon] ?: throw Error("Could not find icon " + room.icon.toString())) {
-                            is Int -> Icon(
-                                painterResource(icon),
-                                room.displayName
-                            )
-                            is ImageVector -> Icon(
-                                icon,
-                                room.displayName
-                            )
-                        }}) { Row(Modifier.clip(shapes.small).horizontalScroll(rememberScrollState()),
+                        {OpenControllerIcon(room.icon, room.displayName)}) {
+                            Row(Modifier.clip(shapes.small).horizontalScroll(rememberScrollState()),
                                   horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             room.controllersList.map { controller ->
                                 (if (controller.hasBrandColor()) Color(AndroidColor.parseColor(controller.brandColor))

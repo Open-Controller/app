@@ -15,6 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.github.michaelbull.result.mapError
+import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.extensions.icons
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
@@ -35,7 +36,10 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                         .heightIn(65.dp, 75.dp)
                         .padding(5.dp)
                         .clip(shapes.medium)
-                        .background(MaterialTheme.colors.secondary.copy(alpha = 0.07f), shapes.medium)
+                        .background(
+                            MaterialTheme.colors.secondary.copy(alpha = 0.07f),
+                            shapes.medium
+                        )
                         .clickable(role = Role.Button) {
                             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                             thread {
@@ -45,16 +49,7 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                             }
                         }, Alignment.Center) {
                     when (widget.button.hasIcon()) {
-                        true -> when (val icon = icons[widget.button.icon] ?: throw Error("Could not find icon " + widget.button.icon.toString())) {
-                            is Int -> Icon(
-                                painterResource(icon),
-                                widget.button.text
-                            )
-                            is ImageVector -> Icon(
-                                icon,
-                                widget.button.text
-                            )
-                        }
+                        true -> OpenControllerIcon(widget.button.icon, widget.button.text)
                         false -> Text(widget.button.text)
                     }
                 }

@@ -1,7 +1,10 @@
 package com.pjtsearch.opencontroller.extensions
 
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import com.pjtsearch.opencontroller.R
@@ -58,3 +61,10 @@ var icons = hashMapOf(
         Icon.ROOM to Icons.Outlined.Room
 )
 
+@Composable
+fun OpenControllerIcon(icon: Icon, text: String) =
+        when (val iconValue = icons[icon] ?: throw Error("Could not find icon $icon")) {
+                is Int -> Icon(painterResource(iconValue), text)
+                is ImageVector -> Icon(iconValue, text)
+                else -> Text(text)
+        }
