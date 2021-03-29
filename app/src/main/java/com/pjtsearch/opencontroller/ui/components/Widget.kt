@@ -28,14 +28,14 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
     val view = LocalView.current
     when (widget.innerCase) {
         InnerCase.BUTTON ->
-            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colors.primary) {
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colors.secondary) {
                 Box(
                     Modifier
                         .widthIn(65.dp, 70.dp)
                         .heightIn(65.dp, 75.dp)
                         .padding(5.dp)
                         .clip(shapes.medium)
-                        .background(MaterialTheme.colors.primary.copy(alpha = 0.07f), shapes.medium)
+                        .background(MaterialTheme.colors.secondary.copy(alpha = 0.07f), shapes.medium)
                         .clickable(role = Role.Button) {
                             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                             thread {

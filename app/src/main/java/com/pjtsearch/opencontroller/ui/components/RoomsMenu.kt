@@ -51,7 +51,7 @@ fun RoomsMenu(house: HouseOrBuilder, onControllerClick: (Controller) -> Unit) =
                                   horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             room.controllersList.map { controller ->
                                 (if (controller.hasBrandColor()) Color(AndroidColor.parseColor(controller.brandColor))
-                                else MaterialTheme.colors.primary).let { color ->
+                                else MaterialTheme.colors.secondary).let { color ->
                                     Button(
                                         elevation = ButtonDefaults.elevation(0.dp, 0.dp),
                                         modifier = Modifier
