@@ -2,10 +2,7 @@ package com.pjtsearch.opencontroller.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
@@ -28,7 +25,7 @@ fun ExpandableListItem(
         content: @Composable ColumnScope.() -> Unit
 ) {
     var opened by remember { mutableStateOf(false) }
-    Column(modifier = modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(3.dp)) {
         ListItem(
                 modifier = Modifier
                         .clip(shape = shapes.small)
