@@ -33,13 +33,9 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                     Modifier
                         .widthIn(65.dp, 70.dp)
                         .heightIn(65.dp, 75.dp)
-                        .padding(2.dp)
+                        .padding(5.dp)
                         .clip(shapes.medium)
-                        .border(
-                            2.dp,
-                            MaterialTheme.colors.onSurface.copy(alpha = 0.3f),
-                            shapes.medium
-                        )
+                        .background(MaterialTheme.colors.primary.copy(alpha = 0.07f), shapes.medium)
                         .clickable(role = Role.Button) {
                             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                             thread {
