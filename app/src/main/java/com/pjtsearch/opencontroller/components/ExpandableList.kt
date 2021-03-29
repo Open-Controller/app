@@ -36,7 +36,7 @@ fun ExpandableListItem(
                 text = text,
                 icon = icon
         )
-        AnimatedVisibility(visible = opened, modifier = Modifier.padding(start = 30.dp)) {
+        AnimatedVisibility(visible = opened) {
             Column(content = content)
         }
     }
