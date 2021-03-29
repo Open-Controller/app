@@ -54,6 +54,7 @@ var icons = hashMapOf(
         Icon.MASTER_BEDROOM to Icons.Outlined.KingBed,
         Icon.EXERCISE_ROOM to Icons.Outlined.FitnessCenter,
         Icon.PLAY_ROOM to Icons.Outlined.Games,
-        Icon.BEDROOM to Icons.Outlined.SingleBed
+        Icon.BEDROOM to Icons.Outlined.SingleBed,
+        Icon.ROOM to Icons.Outlined.Room
 )
 
