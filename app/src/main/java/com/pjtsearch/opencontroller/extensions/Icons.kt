@@ -34,7 +34,7 @@ var icons = hashMapOf(
         Icon.RECORD to Icons.Outlined.RadioButtonChecked,
         Icon.PAUSE to Icons.Outlined.Pause,
         Icon.PLAY to Icons.Outlined.PlayArrow,
-        Icon.GUIDE to Icons.Outlined.List,
+        Icon.GUIDE to Icons.Outlined.Dashboard,
         Icon.DVR to Icons.Outlined.FiberDvr,
         Icon.MENU to Icons.Outlined.Menu,
         Icon.EXIT to Icons.Outlined.ExitToApp,
