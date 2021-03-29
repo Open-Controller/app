@@ -18,6 +18,7 @@ import com.github.michaelbull.result.mapError
 import com.pjtsearch.opencontroller.extensions.icons
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
+import com.pjtsearch.opencontroller_lib_proto.TextInputAction
 import com.pjtsearch.opencontroller_lib_proto.WidgetOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.Widget.InnerCase
 import kotlin.concurrent.thread
@@ -88,7 +89,10 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
         InnerCase.SPACE -> Spacer(modifier)
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
         InnerCase.TEXT_INPUT -> BasicTextField("", {
-            thread { executor.executeLambda(widget.textInput.onInput, listOf(it.last())) }
+            thread {
+                executor.executeLambda(widget.textInput.onInput,
+                    listOf(TextInputAction.newBuilder().setChar(it.last().toString()).build()))
+            }
         })
     }
 }
