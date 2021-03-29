@@ -124,12 +124,14 @@ fun MainActivityView() {
                     .padding(10.dp)
                     .padding(bottom = 20.dp)) {
                 Row(Modifier.padding(start = 8.dp, bottom = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button({ page = Page.Settings; scope.launch { menuState.conceal()} }) {
+                    Button({ page = Page.Settings; scope.launch { menuState.conceal()} },
+                            colors = ButtonDefaults.buttonColors(MaterialTheme.colors.secondary)) {
                         Text("Settings")
                     }
                     Crossfade(house) {
                         if (it != null) {
-                            Button({ house = null; page = Page.Home }) {
+                            Button({ house = null; page = Page.Home },
+                                colors = ButtonDefaults.buttonColors(MaterialTheme.colors.secondary)) {
                                 Text("Exit house")
                             }
                         }
