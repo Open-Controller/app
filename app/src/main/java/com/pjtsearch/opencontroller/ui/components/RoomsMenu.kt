@@ -1,6 +1,7 @@
 package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -9,8 +10,12 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -44,9 +49,21 @@ fun RoomsMenu(house: HouseOrBuilder, onControllerClick: (Controller) -> Unit) =
                             )
                         }}) { Row(Modifier.clip(shapes.small).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                             room.controllersList.map { controller ->
-                                Button(onClick = { onControllerClick(controller) },
-                                       modifier = Modifier.width(120.dp).height(100.dp)) {
-                                    Text(controller.displayName)
+                                (if (controller.hasBrandColor()) Color(AndroidColor.parseColor(controller.brandColor))
+                                else MaterialTheme.colors.primary).let { color ->
+                                    Button(
+                                        elevation = ButtonDefaults.elevation(0.dp, 0.dp),
+                                        modifier = Modifier
+                                            .width(120.dp)
+                                            .height(100.dp),
+                                        onClick = { onControllerClick(controller) },
+                                        colors = ButtonDefaults.buttonColors(
+                                            backgroundColor = color,
+                                            contentColor = if (color.luminance() < 0.3) Color.White else Color.Black
+                                        )
+                                    ) {
+                                        Text(controller.displayName)
+                                    }
                                 }
                             }
                         }
