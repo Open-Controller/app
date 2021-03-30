@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -147,7 +148,7 @@ fun MainActivityView() {
         },
         frontLayerContent = {
             Box(Modifier.padding(20.dp)) {
-                Crossfade(menuState.targetValue) {
+                Crossfade(menuState.targetValue, animationSpec = tween(100)) {
                     when (it) {
                         BackdropValue.Concealed -> when (val page = page) {
                             is Page.Home -> Text("Home", style = typography.h5)
