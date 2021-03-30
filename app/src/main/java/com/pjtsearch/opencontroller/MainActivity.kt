@@ -79,18 +79,38 @@ sealed class Page {
     }
 }
 
+sealed class BackgroundPage {
+    object Homes : BackgroundPage()
+    data class Rooms(val house: House, val executor: OpenControllerLibExecutor) : BackgroundPage()
+    fun serialize() =
+        when (val page = this) {
+            is Homes -> listOf("Homes")
+            is Rooms -> listOf("Rooms", page.house.toByteArray())
+        }
+    companion object {
+        fun deserialize(from: List<Serializable>) =
+            when (from[0]) {
+                "Homes" -> Homes
+                "Rooms" -> {
+                    val house = House.parseFrom(from[1] as ByteArray)
+                    Rooms(house, OpenControllerLibExecutor(house))
+                }
+                else -> Homes
+            }
+    }
+}
+
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
 fun MainActivityView() {
-    var house: House? by rememberSaveable(
-        saver = Saver({it.value?.toByteArray()}, { mutableStateOf(House.parseFrom(it)) })
-    ) { mutableStateOf(null) }
+    var backgroundPage: BackgroundPage by rememberSaveable(
+        saver = Saver({ it.value.serialize() }, { mutableStateOf(BackgroundPage.deserialize(it)) })
+    ) { mutableStateOf(BackgroundPage.Homes) }
     var page: Page by rememberSaveable(
         saver = Saver({ it.value.serialize() }, { mutableStateOf(Page.deserialize(it)) })
     ) { mutableStateOf(Page.Home) }
     val menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
-    val executor = remember(house) { house?.let { OpenControllerLibExecutor(it) } }
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
     val houseRefs = ctx.settingsDataStore.data.map {
@@ -128,21 +148,24 @@ fun MainActivityView() {
                     Button({ page = Page.Settings; scope.launch { menuState.conceal()} }) {
                         Text("Settings")
                     }
-                    Crossfade(house) {
-                        if (it != null) {
-                            Button({ house = null; page = Page.Home }) {
+                    Crossfade(backgroundPage) {
+                        if (it is BackgroundPage.Rooms) {
+                            Button({ backgroundPage = BackgroundPage.Homes; page = Page.Home }) {
                                 Text("Exit house")
                             }
                         }
                     }
                 }
-                Crossfade(house) {
-                    it?.let { house ->
-                        RoomsMenu(house) {
+                Crossfade(backgroundPage) {
+                    when (val it = backgroundPage) {
+                        is BackgroundPage.Homes -> HousesMenu(houseRefs.value,{ e -> onError(e) }) { newHouse ->
+                            backgroundPage = BackgroundPage.Rooms(newHouse, OpenControllerLibExecutor(newHouse))
+                        }
+                        is BackgroundPage.Rooms -> RoomsMenu(it.house) {
                             page = Page.Controller(it)
                             scope.launch { menuState.conceal() }
                         }
-                    } ?: HousesMenu(houseRefs.value, { e -> onError(e) }) { newHouse -> house = newHouse }
+                    }
                 }
             }
         },
@@ -157,7 +180,7 @@ fun MainActivityView() {
                                 )
                             is Page.Controller -> ControllerView(
                                     page.controller,
-                                    executor!!,
+                                    (backgroundPage as BackgroundPage.Rooms).executor!!,
                                     onError = { e -> onError(e) }
                                 )
                         }
