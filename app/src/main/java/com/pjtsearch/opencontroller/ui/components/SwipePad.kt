@@ -26,7 +26,7 @@ import kotlin.math.atan2
 
 
 @Composable
-fun SwipePad(onAction: (DirectionVector) -> Unit = {}) {
+fun SwipePad(modifier: Modifier = Modifier, onAction: (DirectionVector) -> Unit = {}) {
     var startPosition: Offset? by remember { mutableStateOf(null) }
     val view = LocalView.current
     var nextActionTime: Long? by remember { mutableStateOf(null) }
@@ -59,43 +59,36 @@ fun SwipePad(onAction: (DirectionVector) -> Unit = {}) {
         }
         onDispose { stopped = true }
     }
-
-    Box(Modifier.padding(top = 50.dp)) {
-        Box(
-            Modifier
-                .background(MaterialTheme.colors.secondary.copy(alpha = 0.07f), shapes.small)
-                .height(350.dp)
-                .width(400.dp)
-                .pointerInput(Unit) {
-                    detectDragGestures(
-                        onDragEnd = {
-                            if (!hasRun) {
-                                runAction(swipeVector)
-                            }
-                            reset()
-                        },
-                        onDragCancel = { reset() },
-                        onDragStart = { reset() }
-                    ) { change, _ ->
-                        change.consumePositionChange()
-                        if (startPosition == null) startPosition = change.previousPosition
-                        val vec = (change.position - startPosition!!)
-                        val swipeOffset = Offset(vec.x / 600f, vec.y / -600f)
-                        val dirs = listOf(
-                            DirectionVector.Up(swipeOffset.dot(Offset(0f, 1f))),
-                            DirectionVector.Down(swipeOffset.dot(Offset(0f, -1f))),
-                            DirectionVector.Left(swipeOffset.dot(Offset(-1f, 0f))),
-                            DirectionVector.Right(swipeOffset.dot(Offset(1f, 0f)))
-                        )
-                        swipeVector = dirs.maxByOrNull { d -> d.magnitude }!!
-                    }
+    Box(modifier
+            .pointerInput(Unit) {
+                detectDragGestures(
+                    onDragEnd = {
+                        if (!hasRun) {
+                            runAction(swipeVector)
+                        }
+                        reset()
+                    },
+                    onDragCancel = { reset() },
+                    onDragStart = { reset() }
+                ) { change, _ ->
+                    change.consumePositionChange()
+                    if (startPosition == null) startPosition = change.previousPosition
+                    val vec = (change.position - startPosition!!)
+                    val swipeOffset = Offset(vec.x / 600f, vec.y / -600f)
+                    val dirs = listOf(
+                        DirectionVector.Up(swipeOffset.dot(Offset(0f, 1f))),
+                        DirectionVector.Down(swipeOffset.dot(Offset(0f, -1f))),
+                        DirectionVector.Left(swipeOffset.dot(Offset(-1f, 0f))),
+                        DirectionVector.Right(swipeOffset.dot(Offset(1f, 0f)))
+                    )
+                    swipeVector = dirs.maxByOrNull { d -> d.magnitude }!!
                 }
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { runAction(DirectionVector.Zero) }
-        )
-    }
+            }
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { runAction(DirectionVector.Zero) }
+    )
 }
 
 sealed class DirectionVector {

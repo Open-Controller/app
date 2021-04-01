@@ -77,7 +77,11 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                 Widget(widget.arrowLayout.bottom, executor, onError = onError)
             }
         }
-        InnerCase.SWIPE_PAD -> SwipePad {
+        InnerCase.SWIPE_PAD -> SwipePad(Modifier
+            .background(MaterialTheme.colors.secondary.copy(alpha = 0.07f), shapes.small)
+            .height(350.dp)
+            .width(400.dp)
+        ) {
             val lambda = when (it) {
                 is DirectionVector.Down -> widget.swipePad.onSwipeDown
                 is DirectionVector.Left -> widget.swipePad.onSwipeLeft
