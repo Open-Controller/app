@@ -15,6 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.github.michaelbull.result.mapError
+import com.pjtsearch.opencontroller.extensions.DirectionVector
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.extensions.icons
 import com.pjtsearch.opencontroller.ui.theme.shapes
@@ -77,22 +78,44 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                 Widget(widget.arrowLayout.bottom, executor, onError = onError)
             }
         }
-        InnerCase.SWIPE_PAD -> SwipePad(Modifier
-            .background(MaterialTheme.colors.secondary.copy(alpha = 0.07f), shapes.small)
-            .height(350.dp)
-            .width(400.dp)
+        InnerCase.SWIPE_PAD -> Column(Modifier.background(
+            MaterialTheme.colors.secondary.copy(alpha = 0.07f), shapes.small)
         ) {
-            val lambda = when (it) {
-                is DirectionVector.Down -> widget.swipePad.onSwipeDown
-                is DirectionVector.Left -> widget.swipePad.onSwipeLeft
-                is DirectionVector.Right -> widget.swipePad.onSwipeRight
-                is DirectionVector.Up -> widget.swipePad.onSwipeUp
-                DirectionVector.Zero -> widget.swipePad.onClick
+            SwipePad(
+                Modifier
+                    .height(350.dp)
+                    .width(400.dp)
+            ) {
+                val lambda = when (it) {
+                    is DirectionVector.Down -> widget.swipePad.onSwipeDown
+                    is DirectionVector.Left -> widget.swipePad.onSwipeLeft
+                    is DirectionVector.Right -> widget.swipePad.onSwipeRight
+                    is DirectionVector.Up -> widget.swipePad.onSwipeUp
+                    DirectionVector.Zero -> widget.swipePad.onClick
+                }
+                thread {
+                    executor
+                        .executeLambda(lambda, listOf())
+                        .mapError(onError)
+                }
             }
-            thread {
-                executor
-                    .executeLambda(lambda, listOf())
-                    .mapError(onError)
+            if (widget.swipePad.hasOnBottomDecrease() && widget.swipePad.hasOnBottomIncrease()) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    IconButton(onClick = {thread {
+                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                        executor.executeLambda(widget.swipePad.onBottomDecrease, listOf())
+                            .mapError(onError)
+                    }}) {
+                        OpenControllerIcon(widget.swipePad.bottomDecreaseIcon, "Decrease")
+                    }
+                    IconButton(onClick = {thread {
+                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                        executor.executeLambda(widget.swipePad.onBottomIncrease, listOf())
+                            .mapError(onError)
+                    }}) {
+                        OpenControllerIcon(widget.swipePad.bottomIncreaseIcon, "Increase")
+                    }
+                }
             }
         }
         InnerCase.SPACE -> Spacer(modifier)
