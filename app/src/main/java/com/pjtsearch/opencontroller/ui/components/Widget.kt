@@ -106,7 +106,7 @@ fun ColumnScope.Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecu
                 }
             }
             if (widget.swipePad.hasOnBottomDecrease() && widget.swipePad.hasOnBottomIncrease()) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(if (widget.expand) Modifier.fillMaxWidth() else Modifier.defaultMinSize(200.dp, 10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                     IconButton(onClick = {
                         thread {
                             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
