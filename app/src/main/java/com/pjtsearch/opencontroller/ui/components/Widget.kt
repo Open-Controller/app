@@ -89,7 +89,7 @@ fun ColumnScope.Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecu
         ) {
             SwipePad(
                 if (widget.expand)
-                    Modifier.weight(1f, true)
+                    Modifier.weight(1f, true).fillMaxWidth()
                 else Modifier.defaultMinSize(200.dp, 200.dp)
             ) {
                 val lambda = when (it) {
