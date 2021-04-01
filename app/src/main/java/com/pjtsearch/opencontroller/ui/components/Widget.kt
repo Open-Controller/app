@@ -77,6 +77,20 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                 Widget(widget.arrowLayout.bottom, executor, onError = onError)
             }
         }
+        InnerCase.SWIPE_PAD -> SwipePad {
+            val lambda = when (it) {
+                is DirectionVector.Down -> widget.swipePad.onSwipeDown
+                is DirectionVector.Left -> widget.swipePad.onSwipeLeft
+                is DirectionVector.Right -> widget.swipePad.onSwipeRight
+                is DirectionVector.Up -> widget.swipePad.onSwipeUp
+                DirectionVector.Zero -> widget.swipePad.onClick
+            }
+            thread {
+                executor
+                    .executeLambda(lambda, listOf())
+                    .mapError(onError)
+            }
+        }
         InnerCase.SPACE -> Spacer(modifier)
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
         InnerCase.TEXT_INPUT -> BasicTextField("", {
