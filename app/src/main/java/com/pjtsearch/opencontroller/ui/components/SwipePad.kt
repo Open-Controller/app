@@ -47,8 +47,8 @@ fun SwipePad(onAction: (DirectionVector) -> Unit = {}) {
         var stopped = false
         thread {
             while (swipeVector.magnitude > 0.15 && !stopped) {
-                val time = (100 / swipeVector.magnitude).toLong()
-                if (nextActionTime == null) nextActionTime = System.currentTimeMillis() + time
+                val time = (300 / swipeVector.magnitude).toLong()
+                if (nextActionTime == null) nextActionTime = System.currentTimeMillis() + 500
                 if (nextActionTime != null && System.currentTimeMillis() > nextActionTime!!) {
                     hasRun = true
                     runAction(swipeVector)
