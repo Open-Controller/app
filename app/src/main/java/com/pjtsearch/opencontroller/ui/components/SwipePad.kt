@@ -63,7 +63,7 @@ fun SwipePad(onAction: (DirectionVector) -> Unit = {}) {
     Box(Modifier.padding(top = 50.dp)) {
         Box(
             Modifier
-                .background(MaterialTheme.colors.primary, shapes.small)
+                .background(MaterialTheme.colors.secondary.copy(alpha = 0.07f), shapes.small)
                 .height(350.dp)
                 .width(400.dp)
                 .pointerInput(Unit) {
@@ -94,11 +94,7 @@ fun SwipePad(onAction: (DirectionVector) -> Unit = {}) {
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
                 ) { runAction(DirectionVector.Zero) }
-        ) {
-            Column {
-                Text(swipeVector.toString())
-            }
-        }
+        )
     }
 }
 
