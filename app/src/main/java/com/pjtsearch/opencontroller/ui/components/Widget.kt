@@ -26,15 +26,18 @@ import com.pjtsearch.opencontroller_lib_proto.Widget.InnerCase
 import kotlin.concurrent.thread
 
 @Composable
-fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifier: Modifier = Modifier, onError: (Throwable) -> Unit) {
+fun ColumnScope.Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifier: Modifier = Modifier, onError: (Throwable) -> Unit) {
     val view = LocalView.current
+    val sizedModifier = if (widget.expand) {
+        modifier.weight(1f, false)
+    } else modifier
     when (widget.innerCase) {
         InnerCase.BUTTON ->
             CompositionLocalProvider(LocalContentColor provides MaterialTheme.colors.secondary) {
                 Box(
-                    Modifier
-                        .widthIn(65.dp, 70.dp)
-                        .heightIn(65.dp, 75.dp)
+                    sizedModifier
+                        .width(65.dp)
+                        .height(65.dp)
                         .padding(5.dp)
                         .clip(shapes.medium)
                         .background(
@@ -48,43 +51,46 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
                                     .executeLambda(widget.button.onClick, listOf())
                                     .mapError(onError)
                             }
-                        }, Alignment.Center) {
+                        }, Alignment.Center
+                ) {
                     when (widget.button.hasIcon()) {
                         true -> OpenControllerIcon(widget.button.icon, widget.button.text)
                         false -> Text(widget.button.text)
                     }
                 }
             }
-        InnerCase.ROW -> Row(modifier, Arrangement.SpaceBetween) {
+        InnerCase.ROW -> Row(sizedModifier, Arrangement.SpaceBetween) {
             widget.row.childrenList.map {
-                Widget(it, executor, onError = onError)
+                this@Widget.Widget(it, executor, onError = onError)
             }
         }
-        InnerCase.COLUMN -> Column(modifier, Arrangement.Top) {
+        InnerCase.COLUMN -> Column(sizedModifier, Arrangement.Top) {
             widget.column.childrenList.map {
                 Widget(it, executor, onError = onError)
             }
         }
-        InnerCase.ARROW_LAYOUT -> Column(modifier, Arrangement.Top) {
+        InnerCase.ARROW_LAYOUT -> Column(sizedModifier, Arrangement.Top) {
             Row(Modifier.align(Alignment.CenterHorizontally)) {
-                Widget(widget.arrowLayout.top, executor, onError = onError)
+                this@Widget.Widget(widget.arrowLayout.top, executor, onError = onError)
             }
             Row {
-                Widget(widget.arrowLayout.left, executor, onError = onError)
-                Widget(widget.arrowLayout.center, executor, onError = onError)
-                Widget(widget.arrowLayout.right, executor, onError = onError)
+                this@Widget.Widget(widget.arrowLayout.left, executor, onError = onError)
+                this@Widget.Widget(widget.arrowLayout.center, executor, onError = onError)
+                this@Widget.Widget(widget.arrowLayout.right, executor, onError = onError)
             }
             Row(Modifier.align(Alignment.CenterHorizontally)) {
-                Widget(widget.arrowLayout.bottom, executor, onError = onError)
+                this@Widget.Widget(widget.arrowLayout.bottom, executor, onError = onError)
             }
         }
-        InnerCase.SWIPE_PAD -> Column(Modifier.background(
-            MaterialTheme.colors.secondary.copy(alpha = 0.07f), shapes.small)
+        InnerCase.SWIPE_PAD -> Column(
+            sizedModifier.background(
+                MaterialTheme.colors.secondary.copy(alpha = 0.07f), shapes.small
+            )
         ) {
             SwipePad(
-                Modifier
-                    .height(350.dp)
-                    .width(400.dp)
+                if (widget.expand)
+                    Modifier.weight(1f, true)
+                else Modifier.defaultMinSize(200.dp, 200.dp)
             ) {
                 val lambda = when (it) {
                     is DirectionVector.Down -> widget.swipePad.onSwipeDown
@@ -101,29 +107,35 @@ fun Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifie
             }
             if (widget.swipePad.hasOnBottomDecrease() && widget.swipePad.hasOnBottomIncrease()) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    IconButton(onClick = {thread {
-                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                        executor.executeLambda(widget.swipePad.onBottomDecrease, listOf())
-                            .mapError(onError)
-                    }}) {
+                    IconButton(onClick = {
+                        thread {
+                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                            executor.executeLambda(widget.swipePad.onBottomDecrease, listOf())
+                                .mapError(onError)
+                        }
+                    }) {
                         OpenControllerIcon(widget.swipePad.bottomDecreaseIcon, "Decrease")
                     }
-                    IconButton(onClick = {thread {
-                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                        executor.executeLambda(widget.swipePad.onBottomIncrease, listOf())
-                            .mapError(onError)
-                    }}) {
+                    IconButton(onClick = {
+                        thread {
+                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                            executor.executeLambda(widget.swipePad.onBottomIncrease, listOf())
+                                .mapError(onError)
+                        }
+                    }) {
                         OpenControllerIcon(widget.swipePad.bottomIncreaseIcon, "Increase")
                     }
                 }
             }
         }
-        InnerCase.SPACE -> Spacer(modifier)
+        InnerCase.SPACE -> Spacer(sizedModifier)
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
         InnerCase.TEXT_INPUT -> BasicTextField("", {
             thread {
-                executor.executeLambda(widget.textInput.onInput,
-                    listOf(TextInputAction.newBuilder().setChar(it.last().toString()).build()))
+                executor.executeLambda(
+                    widget.textInput.onInput,
+                    listOf(TextInputAction.newBuilder().setChar(it.last().toString()).build())
+                )
             }
         })
     }
