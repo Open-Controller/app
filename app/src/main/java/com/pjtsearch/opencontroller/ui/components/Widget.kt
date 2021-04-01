@@ -21,65 +21,53 @@ import com.pjtsearch.opencontroller.extensions.icons
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.TextInputAction
+import com.pjtsearch.opencontroller_lib_proto.Widget
 import com.pjtsearch.opencontroller_lib_proto.WidgetOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.Widget.InnerCase
 import kotlin.concurrent.thread
 
 @Composable
-fun ColumnScope.Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecutor, modifier: Modifier = Modifier, onError: (Throwable) -> Unit) {
+fun ColumnScope.Widget(
+    widget: WidgetOrBuilder,
+    executor: OpenControllerLibExecutor,
+    modifier: Modifier = Modifier,
+    onOpenMenu: (List<Widget>) -> Unit,
+    onError: (Throwable) -> Unit
+) {
     val view = LocalView.current
     val sizedModifier = if (widget.expand) {
         modifier.weight(1f, false)
     } else modifier
     when (widget.innerCase) {
         InnerCase.BUTTON ->
-            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colors.secondary) {
-                Box(
-                    sizedModifier
-                        .width(65.dp)
-                        .height(65.dp)
-                        .padding(5.dp)
-                        .clip(shapes.medium)
-                        .background(
-                            MaterialTheme.colors.secondary.copy(alpha = 0.07f),
-                            shapes.medium
-                        )
-                        .clickable(role = Role.Button) {
-                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                            thread {
-                                executor
-                                    .executeLambda(widget.button.onClick, listOf())
-                                    .mapError(onError)
-                            }
-                        }, Alignment.Center
-                ) {
-                    when (widget.button.hasIcon()) {
-                        true -> OpenControllerIcon(widget.button.icon, widget.button.text)
-                        false -> Text(widget.button.text)
-                    }
+            OpenControllerButton(sizedModifier, widget.button.text, if (widget.button.hasIcon()) widget.button.icon else null) {
+                thread {
+                    executor
+                        .executeLambda(widget.button.onClick, listOf())
+                        .mapError(onError)
                 }
             }
         InnerCase.ROW -> Row(sizedModifier, Arrangement.SpaceBetween) {
             widget.row.childrenList.map {
-                this@Widget.Widget(it, executor, onError = onError)
+                this@Widget.Widget(it, executor, onOpenMenu = onOpenMenu, onError = onError)
             }
         }
         InnerCase.COLUMN -> Column(sizedModifier, Arrangement.Top) {
             widget.column.childrenList.map {
-                Widget(it, executor, onError = onError)
+                Widget(it, executor, onOpenMenu = onOpenMenu, onError = onError)
             }
         }
         InnerCase.ARROW_LAYOUT -> Column(sizedModifier, Arrangement.Top) {
             Row(Modifier.align(Alignment.CenterHorizontally)) {
-                this@Widget.Widget(widget.arrowLayout.top, executor, onError = onError)
+                this@Widget.Widget(widget.arrowLayout.top, executor, onOpenMenu = onOpenMenu, onError = onError)
             }
             Row {
-                this@Widget.Widget(widget.arrowLayout.left, executor, onError = onError)
-                this@Widget.Widget(widget.arrowLayout.center, executor, onError = onError)
-                this@Widget.Widget(widget.arrowLayout.right, executor, onError = onError)
+                this@Widget.Widget(widget.arrowLayout.left, executor, onOpenMenu = onOpenMenu, onError = onError)
+                this@Widget.Widget(widget.arrowLayout.center, executor, onOpenMenu = onOpenMenu, onError = onError)
+                this@Widget.Widget(widget.arrowLayout.right, executor, onOpenMenu = onOpenMenu, onError = onError)
             }
             Row(Modifier.align(Alignment.CenterHorizontally)) {
-                this@Widget.Widget(widget.arrowLayout.bottom, executor, onError = onError)
+                this@Widget.Widget(widget.arrowLayout.bottom, executor, onOpenMenu = onOpenMenu, onError = onError)
             }
         }
         InnerCase.SWIPE_PAD -> Column(
@@ -129,6 +117,11 @@ fun ColumnScope.Widget(widget: WidgetOrBuilder, executor: OpenControllerLibExecu
             }
         }
         InnerCase.SPACE -> Spacer(sizedModifier)
+        InnerCase.MENU_BUTTON ->
+            OpenControllerButton(sizedModifier, widget.menuButton.text,
+            if (widget.menuButton.hasIcon()) widget.menuButton.icon else null) {
+                onOpenMenu(widget.menuButton.contentList)
+            }
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
         InnerCase.TEXT_INPUT -> BasicTextField("", {
             thread {
