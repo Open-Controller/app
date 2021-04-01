@@ -19,6 +19,8 @@ import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import com.pjtsearch.opencontroller.extensions.DirectionVector
+import com.pjtsearch.opencontroller.extensions.dragMagnitudeTimer
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_proto.Controller
 import kotlin.concurrent.thread
@@ -29,13 +31,13 @@ import kotlin.math.atan2
 fun SwipePad(modifier: Modifier = Modifier, onAction: (DirectionVector) -> Unit = {}) {
     var startPosition: Offset? by remember { mutableStateOf(null) }
     val view = LocalView.current
-    var nextActionTime: Long? by remember { mutableStateOf(null) }
+    val nextActionTime: MutableState<Long?> = remember { mutableStateOf(null) }
     var hasRun by remember { mutableStateOf(false) }
     var swipeVector: DirectionVector by remember { mutableStateOf(DirectionVector.Zero) }
     fun reset() {
         startPosition = null
         swipeVector = DirectionVector.Zero
-        nextActionTime = null
+        nextActionTime.value = null
         hasRun = false
     }
     fun runAction(vec: DirectionVector) {
@@ -43,21 +45,9 @@ fun SwipePad(modifier: Modifier = Modifier, onAction: (DirectionVector) -> Unit 
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
     }
 
-    DisposableEffect(key1 = swipeVector) {
-        var stopped = false
-        thread {
-            while (swipeVector.magnitude > 0.15 && !stopped) {
-                val time = (300 / swipeVector.magnitude).toLong()
-                if (nextActionTime == null) nextActionTime = System.currentTimeMillis() + 500
-                if (nextActionTime != null && System.currentTimeMillis() > nextActionTime!!) {
-                    hasRun = true
-                    runAction(swipeVector)
-                    nextActionTime = System.currentTimeMillis() + time
-                }
-                Thread.sleep(time + 20)
-            }
-        }
-        onDispose { stopped = true }
+    dragMagnitudeTimer(swipeVector, nextActionTime) {
+        hasRun = true
+        runAction(swipeVector)
     }
     Box(modifier
             .pointerInput(Unit) {
@@ -89,15 +79,6 @@ fun SwipePad(modifier: Modifier = Modifier, onAction: (DirectionVector) -> Unit 
                 indication = null
             ) { runAction(DirectionVector.Zero) }
     )
-}
-
-sealed class DirectionVector {
-    abstract val magnitude: Float
-    data class Up(override val magnitude: Float) : DirectionVector()
-    data class Down(override val magnitude: Float) : DirectionVector()
-    data class Left(override val magnitude: Float) : DirectionVector()
-    data class Right(override val magnitude: Float) : DirectionVector()
-    object Zero : DirectionVector() { override val magnitude = 0f }
 }
 
 infix fun Offset.dot(that: Offset) =
