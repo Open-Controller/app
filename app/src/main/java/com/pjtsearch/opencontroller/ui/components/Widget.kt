@@ -40,7 +40,7 @@ fun ColumnScope.Widget(
     } else modifier
     when (widget.innerCase) {
         InnerCase.BUTTON ->
-            OpenControllerButton(sizedModifier, widget.button.text, if (widget.button.hasIcon()) widget.button.icon else null) {
+            OpenControllerButton(sizedModifier, widget.button.text, if (widget.button.hasIcon()) widget.button.icon else null, widget.button.size) {
                 thread {
                     executor
                         .executeLambda(widget.button.onClick, listOf())
@@ -72,7 +72,7 @@ fun ColumnScope.Widget(
         }
         InnerCase.SWIPE_PAD -> Column(
             sizedModifier.background(
-                MaterialTheme.colors.secondary.copy(alpha = 0.07f), shapes.small
+                MaterialTheme.colors.secondary.copy(alpha = 0.07f), shapes.large
             )
         ) {
             SwipePad(
@@ -94,7 +94,9 @@ fun ColumnScope.Widget(
                 }
             }
             if (widget.swipePad.hasOnBottomDecrease() && widget.swipePad.hasOnBottomIncrease()) {
-                Row(if (widget.expand) Modifier.fillMaxWidth() else Modifier.defaultMinSize(200.dp, 10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(Modifier.padding(5.dp)
+                        .then(if (widget.expand) Modifier.fillMaxWidth() else Modifier.defaultMinSize(200.dp, 10.dp)),
+                    horizontalArrangement = Arrangement.SpaceBetween) {
                     IconButton(onClick = {
                         thread {
                             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
@@ -119,7 +121,7 @@ fun ColumnScope.Widget(
         InnerCase.SPACE -> Spacer(sizedModifier)
         InnerCase.MENU_BUTTON ->
             OpenControllerButton(sizedModifier, widget.menuButton.text,
-            if (widget.menuButton.hasIcon()) widget.menuButton.icon else null) {
+            if (widget.menuButton.hasIcon()) widget.menuButton.icon else null, widget.menuButton.size) {
                 onOpenMenu(widget.menuButton.contentList)
             }
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")

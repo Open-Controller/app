@@ -1,14 +1,18 @@
 package com.pjtsearch.opencontroller.extensions
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.R
 import com.pjtsearch.opencontroller_lib_proto.Icon
+import com.pjtsearch.opencontroller_lib_proto.Size
 
 var icons = hashMapOf(
         Icon.STAR to Icons.Outlined.Star,
@@ -62,9 +66,16 @@ var icons = hashMapOf(
 )
 
 @Composable
-fun OpenControllerIcon(icon: Icon, text: String) =
-        when (val iconValue = icons[icon] ?: throw Error("Could not find icon $icon")) {
-                is Int -> Icon(painterResource(iconValue), text)
-                is ImageVector -> Icon(iconValue, text)
-                else -> Text(text)
+fun OpenControllerIcon(icon: Icon, text: String, size: Size? = Size.SMALL) =
+        (when (size) {
+                Size.SMALL -> 24.dp
+                Size.MEDIUM -> 24.dp
+                Size.LARGE -> 30.dp
+                null -> 24.dp
+        }).let { sz ->
+                when (val iconValue = icons[icon] ?: throw Error("Could not find icon $icon")) {
+                        is Int -> Icon(painterResource(iconValue), text, Modifier.size(sz))
+                        is ImageVector -> Icon(iconValue, text, Modifier.size(sz))
+                        else -> Text(text)
+                }
         }

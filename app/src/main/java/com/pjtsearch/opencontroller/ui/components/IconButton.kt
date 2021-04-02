@@ -3,10 +3,7 @@ package com.pjtsearch.opencontroller.ui.components
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -22,17 +19,27 @@ import com.github.michaelbull.result.mapError
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_proto.Icon
+import com.pjtsearch.opencontroller_lib_proto.Size
 import kotlin.concurrent.thread
 
 @Composable
-fun OpenControllerButton(modifier: Modifier, text: String, icon: Icon?, onClick: () -> Unit) {
+fun OpenControllerButton(modifier: Modifier, text: String, icon: Icon?, size: Size?, onClick: () -> Unit) {
     val view = LocalView.current
     CompositionLocalProvider(LocalContentColor provides MaterialTheme.colors.secondary) {
         Box(
             modifier
-                .width(65.dp)
-                .height(65.dp)
-                .padding(5.dp)
+                .size(when (size) {
+                    Size.SMALL -> 65.dp
+                    Size.MEDIUM -> 77.dp
+                    Size.LARGE -> 156.dp
+                    null -> 65.dp
+                })
+                .padding(when (size) {
+                    Size.SMALL -> 5.dp
+                    Size.MEDIUM -> 8.dp
+                    Size.LARGE -> 8.dp
+                    null -> 5.dp
+                })
                 .clip(shapes.medium)
                 .background(
                     MaterialTheme.colors.secondary.copy(alpha = 0.07f),
@@ -44,7 +51,7 @@ fun OpenControllerButton(modifier: Modifier, text: String, icon: Icon?, onClick:
                 }, Alignment.Center
         ) {
             icon?.let {
-                OpenControllerIcon(icon, text)
+                OpenControllerIcon(icon, text, size)
             } ?: Text(text)
         }
     }
