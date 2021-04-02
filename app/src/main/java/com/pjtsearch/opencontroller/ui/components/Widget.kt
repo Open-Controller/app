@@ -94,7 +94,7 @@ fun ColumnScope.Widget(
                 }
             }
             if (widget.swipePad.hasOnBottomDecrease() && widget.swipePad.hasOnBottomIncrease()) {
-                Row(Modifier.padding(5.dp)
+                Row(Modifier.padding(8.dp)
                         .then(if (widget.expand) Modifier.fillMaxWidth() else Modifier.defaultMinSize(200.dp, 10.dp)),
                     horizontalArrangement = Arrangement.SpaceBetween) {
                     IconButton(onClick = {
