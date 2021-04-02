@@ -1,6 +1,7 @@
 package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
@@ -57,7 +58,7 @@ fun WidgetBottomSheet(modifier: Modifier = Modifier,
                       content: @Composable () -> Unit) {
     val scope = rememberCoroutineScope()
     ModalBottomSheetLayout(modifier = modifier, scrimColor = Color.Black.copy(0.5f), sheetState = state.state, sheetContent = {
-        Box(
+        Column(
             Modifier
                 .padding(20.dp)
                 .fillMaxHeight(0.8f)) {
