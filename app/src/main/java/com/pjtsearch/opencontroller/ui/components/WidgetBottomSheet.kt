@@ -5,7 +5,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller.ui.components.Widget as WidgetDisplay
@@ -21,7 +24,18 @@ fun rememberWidgetBottomSheetState(
     ),
     sheetContent: MutableState<List<Widget>?> = remember{ mutableStateOf(null) }
 ): WidgetBottomSheetState =
-    remember{ WidgetBottomSheetState(state, sheetContent) }
+    rememberSaveable(saver = Saver(
+        {it.sheetContent.value?.map { w -> w.toByteArray() }},
+        {WidgetBottomSheetState(
+            ModalBottomSheetState(
+                initialValue = ModalBottomSheetValue.Hidden,
+                confirmStateChange = { s -> s != ModalBottomSheetValue.HalfExpanded}
+            ),
+            mutableStateOf(it.map { w -> Widget.parseFrom(w)})
+        )}
+    )){
+        WidgetBottomSheetState(state, sheetContent)
+    }
 
 @ExperimentalMaterialApi
 data class WidgetBottomSheetState(
@@ -42,11 +56,11 @@ fun WidgetBottomSheet(modifier: Modifier = Modifier,
                       onError: (Throwable) -> Unit,
                       content: @Composable () -> Unit) {
     val scope = rememberCoroutineScope()
-    ModalBottomSheetLayout(modifier = modifier, sheetState = state.state, sheetContent = {
+    ModalBottomSheetLayout(modifier = modifier, scrimColor = Color.Black.copy(0.5f), sheetState = state.state, sheetContent = {
         Box(
             Modifier
                 .padding(20.dp)
-                .fillMaxHeight(0.7f)) {
+                .fillMaxHeight(0.8f)) {
             if (state.sheetContent.value != null && executor !== null)
                 state.sheetContent.value!!.map {
                     this@ModalBottomSheetLayout.WidgetDisplay(
