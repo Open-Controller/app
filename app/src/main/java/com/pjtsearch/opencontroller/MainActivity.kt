@@ -192,7 +192,7 @@ fun MainActivityView() {
                 }
             },
             frontLayerContent = {
-                Box(Modifier.padding(20.dp)) {
+                Box(Modifier.padding(25.dp)) {
                     Crossfade(menuState.targetValue, animationSpec = tween(100)) {
                         when (it) {
                             BackdropValue.Concealed -> when (val page = page) {

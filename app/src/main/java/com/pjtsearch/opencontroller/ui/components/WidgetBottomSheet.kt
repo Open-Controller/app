@@ -1,9 +1,6 @@
 package com.pjtsearch.opencontroller.ui.components
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
@@ -61,12 +58,14 @@ fun WidgetBottomSheet(modifier: Modifier = Modifier,
         Column(
             Modifier
                 .padding(20.dp)
-                .fillMaxHeight(0.8f)) {
+                .fillMaxHeight(0.8f)
+                .fillMaxWidth()) {
             if (state.sheetContent.value != null && executor !== null)
                 state.sheetContent.value!!.map {
                     this@ModalBottomSheetLayout.WidgetDisplay(
                         it,
                         executor,
+                        Modifier.fillMaxWidth(),
                         onOpenMenu = { w -> scope.launch { state.open(w) }},
                         onError = { onError(it) }
                     )
