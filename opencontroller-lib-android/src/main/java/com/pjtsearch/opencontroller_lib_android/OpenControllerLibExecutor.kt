@@ -85,11 +85,11 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
             }
             Lambda.InnerCase.IS_EQUAL -> lambda.isEqual.let {
                 listOf(when (it.fromCase) {
-                    IsEqualFunc.FromCase.FROM_BOOL -> it.fromBool == it.toBool
-                    IsEqualFunc.FromCase.FROM_STRING -> it.fromString.equals(it.toString)
-                    IsEqualFunc.FromCase.FROM_FLOAT -> it.fromFloat == it.toFloat
-                    IsEqualFunc.FromCase.FROM_INT64 -> it.fromInt64 == it.toInt64
-                    IsEqualFunc.FromCase.FROM_INT32 -> it.fromInt32 == it.toInt32
+                    IsEqualFunc.FromCase.FROM_BOOL -> it.fromBool == if (it.hasToBool()) it.toBool else availableArgs.removeFirst()
+                    IsEqualFunc.FromCase.FROM_STRING -> it.fromString.equals(if (it.hasToString()) it.toString else availableArgs.removeFirst())
+                    IsEqualFunc.FromCase.FROM_FLOAT -> it.fromFloat == if (it.hasToFloat()) it.toFloat else availableArgs.removeFirst()
+                    IsEqualFunc.FromCase.FROM_INT64 -> it.fromInt64 == if (it.hasToInt64()) it.toInt64 else availableArgs.removeFirst()
+                    IsEqualFunc.FromCase.FROM_INT32 -> it.fromInt32 == if (it.hasToInt32()) it.toInt32 else availableArgs.removeFirst()
                     IsEqualFunc.FromCase.FROM_NOT_SET -> {
                         val arg = availableArgs.removeFirst()
                         when (it.toCase) {
