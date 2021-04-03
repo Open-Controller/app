@@ -62,7 +62,10 @@ var icons = hashMapOf(
         Icon.EXERCISE_ROOM to Icons.Outlined.FitnessCenter,
         Icon.PLAY_ROOM to Icons.Outlined.Games,
         Icon.BEDROOM to Icons.Outlined.SingleBed,
-        Icon.ROOM to Icons.Outlined.Room
+        Icon.ROOM to Icons.Outlined.Room,
+        Icon.MENU_ALT to Icons.Outlined.MoreHoriz,
+        Icon.PLUS to Icons.Outlined.Add,
+        Icon.MINUS to Icons.Outlined.Remove
 )
 
 @Composable
