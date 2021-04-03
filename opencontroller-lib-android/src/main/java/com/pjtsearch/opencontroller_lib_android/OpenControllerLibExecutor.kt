@@ -49,8 +49,8 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
                 }
                 listOf()
             }
-            Lambda.InnerCase.FOLD_ARGS ->
-                lambda.foldArgs.lambdasList.fold(capturedArgs) { lastResult, curr ->
+            Lambda.InnerCase.PIPE_ARGS ->
+                lambda.pipeArgs.lambdasList.fold(capturedArgs) { lastResult, curr ->
                     executeLambda(curr, lastResult).unwrap()
                 }
             Lambda.InnerCase.DELAY -> lambda.delay.let {

@@ -94,9 +94,9 @@ class OpenControllerLibExecutorTest {
             }
 
     @Test
-    fun testFoldArgs() =
+    fun testPipeArgs() =
         executor.executeLambda(
-            Lambda.newBuilder().setFoldArgs(FoldArgsFunc.newBuilder().addAllLambdas(listOf(
+            Lambda.newBuilder().setPipeArgs(PipeArgsFunc.newBuilder().addAllLambdas(listOf(
                 Lambda.newBuilder().setTcp(TCPFunc.newBuilder()
                     .setCommand("")
                     .setAddress("127.0.0.1:" + mockWebServer.port)
@@ -188,7 +188,7 @@ class OpenControllerLibExecutorTest {
     @Test
     fun testPushStack() =
         executor.executeLambda(
-            Lambda.newBuilder().setFoldArgs(FoldArgsFunc.newBuilder().addAllLambdas(listOf(
+            Lambda.newBuilder().setPipeArgs(PipeArgsFunc.newBuilder().addAllLambdas(listOf(
                 Lambda.newBuilder().setPushStack(PushStackFunc.newBuilder()
                     .setLambda(Lambda.newBuilder().setString("tes").build())).build(),
                 Lambda.newBuilder().addArgs("1").setPushStack(PushStackFunc.newBuilder()
@@ -207,7 +207,7 @@ class OpenControllerLibExecutorTest {
     @Test
     fun testPrependStack() =
         executor.executeLambda(
-            Lambda.newBuilder().setFoldArgs(FoldArgsFunc.newBuilder().addAllLambdas(listOf(
+            Lambda.newBuilder().setPipeArgs(PipeArgsFunc.newBuilder().addAllLambdas(listOf(
                 Lambda.newBuilder().setPushStack(PushStackFunc.newBuilder()
                     .setLambda(Lambda.newBuilder().setString("t").build())).build(),
                 Lambda.newBuilder().addArgs("1").setPrependStack(PrependStackFunc.newBuilder()
