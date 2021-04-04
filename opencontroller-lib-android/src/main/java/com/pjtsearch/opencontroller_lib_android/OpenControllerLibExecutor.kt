@@ -32,15 +32,21 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
             Lambda.InnerCase.TCP -> lambda.tcp.let {
                 val (host, port) = (if (it.hasAddress()) it.address else availableArgs.removeFirst() as String)
                     .split(":")
-                val client = Socket(host, port.toInt())
+                var client:Socket? = null
+                // HACK: Ignore TCP connection errors
+                try {
+                    client = Socket(host, port.toInt())
+                } catch (err: Exception) {
+                    err.printStackTrace()
+                }
                 val command = if (it.hasCommand()) it.command else availableArgs.removeFirst() as String
-                client.outputStream.write((command+"\r\n").toByteArray())
+                client?.outputStream?.write((command+"\r\n").toByteArray())
 //                val scanner = client.getInputStream()
 //                println("$host:$port")
 //                println(lambda.tcp.command)
 //                println(scanner.read())
                 Thread.sleep(300)
-                client.close()
+                client?.close()
                 listOf()
             }
             Lambda.InnerCase.MACRO -> lambda.macro.let {
