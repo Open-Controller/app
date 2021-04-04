@@ -6,10 +6,12 @@ import com.github.michaelbull.result.runCatching
 import com.github.michaelbull.result.unwrap
 import com.google.protobuf.Message
 import com.pjtsearch.opencontroller_lib_proto.*
+import java.lang.Exception
 
 import java.net.Socket
 
-class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
+class OpenControllerLibExecutor(private val house: HouseOrBuilder,
+                                private var sockets: Map<String, Socket> = hashMapOf()) {
     fun executeLambda(lambda: LambdaOrBuilder, args: List<Any?>): Result<List<Any?>, Throwable> = runCatching {
         if (args.size < lambda.argsList.size) throw Error("${lambda.id} Expected ${lambda.argsList.size} args, but got ${args.size}")
         val capturedArgs = args.subList(0, lambda.argsList.size)
@@ -32,10 +34,12 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
             Lambda.InnerCase.TCP -> lambda.tcp.let {
                 val (host, port) = (if (it.hasAddress()) it.address else availableArgs.removeFirst() as String)
                     .split(":")
-                var client:Socket? = null
-                // HACK: Ignore TCP connection errors
+                var client:Socket? = null;
                 try {
-                    client = Socket(host, port.toInt())
+                    client = sockets["$host:$port"] ?: Socket(host, port.toInt()).let { s ->
+                        sockets = sockets + ("$host:$port" to s)
+                        s
+                    }
                 } catch (err: Exception) {
                     err.printStackTrace()
                 }
@@ -47,6 +51,7 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder) {
 //                println(scanner.read())
                 Thread.sleep(300)
                 client?.close()
+                sockets = sockets - "$host:$port"
                 listOf()
             }
             Lambda.InnerCase.MACRO -> lambda.macro.let {
