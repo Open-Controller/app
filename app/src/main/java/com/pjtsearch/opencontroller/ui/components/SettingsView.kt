@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.pjtsearch.opencontroller.components.ControlledExpandableListItem
 import com.pjtsearch.opencontroller.components.ExpandableListItem
 import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.NetworkHouseRef
@@ -34,7 +35,7 @@ fun SettingsView(onError: (Throwable) -> Unit) {
     val scope = rememberCoroutineScope()
     Column {
         settings.value.houseRefsList.forEachIndexed { i, it ->
-            ExpandableListItem(text = { Box(Modifier.fillMaxWidth()) {
+            ControlledExpandableListItem(text = { Box(Modifier.fillMaxWidth()) {
                 Text(it.displayName, Modifier.align(Alignment.CenterStart))
                 IconButton(onClick = {
                     scope.launch {
@@ -56,7 +57,7 @@ fun SettingsView(onError: (Throwable) -> Unit) {
                 }
             }
         }
-        ExpandableListItem(text = { Row(verticalAlignment = Alignment.CenterVertically) {
+        ControlledExpandableListItem(text = { Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Outlined.Add, "Add a house")
             Text("Add house")
         }}) {

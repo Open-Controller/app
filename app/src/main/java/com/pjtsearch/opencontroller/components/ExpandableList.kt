@@ -21,15 +21,14 @@ fun ExpandableListItem(
         modifier: Modifier = Modifier,
         text: @Composable () -> Unit,
         icon: @Composable () -> Unit = {},
-        onOpen: () -> Unit = {},
-        content: @Composable ColumnScope.() -> Unit
-) {
-    var opened by remember { mutableStateOf(false) }
+        opened: Boolean,
+        onChange: (Boolean) -> Unit = {},
+        content: @Composable ColumnScope.() -> Unit) =
     Column(modifier = modifier) {
         ListItem(
                 modifier = Modifier
                         .clip(shape = shapes.small)
-                        .toggleable(opened, onValueChange = { onOpen(); opened = it }),
+                        .toggleable(opened, onValueChange = { onChange(it) }),
                 text = text,
                 icon = icon
         )
@@ -37,4 +36,18 @@ fun ExpandableListItem(
             Column(content = content)
         }
     }
+
+
+@ExperimentalAnimationApi
+@ExperimentalMaterialApi
+@Composable
+fun ControlledExpandableListItem(
+    modifier: Modifier = Modifier,
+    text: @Composable () -> Unit,
+    icon: @Composable () -> Unit = {},
+    onChange: (Boolean) -> Unit = {},
+    content: @Composable ColumnScope.() -> Unit
+) {
+    var opened by remember { mutableStateOf(false) }
+    ExpandableListItem(modifier, text, icon, opened, { opened = it; onChange(it) }, content)
 }

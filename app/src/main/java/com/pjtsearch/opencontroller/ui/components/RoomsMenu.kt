@@ -11,6 +11,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
+import com.pjtsearch.opencontroller.components.ControlledExpandableListItem
 import com.pjtsearch.opencontroller.components.ExpandableListItem
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.ui.theme.shapes
@@ -25,7 +26,7 @@ fun RoomsMenu(house: HouseOrBuilder, onControllerClick: (Controller) -> Unit) =
     Column(modifier = Modifier.fillMaxHeight()) {
         house.roomsList
             ?.map { room ->
-                ExpandableListItem(
+                ControlledExpandableListItem(
                     Modifier
                         .fillMaxWidth()
                         .padding(5.dp),
