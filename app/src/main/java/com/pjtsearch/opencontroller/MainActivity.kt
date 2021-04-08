@@ -26,10 +26,13 @@ import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.NetworkHouseRef
 import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.ui.components.*
+import com.pjtsearch.opencontroller.ui.components.Widget as WidgetDisplay
 import com.pjtsearch.opencontroller.ui.theme.typography
 import com.google.accompanist.insets.statusBarsPadding
 import com.pjtsearch.opencontroller.components.PagedBackdrop
+import com.pjtsearch.opencontroller.components.PagedBottomSheet
 import com.pjtsearch.opencontroller.const.BackgroundPage
+import com.pjtsearch.opencontroller.const.BottomSheetPage
 import com.pjtsearch.opencontroller.const.Page
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
@@ -77,7 +80,8 @@ fun MainActivityView() {
         it.houseRefsList
     }.collectAsState(listOf())
 
-    val sheetState = rememberWidgetBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+    var sheetPage by remember { mutableStateOf(BottomSheetPage.Widgets(listOf())) }
 
     val onError = { err: Throwable ->
         scope.launch {
@@ -89,12 +93,28 @@ fun MainActivityView() {
         }
     }
     val onOpenMenu = { widgets: List<Widget> ->
-        scope.launch { sheetState.open(widgets) }
+        scope.launch {
+            sheetPage = BottomSheetPage.Widgets(widgets)
+            sheetState.show()
+        }
     }
-    WidgetBottomSheet(Modifier,
-        if (backgroundPage is BackgroundPage.Rooms) (backgroundPage as BackgroundPage.Rooms).executor else null,
-        sheetState,
-        { onError(it) }
+    PagedBottomSheet(
+        state = sheetState,
+        page = sheetPage,
+        sheetContent = { pg ->
+            val bgPage = backgroundPage
+            when (pg) {
+                is BottomSheetPage.Widgets -> if (bgPage is BackgroundPage.Rooms) {
+                    pg.widgets.map { w -> WidgetDisplay(
+                        w,
+                        bgPage.executor,
+                        Modifier.fillMaxWidth(),
+                        onOpenMenu = { onOpenMenu(it) },
+                        onError = { onError(it) }
+                    ) }
+                }
+            }
+        }
     ) {
         PagedBackdrop(
             menuState = menuState,

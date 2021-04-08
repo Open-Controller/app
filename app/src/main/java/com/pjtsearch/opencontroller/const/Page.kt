@@ -2,6 +2,7 @@ package com.pjtsearch.opencontroller.const
 
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.House
+import com.pjtsearch.opencontroller_lib_proto.Widget
 import java.io.Serializable
 
 sealed class Page {
@@ -44,6 +45,23 @@ sealed class BackgroundPage {
                     Rooms(house, OpenControllerLibExecutor(house))
                 }
                 else -> Homes
+            }
+    }
+}
+
+sealed class BottomSheetPage {
+    data class Widgets(val widgets: List<Widget>) : BottomSheetPage()
+    fun serialize() =
+        when (val page = this) {
+            is Widgets -> listOf("Widgets", page.widgets.map { w -> w.toByteArray() })
+        }
+    companion object {
+        fun deserialize(from: List<Serializable>) =
+            when (from[0]) {
+                "Widgets" -> {
+                    Widgets((from[1] as List<ByteArray>).map { w -> Widget.parseFrom(w)})
+                }
+                else -> Widgets(listOf())
             }
     }
 }
