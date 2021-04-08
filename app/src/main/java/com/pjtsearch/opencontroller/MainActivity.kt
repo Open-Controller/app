@@ -29,6 +29,8 @@ import com.pjtsearch.opencontroller.ui.components.*
 import com.pjtsearch.opencontroller.ui.theme.typography
 import com.google.accompanist.insets.statusBarsPadding
 import com.pjtsearch.opencontroller.components.PagedBackdrop
+import com.pjtsearch.opencontroller.const.BackgroundPage
+import com.pjtsearch.opencontroller.const.Page
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.*
@@ -55,50 +57,6 @@ class MainActivity : AppCompatActivity() {
                 MainActivityView()
             }
         }
-    }
-}
-
-sealed class Page {
-    abstract val title: String
-
-    object Home : Page() { override val title = "Home"}
-    object Settings : Page() { override val title = "Settings"}
-    data class Controller(val controller: ProtoController) : Page() { override val title: String = controller.displayName }
-    fun serialize() =
-        when (val page = this) {
-            is Home -> listOf("Home")
-            is Settings -> listOf("Settings")
-            is Controller -> listOf("Controller", page.controller.toByteArray())
-        }
-    companion object {
-        fun deserialize(from: List<Serializable>) =
-            when (from[0]) {
-                "Home" -> Home
-                "Controller" -> Controller(ProtoController.parseFrom(from[1] as ByteArray))
-                "Settings" -> Settings
-                else -> Home
-            }
-    }
-}
-
-sealed class BackgroundPage {
-    object Homes : BackgroundPage()
-    data class Rooms(val house: House, val executor: OpenControllerLibExecutor) : BackgroundPage()
-    fun serialize() =
-        when (val page = this) {
-            is Homes -> listOf("Homes")
-            is Rooms -> listOf("Rooms", page.house.toByteArray())
-        }
-    companion object {
-        fun deserialize(from: List<Serializable>) =
-            when (from[0]) {
-                "Homes" -> Homes
-                "Rooms" -> {
-                    val house = House.parseFrom(from[1] as ByteArray)
-                    Rooms(house, OpenControllerLibExecutor(house))
-                }
-                else -> Homes
-            }
     }
 }
 

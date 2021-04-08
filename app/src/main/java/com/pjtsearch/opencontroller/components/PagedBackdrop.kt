@@ -11,8 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.statusBarsPadding
-import com.pjtsearch.opencontroller.BackgroundPage
-import com.pjtsearch.opencontroller.Page
+import com.pjtsearch.opencontroller.const.BackgroundPage
+import com.pjtsearch.opencontroller.const.Page
 import com.pjtsearch.opencontroller.ui.components.*
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller.ui.theme.typography
