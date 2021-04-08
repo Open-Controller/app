@@ -28,6 +28,7 @@ import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.ui.components.*
 import com.pjtsearch.opencontroller.ui.theme.typography
 import com.google.accompanist.insets.statusBarsPadding
+import com.pjtsearch.opencontroller.components.PagedBackdrop
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.*
@@ -137,86 +138,56 @@ fun MainActivityView() {
         sheetState,
         { onError(it) }
     ) {
-        BackdropScaffold(
-            scaffoldState = menuState,
-            headerHeight = 100.dp,
-            modifier = Modifier.statusBarsPadding(),
-            backLayerBackgroundColor = MaterialTheme.colors.background,
-            frontLayerElevation = if (MaterialTheme.colors.isLight) 18.dp else 1.dp,
-            frontLayerShape = shapes.large,
-            appBar = {
-                AppBar(
-                    menuState = menuState,
-                    concealedTitle = { Text(page.title, style = typography.h5) },
-                    revealedTitle = { Text("Menu", style = typography.h5) }
-                )
-            },
-            backLayerContent = {
-                Column(
-                    Modifier
-                        .padding(10.dp)
-                        .padding(bottom = 20.dp)
+        PagedBackdrop(
+            menuState = menuState,
+            page = page,
+            backgroundPage = backgroundPage,
+            backLayerContent = { pg ->
+                Row(
+                    Modifier.padding(start = 8.dp, bottom = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(
-                        Modifier.padding(start = 8.dp, bottom = 20.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Button({ page = Page.Settings; scope.launch { menuState.conceal() } }) {
-                            Text("Settings")
-                        }
-                        Crossfade(backgroundPage) {
-                            if (it is BackgroundPage.Rooms) {
-                                Button({
-                                    backgroundPage = BackgroundPage.Homes; page = Page.Home
-                                }) {
-                                    Text("Exit house")
-                                }
+                    Button({ page = Page.Settings; scope.launch { menuState.conceal() } }) {
+                        Text("Settings")
+                    }
+                    Crossfade(pg) {
+                        if (it is BackgroundPage.Rooms) {
+                            Button({
+                                backgroundPage = BackgroundPage.Homes; page = Page.Home
+                            }) {
+                                Text("Exit house")
                             }
                         }
                     }
-                    Crossfade(backgroundPage) {
-                        when (val it = backgroundPage) {
-                            is BackgroundPage.Homes -> HousesMenu(houseRefs.value,
-                                { e -> onError(e) }) { newHouse ->
-                                backgroundPage = BackgroundPage.Rooms(
-                                    newHouse,
-                                    OpenControllerLibExecutor(newHouse)
-                                )
-                            }
-                            is BackgroundPage.Rooms -> RoomsMenu(it.house) {
-                                page = Page.Controller(it)
-                                scope.launch { menuState.conceal() }
-                            }
+                }
+                Crossfade(pg) {
+                    when (pg) {
+                        is BackgroundPage.Homes -> HousesMenu(houseRefs.value,
+                            { e -> onError(e) }) { newHouse ->
+                            backgroundPage = BackgroundPage.Rooms(
+                                newHouse,
+                                OpenControllerLibExecutor(newHouse)
+                            )
+                        }
+                        is BackgroundPage.Rooms -> RoomsMenu(pg.house) {
+                            page = Page.Controller(it)
+                            scope.launch { menuState.conceal() }
                         }
                     }
                 }
             },
             frontLayerContent = {
-                Box(Modifier.padding(25.dp)) {
-                    Crossfade(menuState.targetValue, animationSpec = tween(100)) {
-                        when (it) {
-                            BackdropValue.Concealed -> when (val page = page) {
-                                is Page.Home -> Text("Home", style = typography.h5)
-                                is Page.Settings -> SettingsView(
-                                    onError = { e -> onError(e) }
-                                )
-                                is Page.Controller -> ControllerView(
-                                    page.controller,
-                                    (backgroundPage as BackgroundPage.Rooms).executor!!,
-                                    onOpenMenu = { w -> onOpenMenu(w) },
-                                    onError = { e -> onError(e) }
-                                )
-                            }
-                            BackdropValue.Revealed -> Box(Modifier.fillMaxWidth()) {
-                                Text(page.title, style = typography.h5)
-                                Icon(
-                                    Icons.Outlined.KeyboardArrowUp,
-                                    "Close menu",
-                                    modifier = Modifier.align(alignment = Alignment.CenterEnd)
-                                )
-                            }
-                        }
-                    }
+                when (it) {
+                    is Page.Home -> Text("Home", style = typography.h5)
+                    is Page.Settings -> SettingsView(
+                        onError = { e -> onError(e) }
+                    )
+                    is Page.Controller -> ControllerView(
+                        it.controller,
+                        (backgroundPage as BackgroundPage.Rooms).executor!!,
+                        onOpenMenu = { w -> onOpenMenu(w) },
+                        onError = { e -> onError(e) }
+                    )
                 }
             }
         )
