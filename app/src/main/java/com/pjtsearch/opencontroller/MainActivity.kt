@@ -67,12 +67,8 @@ class MainActivity : AppCompatActivity() {
 @ExperimentalMaterialApi
 @Composable
 fun MainActivityView() {
-    var backgroundPage: BackgroundPage by rememberSaveable(
-        saver = Saver({ it.value.serialize() }, { mutableStateOf(BackgroundPage.deserialize(it)) })
-    ) { mutableStateOf(BackgroundPage.Homes) }
-    var page: Page by rememberSaveable(
-        saver = Saver({ it.value.serialize() }, { mutableStateOf(Page.deserialize(it)) })
-    ) { mutableStateOf(Page.Home) }
+    var backgroundPage: BackgroundPage by rememberSaveable { mutableStateOf(BackgroundPage.Homes) }
+    var page: Page by rememberSaveable { mutableStateOf(Page.Home) }
     val menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
@@ -81,9 +77,7 @@ fun MainActivityView() {
     }.collectAsState(listOf())
 
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-    var sheetPage: BottomSheetPage by rememberSaveable(
-        saver = Saver({ it.value.serialize() }, { mutableStateOf(BottomSheetPage.deserialize(it as List<Serializable>)) })
-    ) { mutableStateOf(BottomSheetPage.Widgets(listOf())) }
+    var sheetPage: BottomSheetPage by rememberSaveable { mutableStateOf(BottomSheetPage.Widgets(listOf())) }
 
     val onError = { err: Throwable ->
         scope.launch {
