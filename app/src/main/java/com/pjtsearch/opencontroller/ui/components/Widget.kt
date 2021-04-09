@@ -125,13 +125,13 @@ fun ColumnScope.Widget(
                 onOpenMenu(widget.menuButton.contentList)
             }
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
-        InnerCase.TEXT_INPUT -> BasicTextField("", {
+        InnerCase.TEXT_INPUT -> TextInput {
             thread {
                 executor.executeLambda(
                     widget.textInput.onInput,
-                    listOf(TextInputAction.newBuilder().setChar(it.last().toString()).build())
+                    listOf(it)
                 )
             }
-        })
+        }
     }
 }
