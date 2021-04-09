@@ -115,14 +115,18 @@ fun MainActivityView() {
                             settings.toBuilder()
                                 .addHouseRefs(it).build()
                         }
+                        sheetState.hide()
                     }
                 }
                 is BottomSheetPage.EditHouseRef -> ModifyHouseRef(pg.houseRef.value, {pg.houseRef.value = it}) {
-                    scope.launch { ctx.settingsDataStore.updateData { settings ->
-                        settings.toBuilder()
-                            .removeHouseRefs(pg.index)
-                            .addHouseRefs(it).build()
-                    }}
+                    scope.launch {
+                        ctx.settingsDataStore.updateData { settings ->
+                            settings.toBuilder()
+                                .removeHouseRefs(pg.index)
+                                .addHouseRefs(it).build()
+                        }
+                        sheetState.hide()
+                    }
                 }
             }
         }
