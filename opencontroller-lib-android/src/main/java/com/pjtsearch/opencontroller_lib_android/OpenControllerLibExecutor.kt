@@ -6,12 +6,13 @@ import com.github.michaelbull.result.runCatching
 import com.github.michaelbull.result.unwrap
 import com.google.protobuf.Message
 import com.pjtsearch.opencontroller_lib_proto.*
+import java.io.Serializable
 import java.lang.Exception
 
 import java.net.Socket
 
 class OpenControllerLibExecutor(private val house: HouseOrBuilder,
-                                private var sockets: Map<String, Socket> = hashMapOf()) {
+                                private var sockets: Map<String, Socket> = hashMapOf()) : Serializable {
     fun executeLambda(lambda: LambdaOrBuilder, args: List<Any?>): Result<List<Any?>, Throwable> = runCatching {
         if (args.size < lambda.argsList.size) throw Error("${lambda.id} Expected ${lambda.argsList.size} args, but got ${args.size}")
         val capturedArgs = args.subList(0, lambda.argsList.size)
