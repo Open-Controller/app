@@ -57,10 +57,10 @@ fun SettingsView(onError: (Throwable) -> Unit) {
                 }
             }
         }
-        ControlledExpandableListItem(text = { Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.Add, "Add a house")
-            Text("Add house")
-        }}) {
+        ControlledExpandableListItem(
+            text = { Text("Add house") },
+            icon = { Icon(Icons.Outlined.Add, "Add a house") }
+        ) {
             EditHouseRef(HouseRef.getDefaultInstance()) {
                 scope.launch { ctx.settingsDataStore.updateData { settings ->
                     settings.toBuilder()
