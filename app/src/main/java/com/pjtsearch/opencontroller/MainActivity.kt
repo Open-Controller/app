@@ -81,7 +81,9 @@ fun MainActivityView() {
     }.collectAsState(listOf())
 
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-    var sheetPage by remember { mutableStateOf(BottomSheetPage.Widgets(listOf())) }
+    var sheetPage: BottomSheetPage by rememberSaveable(
+        saver = Saver({ it.value.serialize() }, { mutableStateOf(BottomSheetPage.deserialize(it as List<Serializable>)) })
+    ) { mutableStateOf(BottomSheetPage.Widgets(listOf())) }
 
     val onError = { err: Throwable ->
         scope.launch {
@@ -112,6 +114,21 @@ fun MainActivityView() {
                         onOpenMenu = { onOpenMenu(it) },
                         onError = { onError(it) }
                     ) }
+                }
+                is BottomSheetPage.AddHouseRef -> ModifyHouseRef(pg.houseRef.value, {pg.houseRef.value = it}) {
+                    scope.launch {
+                        ctx.settingsDataStore.updateData { settings ->
+                            settings.toBuilder()
+                                .addHouseRefs(it).build()
+                        }
+                    }
+                }
+                is BottomSheetPage.EditHouseRef -> ModifyHouseRef(pg.houseRef.value, {pg.houseRef.value = it}) {
+                    scope.launch { ctx.settingsDataStore.updateData { settings ->
+                        settings.toBuilder()
+                            .removeHouseRefs(pg.index)
+                            .addHouseRefs(it).build()
+                    }}
                 }
             }
         }
@@ -158,7 +175,12 @@ fun MainActivityView() {
                 when (it) {
                     is Page.Home -> Text("Home", style = typography.h5)
                     is Page.Settings -> SettingsView(
-                        onError = { e -> onError(e) }
+                        onBottomSheetPage = { p ->
+                            scope.launch {
+                                sheetPage = p
+                                sheetState.show()
+                            }
+                        }
                     )
                     is Page.Controller -> ControllerView(
                         it.controller,

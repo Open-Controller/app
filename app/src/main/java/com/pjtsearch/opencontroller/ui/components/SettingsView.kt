@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.components.ControlledExpandableListItem
 import com.pjtsearch.opencontroller.components.ExpandableListItem
+import com.pjtsearch.opencontroller.const.BottomSheetPage
 import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.NetworkHouseRef
 import com.pjtsearch.opencontroller.settings.Settings
@@ -29,73 +30,37 @@ import kotlinx.coroutines.launch
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
-fun SettingsView(onError: (Throwable) -> Unit) {
+fun SettingsView(onBottomSheetPage: (BottomSheetPage) -> Unit) {
     val ctx = LocalContext.current
     val settings = ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
     val scope = rememberCoroutineScope()
     Column {
         settings.value.houseRefsList.forEachIndexed { i, it ->
-            ControlledExpandableListItem(text = { Box(Modifier.fillMaxWidth()) {
-                Text(it.displayName, Modifier.align(Alignment.CenterStart))
-                IconButton(onClick = {
-                    scope.launch {
-                        ctx.settingsDataStore.updateData { settings ->
-                            settings.toBuilder().removeHouseRefs(i).build()
+            ListItem(
+                text = { Box(Modifier.fillMaxWidth()) {
+                    Text(it.displayName, Modifier.align(Alignment.CenterStart))
+                    IconButton(onClick = {
+                        scope.launch {
+                            ctx.settingsDataStore.updateData { settings ->
+                                settings.toBuilder().removeHouseRefs(i).build()
+                            }
                         }
+                    },
+                    Modifier.align(Alignment.CenterEnd)) {
+                        Icon(Icons.Outlined.Delete, "Delete this house")
                     }
-                },
-                Modifier.align(Alignment.CenterEnd)) {
-                    Icon(Icons.Outlined.Delete, "Delete this house")
+                }},
+                modifier = Modifier.clickable {
+                    onBottomSheetPage(BottomSheetPage.EditHouseRef(mutableStateOf(it), i))
                 }
-            }}) {
-                EditHouseRef(it) {
-                    scope.launch { ctx.settingsDataStore.updateData { settings ->
-                        settings.toBuilder()
-                            .removeHouseRefs(i)
-                            .addHouseRefs(it).build()
-                    }}
-                }
-            }
+            )
         }
-        ControlledExpandableListItem(
+        ListItem(
             text = { Text("Add house") },
-            icon = { Icon(Icons.Outlined.Add, "Add a house") }
-        ) {
-            EditHouseRef(HouseRef.getDefaultInstance()) {
-                scope.launch { ctx.settingsDataStore.updateData { settings ->
-                    settings.toBuilder()
-                        .addHouseRefs(it).build()
-                }}
+            icon = { Icon(Icons.Outlined.Add, "Add a house") },
+            modifier = Modifier.clickable {
+                onBottomSheetPage(BottomSheetPage.AddHouseRef(mutableStateOf(HouseRef.getDefaultInstance())))
             }
-        }
-    }
-}
-
-@Composable
-fun EditHouseRef(houseRef: HouseRef, onSave: (HouseRef) -> Unit) {
-    var houseRefBuilder by remember(houseRef) { mutableStateOf(HouseRef.newBuilder(houseRef).build()) }
-    val scope = rememberCoroutineScope()
-
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        TextField(
-            label = { Text("Name") },
-            value = houseRefBuilder.displayName,
-            onValueChange = {
-                houseRefBuilder =
-                    houseRefBuilder.toBuilder().setDisplayName(it).build()
-            })
-        TextField(
-            label = { Text("URL") },
-            value = houseRefBuilder.networkHouseRef.url,
-            onValueChange = {
-                houseRefBuilder = houseRefBuilder.toBuilder().setNetworkHouseRef(
-                    houseRefBuilder.networkHouseRef.toBuilder().setUrl(it)
-                ).build()
-            })
-        Button(onClick = { scope.launch {
-            onSave(houseRefBuilder);
-        }}) {
-            Text("Save")
-        }
+        )
     }
 }

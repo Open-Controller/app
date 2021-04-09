@@ -1,5 +1,8 @@
 package com.pjtsearch.opencontroller.const
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.House
 import com.pjtsearch.opencontroller_lib_proto.Widget
@@ -51,9 +54,17 @@ sealed class BackgroundPage {
 
 sealed class BottomSheetPage {
     data class Widgets(val widgets: List<Widget>) : BottomSheetPage()
+    data class EditHouseRef(var houseRef: MutableState<HouseRef>, val index: Int) : BottomSheetPage()
+    data class AddHouseRef(var houseRef: MutableState<HouseRef>) : BottomSheetPage()
     fun serialize() =
         when (val page = this) {
             is Widgets -> listOf("Widgets", page.widgets.map { w -> w.toByteArray() })
+            is EditHouseRef -> listOf(
+                "EditHouseRef",
+                page.houseRef.value.toByteArray(),
+                page.index
+            )
+            is AddHouseRef -> listOf("AddHouseRef", page.houseRef.value.toByteArray())
         }
     companion object {
         fun deserialize(from: List<Serializable>) =
@@ -61,6 +72,10 @@ sealed class BottomSheetPage {
                 "Widgets" -> {
                     Widgets((from[1] as List<ByteArray>).map { w -> Widget.parseFrom(w)})
                 }
+                "EditHouseRef" -> {
+                    EditHouseRef(mutableStateOf(HouseRef.parseFrom((from[1] as ByteArray))), from[2] as Int)
+                }
+                "AddHouseRef" -> AddHouseRef(mutableStateOf(HouseRef.parseFrom((from[1] as ByteArray))))
                 else -> Widgets(listOf())
             }
     }
