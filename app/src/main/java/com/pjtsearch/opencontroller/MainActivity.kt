@@ -189,7 +189,17 @@ fun MainActivityView() {
                             sheetState.show()
                         }}
                     )
-                    is Page.HomeGreeter -> Text("Home greeter")
+                    is Page.HomeGreeter -> HomeGreeterView(
+                        house = it.house,
+                        onRevealMenu = { scope.launch { menuState.reveal() } },
+                        onExitHome = {
+                            scope.launch {
+                                page = Page.EmptyGreeter
+                                menuState.reveal()
+                                backgroundPage = BackgroundPage.Homes
+                            }
+                        }
+                    )
                     is Page.Settings -> SettingsView(
                         onBottomSheetPage = { p ->
                             scope.launch {
