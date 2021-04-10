@@ -70,7 +70,20 @@ fun PagedBackdrop(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(20.dp)
                             ) {
-                                page.bottomContent(this)
+                                page.bottomIcon?.let { ic ->
+                                    Icon(
+                                        ic, page.bottomText ?: "Bottom Icon",
+                                        Modifier.align(Alignment.CenterHorizontally).size(200.dp),
+                                        MaterialTheme.colors.onSurface.copy(0.3f)
+                                    )
+                                }
+                                page.bottomText?.let { text ->
+                                    Text(
+                                        text,
+                                        style = typography.h5,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
                         }
                     }

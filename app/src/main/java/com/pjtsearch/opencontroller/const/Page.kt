@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.settings.HouseRef
@@ -25,25 +26,16 @@ import java.io.Serializable
 
 sealed class Page {
     abstract val title: String
-    open val bottomContent: @Composable ColumnScope.() -> Unit = {}
+    open val bottomIcon: ImageVector? = null
+    open val bottomText: String? = null
 
     object EmptyGreeter : Page() {
-        override val title = "Home"
-        override val bottomContent: @Composable() (ColumnScope.() -> Unit) = {
-            Icon(
-                Icons.Outlined.AutoAwesome, "OpenController logo",
-                Modifier.align(Alignment.CenterHorizontally).size(200.dp),
-                MaterialTheme.colors.onSurface.copy(0.3f)
-            )
-            Text(
-                "Select a Home",
-                style = typography.h5,
-                textAlign = TextAlign.Center
-            )
-        }
+        override val title = "Welcome"
+        override val bottomIcon = Icons.Outlined.AutoAwesome
+        override val bottomText = "Select a Home"
     }
 //    For when house already opened
-    data class HomeGreeter(val house: House) : Page() { override val title = "Home" }
+    data class HomeGreeter(val house: House) : Page() { override val title = "Welcome" }
     object Settings : Page() { override val title = "Settings"}
     data class Controller(val controller: com.pjtsearch.opencontroller_lib_proto.Controller) : Page() { override val title: String = controller.displayName }
 
