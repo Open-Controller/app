@@ -79,7 +79,7 @@ fun MainActivityView() {
     var page: Page by rememberSaveable(
         saver = Saver({it.value.serialize()}, {mutableStateOf(Page.deserialize(it))})
     ) { mutableStateOf(Page.EmptyGreeter) }
-    val menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
+    val menuState = rememberBackdropScaffoldState(BackdropValue.Concealed)
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
     val houseRefs = ctx.settingsDataStore.data.map {
