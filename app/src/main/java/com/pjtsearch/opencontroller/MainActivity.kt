@@ -171,7 +171,13 @@ fun MainActivityView() {
             },
             frontLayerContent = {
                 when (it) {
-                    is Page.Home -> Text("Home", style = typography.h5)
+                    is Page.Home -> HomeView(
+                        onRevealMenu = { scope.launch { menuState.reveal() } },
+                        onAddHome = { scope.launch {
+                            sheetPage = BottomSheetPage.AddHouseRef(mutableStateOf(HouseRef.getDefaultInstance()))
+                            sheetState.show()
+                        }}
+                    )
                     is Page.Settings -> SettingsView(
                         onBottomSheetPage = { p ->
                             scope.launch {
