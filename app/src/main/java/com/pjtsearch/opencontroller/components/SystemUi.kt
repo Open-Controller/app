@@ -6,29 +6,27 @@ import android.view.View
 import android.view.Window
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.luminance
 import com.pjtsearch.opencontroller.ui.theme.OpenControllerTheme
 import com.google.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.systemuicontroller.LocalSystemUiController
 
 @Composable
 fun SystemUi(window: Window, content: @Composable () -> Unit) =
         OpenControllerTheme {
-            window.statusBarColor = Color.TRANSPARENT
-            window.navigationBarColor = Color.TRANSPARENT
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 window.setDecorFitsSystemWindows(false)
             }
 
-            @Suppress("DEPRECATION")
-            if (MaterialTheme.colors.background.luminance() > 0.5f) {
-                window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or
-                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-            }
+            val systemUiController = LocalSystemUiController.current
+            val useDarkIcons = MaterialTheme.colors.isLight
 
-            @Suppress("DEPRECATION")
-            if (MaterialTheme.colors.background.luminance() > 0.5f) {
-                window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or
-                        View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            SideEffect {
+                systemUiController.setSystemBarsColor(
+                    color = Transparent,
+                    darkIcons = useDarkIcons
+                )
             }
             ProvideWindowInsets(content = content)
         }

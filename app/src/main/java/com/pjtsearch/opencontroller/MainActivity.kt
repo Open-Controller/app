@@ -29,6 +29,8 @@ import com.pjtsearch.opencontroller.ui.components.*
 import com.pjtsearch.opencontroller.ui.components.Widget as WidgetDisplay
 import com.pjtsearch.opencontroller.ui.theme.typography
 import com.google.accompanist.insets.statusBarsPadding
+import com.google.accompanist.systemuicontroller.LocalSystemUiController
+import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
 import com.pjtsearch.opencontroller.components.PagedBackdrop
 import com.pjtsearch.opencontroller.components.PagedBottomSheet
 import com.pjtsearch.opencontroller.const.BackgroundPage
@@ -41,7 +43,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.Serializable
-import kotlin.concurrent.thread
 import com.pjtsearch.opencontroller_lib_proto.Controller as ProtoController
 import com.pjtsearch.opencontroller.ui.components.Widget as WidgetDisplay
 
@@ -56,8 +57,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SystemUi(this.window) {
-                MainActivityView()
+            val controller = rememberAndroidSystemUiController()
+            CompositionLocalProvider(LocalSystemUiController provides controller) {
+                SystemUi(this.window) {
+                    MainActivityView()
+                }
             }
         }
     }
