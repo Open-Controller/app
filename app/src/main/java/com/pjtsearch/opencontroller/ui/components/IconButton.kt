@@ -15,12 +15,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.github.michaelbull.result.mapError
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_proto.Icon
 import com.pjtsearch.opencontroller_lib_proto.Size
-import kotlin.concurrent.thread
 
 @Composable
 fun OpenControllerButton(modifier: Modifier, text: String, icon: Icon?, size: Size?, onClick: () -> Unit) {

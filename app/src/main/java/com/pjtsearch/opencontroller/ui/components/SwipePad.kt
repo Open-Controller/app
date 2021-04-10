@@ -1,30 +1,18 @@
 package com.pjtsearch.opencontroller.ui.components
 
-import android.graphics.Color
 import android.view.HapticFeedbackConstants
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
-import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.extensions.DirectionVector
 import com.pjtsearch.opencontroller.extensions.dragMagnitudeTimer
-import com.pjtsearch.opencontroller.ui.theme.shapes
-import com.pjtsearch.opencontroller_lib_proto.Controller
-import kotlin.concurrent.thread
-import kotlin.math.atan2
 
 
 @Composable

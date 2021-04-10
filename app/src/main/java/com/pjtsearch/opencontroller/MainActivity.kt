@@ -5,16 +5,12 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.datastore.core.DataStore
@@ -23,12 +19,9 @@ import com.pjtsearch.opencontroller.components.SystemUi
 import com.pjtsearch.opencontroller.extensions.SettingsSerializer
 import com.pjtsearch.opencontroller.extensions.copy
 import com.pjtsearch.opencontroller.settings.HouseRef
-import com.pjtsearch.opencontroller.settings.NetworkHouseRef
 import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.ui.components.*
 import com.pjtsearch.opencontroller.ui.components.Widget as WidgetDisplay
-import com.pjtsearch.opencontroller.ui.theme.typography
-import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.systemuicontroller.LocalSystemUiController
 import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
 import com.pjtsearch.opencontroller.components.PagedBackdrop
@@ -36,15 +29,10 @@ import com.pjtsearch.opencontroller.components.PagedBottomSheet
 import com.pjtsearch.opencontroller.const.BackgroundPage
 import com.pjtsearch.opencontroller.const.BottomSheetPage
 import com.pjtsearch.opencontroller.const.Page
-import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.*
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import java.io.Serializable
-import com.pjtsearch.opencontroller_lib_proto.Controller as ProtoController
-import com.pjtsearch.opencontroller.ui.components.Widget as WidgetDisplay
 
 val Context.settingsDataStore: DataStore<Settings> by dataStore(
     fileName = "Settings.proto",

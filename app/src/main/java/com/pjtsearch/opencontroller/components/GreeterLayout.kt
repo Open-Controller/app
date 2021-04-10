@@ -1,7 +1,6 @@
 package com.pjtsearch.opencontroller.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.runtime.Composable

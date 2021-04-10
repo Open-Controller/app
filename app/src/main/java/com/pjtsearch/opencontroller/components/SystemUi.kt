@@ -1,13 +1,10 @@
 package com.pjtsearch.opencontroller.components
 
-import android.graphics.Color
 import android.os.Build
-import android.view.View
 import android.view.Window
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color.Companion.Transparent
-import androidx.compose.ui.graphics.luminance
 import com.pjtsearch.opencontroller.ui.theme.OpenControllerTheme
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.systemuicontroller.LocalSystemUiController

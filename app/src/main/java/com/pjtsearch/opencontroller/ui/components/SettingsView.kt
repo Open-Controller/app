@@ -1,6 +1,5 @@
 package com.pjtsearch.opencontroller.ui.components
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,23 +7,14 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import com.pjtsearch.opencontroller.components.ControlledExpandableListItem
-import com.pjtsearch.opencontroller.components.ExpandableListItem
 import com.pjtsearch.opencontroller.const.BottomSheetPage
 import com.pjtsearch.opencontroller.settings.HouseRef
-import com.pjtsearch.opencontroller.settings.NetworkHouseRef
 import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.settingsDataStore
-import com.pjtsearch.opencontroller.ui.theme.shapes
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @ExperimentalAnimationApi
