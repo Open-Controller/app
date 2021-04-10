@@ -17,6 +17,8 @@ import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.Widget
 import com.pjtsearch.opencontroller_lib_proto.WidgetOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.Widget.InnerCase
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun ColumnScope.Widget(
@@ -33,11 +35,11 @@ fun ColumnScope.Widget(
     when (widget.innerCase) {
         InnerCase.BUTTON ->
             OpenControllerButton(sizedModifier, widget.button.text, if (widget.button.hasIcon()) widget.button.icon else null, widget.button.size) {
-                Thread {
+                GlobalScope.launch {
                     executor
                         .executeLambda(widget.button.onClick, listOf())
                         .mapError(onError)
-                }.start()
+                }
             }
         InnerCase.ROW -> Row(sizedModifier, Arrangement.SpaceBetween) {
             widget.row.childrenList.map {
@@ -79,31 +81,31 @@ fun ColumnScope.Widget(
                     is DirectionVector.Up -> widget.swipePad.onSwipeUp
                     DirectionVector.Zero -> widget.swipePad.onClick
                 }
-                Thread {
+                GlobalScope.launch {
                     executor
                         .executeLambda(lambda, listOf())
                         .mapError(onError)
-                }.start()
+                }
             }
             if (widget.swipePad.hasOnBottomDecrease() && widget.swipePad.hasOnBottomIncrease()) {
                 Row(Modifier.padding(8.dp)
                         .then(if (widget.expand) Modifier.fillMaxWidth() else Modifier.defaultMinSize(200.dp, 10.dp)),
                     horizontalArrangement = Arrangement.SpaceBetween) {
                     IconButton(onClick = {
-                        Thread {
+                        GlobalScope.launch {
                             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                             executor.executeLambda(widget.swipePad.onBottomDecrease, listOf())
                                 .mapError(onError)
-                        }.start()
+                        }
                     }) {
                         OpenControllerIcon(widget.swipePad.bottomDecreaseIcon, "Decrease")
                     }
                     IconButton(onClick = {
-                        Thread {
+                        GlobalScope.launch {
                             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                             executor.executeLambda(widget.swipePad.onBottomIncrease, listOf())
                                 .mapError(onError)
-                        }.start()
+                        }
                     }) {
                         OpenControllerIcon(widget.swipePad.bottomIncreaseIcon, "Increase")
                     }
@@ -118,12 +120,12 @@ fun ColumnScope.Widget(
             }
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
         InnerCase.TEXT_INPUT -> TextInput {
-            Thread {
+            GlobalScope.launch {
                 executor.executeLambda(
                     widget.textInput.onInput,
                     listOf(it)
                 )
-            }.start()
+            }
         }
     }
 }

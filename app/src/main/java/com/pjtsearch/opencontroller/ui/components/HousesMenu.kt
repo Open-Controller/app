@@ -17,15 +17,19 @@ import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.NetworkHouseRef
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_proto.House
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
 @Composable
 fun HousesMenu(houseRefs: List<HouseRef>, onError: (Throwable) -> Unit, onChoose: (House) -> Unit) =
     Column {
         houseRefs.map {
-            ListItem(Modifier.padding(5.dp).padding(start = 20.dp).clip(shapes.small).clickable { Thread {
-                resolveHouseRef(it).onFailure(onError).onSuccess(onChoose)
-            }.start()}) {
+            ListItem(Modifier.padding(5.dp).padding(start = 20.dp).clip(shapes.small).clickable {
+                GlobalScope.launch {
+                    resolveHouseRef(it).onFailure(onError).onSuccess(onChoose)
+                }
+            }) {
                 Text(it.displayName)
             }
         }
