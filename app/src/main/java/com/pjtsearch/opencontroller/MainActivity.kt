@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
 @Composable
 fun MainActivityView() {
     var backgroundPage: BackgroundPage by rememberSaveable { mutableStateOf(BackgroundPage.Homes) }
-    var page: Page by rememberSaveable { mutableStateOf(Page.Home) }
+    var page: Page by rememberSaveable { mutableStateOf(Page.EmptyGreeter) }
     val menuState by mutableStateOf(rememberBackdropScaffoldState(BackdropValue.Concealed))
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
@@ -146,7 +146,7 @@ fun MainActivityView() {
                     Crossfade(pg) {
                         if (it is BackgroundPage.Rooms) {
                             Button({
-                                backgroundPage = BackgroundPage.Homes; page = Page.Home
+                                backgroundPage = BackgroundPage.Homes; page = Page.EmptyGreeter
                             }) {
                                 Text("Exit house")
                             }
@@ -161,6 +161,7 @@ fun MainActivityView() {
                                 newHouse,
                                 OpenControllerLibExecutor(newHouse)
                             )
+                            page = Page.HomeGreeter(newHouse)
                         }
                         is BackgroundPage.Rooms -> RoomsMenu(pg.house) {
                             page = Page.Controller(it)
@@ -171,13 +172,14 @@ fun MainActivityView() {
             },
             frontLayerContent = {
                 when (it) {
-                    is Page.Home -> HomeView(
+                    is Page.EmptyGreeter -> HomeView(
                         onRevealMenu = { scope.launch { menuState.reveal() } },
                         onAddHome = { scope.launch {
                             sheetPage = BottomSheetPage.AddHouseRef(mutableStateOf(HouseRef.getDefaultInstance()))
                             sheetState.show()
                         }}
                     )
+                    is Page.HomeGreeter -> Text("Home greeter")
                     is Page.Settings -> SettingsView(
                         onBottomSheetPage = { p ->
                             scope.launch {

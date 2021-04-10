@@ -5,10 +5,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Villa
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.statusBarsPadding
 import com.pjtsearch.opencontroller.const.BackgroundPage
@@ -54,13 +57,21 @@ fun PagedBackdrop(
                 Crossfade(menuState.targetValue, animationSpec = tween(100)) {
                     when (it) {
                         BackdropValue.Concealed -> frontLayerContent(page)
-                        BackdropValue.Revealed -> Box(Modifier.fillMaxWidth()) {
-                            Text(page.title, style = typography.h5)
-                            Icon(
-                                Icons.Outlined.KeyboardArrowUp,
-                                "Close menu",
-                                modifier = Modifier.align(alignment = Alignment.CenterEnd)
-                            )
+                        BackdropValue.Revealed -> Column {
+                            Box(Modifier.fillMaxWidth()) {
+                                Text(page.title, style = typography.h5)
+                                Icon(
+                                    Icons.Outlined.KeyboardArrowUp,
+                                    "Close menu",
+                                    modifier = Modifier.align(alignment = Alignment.CenterEnd)
+                                )
+                            }
+                            Column(Modifier.padding(top = 80.dp).fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(20.dp)
+                            ) {
+                                page.bottomContent(this)
+                            }
                         }
                     }
                 }
