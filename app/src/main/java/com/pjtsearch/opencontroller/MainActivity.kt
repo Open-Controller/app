@@ -182,7 +182,7 @@ fun MainActivityView() {
             },
             frontLayerContent = {
                 when (it) {
-                    is Page.EmptyGreeter -> HomeView(
+                    is Page.EmptyGreeter -> EmptyGreeterView(
                         onRevealMenu = { scope.launch { menuState.reveal() } },
                         onAddHome = { scope.launch {
                             sheetPage = BottomSheetPage.AddHouseRef(mutableStateOf(HouseRef.getDefaultInstance()))

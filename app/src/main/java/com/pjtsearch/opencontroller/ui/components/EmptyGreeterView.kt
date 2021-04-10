@@ -21,7 +21,7 @@ import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller.ui.theme.typography
 
 @Composable
-fun HomeView(onRevealMenu: () -> Unit, onAddHome: () -> Unit) =
+fun EmptyGreeterView(onRevealMenu: () -> Unit, onAddHome: () -> Unit) =
     Column {
         Column(
             Modifier.weight(1f).align(Alignment.CenterHorizontally),
