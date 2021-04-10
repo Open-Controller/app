@@ -3,28 +3,20 @@ package com.pjtsearch.opencontroller.ui.components
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.github.michaelbull.result.mapError
 import com.pjtsearch.opencontroller.extensions.DirectionVector
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
-import com.pjtsearch.opencontroller.extensions.icons
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
-import com.pjtsearch.opencontroller_lib_proto.TextInputAction
 import com.pjtsearch.opencontroller_lib_proto.Widget
 import com.pjtsearch.opencontroller_lib_proto.WidgetOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.Widget.InnerCase
-import kotlin.concurrent.thread
 
 @Composable
 fun ColumnScope.Widget(
@@ -41,11 +33,11 @@ fun ColumnScope.Widget(
     when (widget.innerCase) {
         InnerCase.BUTTON ->
             OpenControllerButton(sizedModifier, widget.button.text, if (widget.button.hasIcon()) widget.button.icon else null, widget.button.size) {
-                thread {
+                Thread {
                     executor
                         .executeLambda(widget.button.onClick, listOf())
                         .mapError(onError)
-                }
+                }.start()
             }
         InnerCase.ROW -> Row(sizedModifier, Arrangement.SpaceBetween) {
             widget.row.childrenList.map {
@@ -87,31 +79,31 @@ fun ColumnScope.Widget(
                     is DirectionVector.Up -> widget.swipePad.onSwipeUp
                     DirectionVector.Zero -> widget.swipePad.onClick
                 }
-                thread {
+                Thread {
                     executor
                         .executeLambda(lambda, listOf())
                         .mapError(onError)
-                }
+                }.start()
             }
             if (widget.swipePad.hasOnBottomDecrease() && widget.swipePad.hasOnBottomIncrease()) {
                 Row(Modifier.padding(8.dp)
                         .then(if (widget.expand) Modifier.fillMaxWidth() else Modifier.defaultMinSize(200.dp, 10.dp)),
                     horizontalArrangement = Arrangement.SpaceBetween) {
                     IconButton(onClick = {
-                        thread {
+                        Thread {
                             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                             executor.executeLambda(widget.swipePad.onBottomDecrease, listOf())
                                 .mapError(onError)
-                        }
+                        }.start()
                     }) {
                         OpenControllerIcon(widget.swipePad.bottomDecreaseIcon, "Decrease")
                     }
                     IconButton(onClick = {
-                        thread {
+                        Thread {
                             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                             executor.executeLambda(widget.swipePad.onBottomIncrease, listOf())
                                 .mapError(onError)
-                        }
+                        }.start()
                     }) {
                         OpenControllerIcon(widget.swipePad.bottomIncreaseIcon, "Increase")
                     }
@@ -126,12 +118,12 @@ fun ColumnScope.Widget(
             }
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
         InnerCase.TEXT_INPUT -> TextInput {
-            thread {
+            Thread {
                 executor.executeLambda(
                     widget.textInput.onInput,
                     listOf(it)
                 )
-            }
+            }.start()
         }
     }
 }
