@@ -14,6 +14,7 @@ import com.pjtsearch.opencontroller.extensions.DirectionVector
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
+import com.pjtsearch.opencontroller_lib_proto.Size
 import com.pjtsearch.opencontroller_lib_proto.Widget
 import com.pjtsearch.opencontroller_lib_proto.WidgetOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.Widget.InnerCase
@@ -119,7 +120,12 @@ fun ColumnScope.Widget(
                 onOpenMenu(widget.menuButton.contentList)
             }
         InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
-        InnerCase.TEXT_INPUT -> TextInput {
+        InnerCase.TEXT_INPUT -> TextInput(
+            sizedModifier,
+            widget.textInput.text,
+            widget.textInput.icon,
+            widget.textInput.size
+        ) {
             GlobalScope.launch {
                 executor.executeLambda(
                     widget.textInput.onInput,

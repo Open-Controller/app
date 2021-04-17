@@ -86,6 +86,7 @@ message TextInput {
   required Lambda on_input = 1;
   required string text = 3;
   optional Icon icon = 2;
+  optional Size size = 4 [default = SMALL];
 }
 
 message TextInputAction {
