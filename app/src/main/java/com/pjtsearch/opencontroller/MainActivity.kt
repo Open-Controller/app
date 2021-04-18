@@ -24,6 +24,7 @@ import com.pjtsearch.opencontroller.ui.components.*
 import com.pjtsearch.opencontroller.ui.components.Widget as WidgetDisplay
 import com.google.accompanist.systemuicontroller.LocalSystemUiController
 import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
+import com.pjtsearch.opencontroller.components.DialogSheet
 import com.pjtsearch.opencontroller.components.PagedBackdrop
 import com.pjtsearch.opencontroller.components.PagedBottomSheet
 import com.pjtsearch.opencontroller.const.BackgroundPage
@@ -81,6 +82,8 @@ fun MainActivityView() {
         mutableStateOf(BottomSheetPage.Widgets(listOf()))
     }
 
+    val dialogState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+
     val onError = { err: Throwable ->
         scope.launch {
             err.printStackTrace()
@@ -96,118 +99,130 @@ fun MainActivityView() {
             sheetState.show()
         }
     }
-    PagedBottomSheet(
-        state = sheetState,
-        page = sheetPage,
-        sheetContent = { pg ->
-            val bgPage = backgroundPage
-            when (pg) {
-                is BottomSheetPage.Widgets -> if (bgPage is BackgroundPage.Rooms) {
-                    pg.widgets.map { w -> WidgetDisplay(
-                        w,
-                        bgPage.executor,
-                        Modifier.fillMaxWidth(),
-                        onOpenMenu = { onOpenMenu(it) },
-                        onError = { onError(it) }
-                    ) }
-                }
-                is BottomSheetPage.AddHouseRef -> ModifyHouseRef(pg.houseRef.value, {pg.houseRef.value = it}) {
-                    scope.launch {
-                        ctx.settingsDataStore.updateData { settings ->
-                            settings.toBuilder()
-                                .addHouseRefs(it).build()
+
+    DialogSheet(state = dialogState) {
+        PagedBottomSheet(
+            state = sheetState,
+            page = sheetPage,
+            sheetContent = { pg ->
+                val bgPage = backgroundPage
+                when (pg) {
+                    is BottomSheetPage.Widgets -> if (bgPage is BackgroundPage.Rooms) {
+                        pg.widgets.map { w ->
+                            WidgetDisplay(
+                                w,
+                                bgPage.executor,
+                                Modifier.fillMaxWidth(),
+                                onOpenMenu = { onOpenMenu(it) },
+                                onError = { onError(it) }
+                            )
                         }
-                        sheetState.hide()
                     }
-                }
-                is BottomSheetPage.EditHouseRef -> ModifyHouseRef(pg.houseRef.value, {pg.houseRef.value = it}) {
-                    scope.launch {
-                        ctx.settingsDataStore.updateData { settings ->
-                            settings.toBuilder()
-                                .removeHouseRefs(pg.index)
-                                .addHouseRefs(it).build()
+                    is BottomSheetPage.AddHouseRef -> ModifyHouseRef(
+                        pg.houseRef.value,
+                        { pg.houseRef.value = it }) {
+                        scope.launch {
+                            ctx.settingsDataStore.updateData { settings ->
+                                settings.toBuilder()
+                                    .addHouseRefs(it).build()
+                            }
+                            sheetState.hide()
                         }
-                        sheetState.hide()
+                    }
+                    is BottomSheetPage.EditHouseRef -> ModifyHouseRef(
+                        pg.houseRef.value,
+                        { pg.houseRef.value = it }) {
+                        scope.launch {
+                            ctx.settingsDataStore.updateData { settings ->
+                                settings.toBuilder()
+                                    .removeHouseRefs(pg.index)
+                                    .addHouseRefs(it).build()
+                            }
+                            sheetState.hide()
+                        }
                     }
                 }
             }
-        }
-    ) {
-        PagedBackdrop(
-            menuState = menuState,
-            page = page,
-            backgroundPage = backgroundPage,
-            backLayerContent = { pg ->
-                Row(
-                    Modifier.padding(start = 8.dp, bottom = 20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button({ page = Page.Settings; scope.launch { menuState.conceal() } }) {
-                        Text("Settings")
+        ) {
+            PagedBackdrop(
+                menuState = menuState,
+                page = page,
+                backgroundPage = backgroundPage,
+                backLayerContent = { pg ->
+                    Row(
+                        Modifier.padding(start = 8.dp, bottom = 20.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button({ page = Page.Settings; scope.launch { menuState.conceal() } }) {
+                            Text("Settings")
+                        }
+                        Crossfade(pg) {
+                            if (it is BackgroundPage.Rooms) {
+                                Button({
+                                    backgroundPage = BackgroundPage.Homes; page = Page.EmptyGreeter
+                                }) {
+                                    Text("Exit house")
+                                }
+                            }
+                        }
                     }
                     Crossfade(pg) {
-                        if (it is BackgroundPage.Rooms) {
-                            Button({
-                                backgroundPage = BackgroundPage.Homes; page = Page.EmptyGreeter
-                            }) {
-                                Text("Exit house")
+                        when (pg) {
+                            is BackgroundPage.Homes -> HousesMenu(houseRefs.value,
+                                { e -> onError(e) }) { newHouse ->
+                                backgroundPage = BackgroundPage.Rooms(
+                                    newHouse,
+                                    OpenControllerLibExecutor(newHouse)
+                                )
+                                page = Page.HomeGreeter(newHouse)
+                            }
+                            is BackgroundPage.Rooms -> RoomsMenu(pg.house) {
+                                page = Page.Controller(it)
+                                scope.launch { menuState.conceal() }
                             }
                         }
                     }
-                }
-                Crossfade(pg) {
-                    when (pg) {
-                        is BackgroundPage.Homes -> HousesMenu(houseRefs.value,
-                            { e -> onError(e) }) { newHouse ->
-                            backgroundPage = BackgroundPage.Rooms(
-                                newHouse,
-                                OpenControllerLibExecutor(newHouse)
-                            )
-                            page = Page.HomeGreeter(newHouse)
-                        }
-                        is BackgroundPage.Rooms -> RoomsMenu(pg.house) {
-                            page = Page.Controller(it)
-                            scope.launch { menuState.conceal() }
-                        }
+                },
+                frontLayerContent = {
+                    when (it) {
+                        is Page.EmptyGreeter -> EmptyGreeterView(
+                            onRevealMenu = { scope.launch { menuState.reveal() } },
+                            onAddHome = {
+                                scope.launch {
+                                    sheetPage =
+                                        BottomSheetPage.AddHouseRef(mutableStateOf(HouseRef.getDefaultInstance()))
+                                    sheetState.show()
+                                }
+                            }
+                        )
+                        is Page.HomeGreeter -> HomeGreeterView(
+                            house = it.house,
+                            onRevealMenu = { scope.launch { menuState.reveal() } },
+                            onExitHome = {
+                                scope.launch {
+                                    page = Page.EmptyGreeter
+                                    menuState.reveal()
+                                    backgroundPage = BackgroundPage.Homes
+                                }
+                            }
+                        )
+                        is Page.Settings -> SettingsView(
+                            onBottomSheetPage = { p ->
+                                scope.launch {
+                                    sheetPage = p
+                                    sheetState.show()
+                                }
+                            }
+                        )
+                        is Page.Controller -> ControllerView(
+                            it.controller,
+                            (backgroundPage as BackgroundPage.Rooms).executor!!,
+                            onOpenMenu = { w -> onOpenMenu(w) },
+                            onError = { e -> onError(e) }
+                        )
                     }
                 }
-            },
-            frontLayerContent = {
-                when (it) {
-                    is Page.EmptyGreeter -> EmptyGreeterView(
-                        onRevealMenu = { scope.launch { menuState.reveal() } },
-                        onAddHome = { scope.launch {
-                            sheetPage = BottomSheetPage.AddHouseRef(mutableStateOf(HouseRef.getDefaultInstance()))
-                            sheetState.show()
-                        }}
-                    )
-                    is Page.HomeGreeter -> HomeGreeterView(
-                        house = it.house,
-                        onRevealMenu = { scope.launch { menuState.reveal() } },
-                        onExitHome = {
-                            scope.launch {
-                                page = Page.EmptyGreeter
-                                menuState.reveal()
-                                backgroundPage = BackgroundPage.Homes
-                            }
-                        }
-                    )
-                    is Page.Settings -> SettingsView(
-                        onBottomSheetPage = { p ->
-                            scope.launch {
-                                sheetPage = p
-                                sheetState.show()
-                            }
-                        }
-                    )
-                    is Page.Controller -> ControllerView(
-                        it.controller,
-                        (backgroundPage as BackgroundPage.Rooms).executor!!,
-                        onOpenMenu = { w -> onOpenMenu(w) },
-                        onError = { e -> onError(e) }
-                    )
-                }
-            }
-        )
+            )
+        }
     }
 }
