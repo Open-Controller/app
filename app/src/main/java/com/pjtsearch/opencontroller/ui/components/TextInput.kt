@@ -1,11 +1,8 @@
 package com.pjtsearch.opencontroller.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import com.pjtsearch.opencontroller.components.LocalDialogOpener
 import com.pjtsearch.opencontroller_lib_proto.Icon
@@ -42,7 +39,7 @@ fun TextInput(modifier: Modifier = Modifier, text: String, icon: Icon, size: Siz
         },
         text = text,
         icon = icon,
-        modifier = Modifier,
+        modifier = modifier,
         size = size
     )
 }

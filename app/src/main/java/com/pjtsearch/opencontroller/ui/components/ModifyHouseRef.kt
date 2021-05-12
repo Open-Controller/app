@@ -37,7 +37,7 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit, onSave: (Ho
                 ).build()
             })
         Button(onClick = { scope.launch {
-            onSave(houseRefBuilder);
+            onSave(houseRefBuilder)
         }}) {
             Text("Save")
         }

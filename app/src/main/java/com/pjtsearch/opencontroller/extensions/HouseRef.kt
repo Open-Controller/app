@@ -11,5 +11,6 @@ fun resolveHouseRef(houseRef: HouseRef): Result<House, Throwable> = runCatching 
         HouseRef.InnerCase.NETWORK_HOUSE_REF ->
             House.parseFrom(houseRef.networkHouseRef.url.httpGet().response().third.get())
         HouseRef.InnerCase.INNER_NOT_SET -> throw Error("House ref not set")
+        null -> throw Error("House ref is null")
     }
 }

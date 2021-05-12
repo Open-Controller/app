@@ -16,7 +16,7 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder,
     fun executeLambda(lambda: LambdaOrBuilder, args: List<Any?>): Result<List<Any?>, Throwable> = runCatching {
         if (args.size < lambda.argsList.size) throw Error("${lambda.id} Expected ${lambda.argsList.size} args, but got ${args.size}")
         val capturedArgs = args.subList(0, lambda.argsList.size)
-        val availableArgs = ArrayDeque(capturedArgs);
+        val availableArgs = ArrayDeque(capturedArgs)
 //        println(lambda.innerCase)
         when (lambda.innerCase) {
             Lambda.InnerCase.HTTP -> lambda.http.let {
@@ -30,12 +30,13 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder,
                     HttpMethod.PUT -> listOf(url.httpPut().response().third.get())
                     HttpMethod.PATCH -> listOf(url.httpPatch().response().third.get())
                     HttpMethod.DELETE -> listOf(url.httpDelete().response().third.get())
+                    null -> TODO()
                 }
             }
             Lambda.InnerCase.TCP -> lambda.tcp.let {
                 val (host, port) = (if (it.hasAddress()) it.address else availableArgs.removeFirst() as String)
                     .split(":")
-                var client:Socket? = null;
+                var client:Socket? = null
                 try {
                     client = sockets["$host:$port"] ?: Socket(host, port.toInt()).let { s ->
                         sockets = sockets + ("$host:$port" to s)
@@ -90,8 +91,8 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder,
             }
             Lambda.InnerCase.STRING -> listOf(lambda.string)
             Lambda.InnerCase.SWITCH -> lambda.switch.let {
-                val then = it.conditionsList.firstOrNull {
-                    executeLambda(it.`if`, capturedArgs).unwrap()[0] as Boolean
+                val then = it.conditionsList.firstOrNull { condition ->
+                    executeLambda(condition.`if`, capturedArgs).unwrap()[0] as Boolean
                 }?.then ?: it.`else`
                 executeLambda(then, capturedArgs).unwrap()
             }
@@ -102,15 +103,15 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder,
                     IsEqualFunc.FromCase.FROM_FLOAT -> it.fromFloat == if (it.hasToFloat()) it.toFloat else availableArgs.removeFirst()
                     IsEqualFunc.FromCase.FROM_INT64 -> it.fromInt64 == if (it.hasToInt64()) it.toInt64 else availableArgs.removeFirst()
                     IsEqualFunc.FromCase.FROM_INT32 -> it.fromInt32 == if (it.hasToInt32()) it.toInt32 else availableArgs.removeFirst()
-                    IsEqualFunc.FromCase.FROM_NOT_SET -> {
+                    IsEqualFunc.FromCase.FROM_NOT_SET, null -> {
                         val arg = availableArgs.removeFirst()
                         when (it.toCase) {
                             IsEqualFunc.ToCase.TO_BOOL -> arg as Boolean == it.toBool
-                            IsEqualFunc.ToCase.TO_STRING -> (arg as String).equals(it.toString)
+                            IsEqualFunc.ToCase.TO_STRING -> arg as String == it.toString
                             IsEqualFunc.ToCase.TO_FLOAT -> arg as Float == it.toFloat
                             IsEqualFunc.ToCase.TO_INT64 -> arg as Long == it.toInt64
                             IsEqualFunc.ToCase.TO_INT32 -> arg as Int == it.toInt32
-                            IsEqualFunc.ToCase.TO_NOT_SET -> {
+                            IsEqualFunc.ToCase.TO_NOT_SET, null -> {
                                 arg?.equals(availableArgs.removeFirst())
                             }
                         }
