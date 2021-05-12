@@ -296,4 +296,67 @@ class OpenControllerLibExecutorTest {
             .let {
                 assertEquals(1, it)
             }
+
+    @Test
+    fun testInt32() =
+        executor.executeLambda(
+            Lambda.newBuilder().setInt32(10).build(),
+            listOf()
+        ).unwrap()
+            .let { it as List<Int>}
+            .let { it[0] }
+            .let {
+                assertEquals(10, it)
+            }
+
+    @Test
+    fun testInt64() =
+        executor.executeLambda(
+            Lambda.newBuilder().setInt64(10).build(),
+            listOf()
+        ).unwrap()
+            .let { it as List<Int>}
+            .let { it[0] }
+            .let {
+                assertEquals(10, it)
+            }
+
+
+    @Test
+    fun testFloat() =
+        executor.executeLambda(
+            Lambda.newBuilder().setFloat(10.0f).build(),
+            listOf()
+        ).unwrap()
+            .let { it as List<Float>}
+            .let { it[0] }
+            .let {
+                assertEquals(10.0f, it)
+            }
+
+    @Test
+    fun testGetIndex() =
+        executor.executeLambda(
+            Lambda.newBuilder().addArgs("input")
+                .setGetIndex(GetIndexFunc.newBuilder().setIndex(1).build()).build(),
+            listOf(listOf("test", "test1"))
+        ).unwrap()
+            .let { it as List<String>}
+            .let { it[0] }
+            .let {
+                assertEquals("test1", it)
+            }
+
+    @Test
+    fun testGetIndexInput() =
+        executor.executeLambda(
+            Lambda.newBuilder().addAllArgs(listOf("input", "index"))
+                .setGetIndex(GetIndexFunc.newBuilder().build()).build(),
+            listOf(listOf("test", "test1"), 1)
+        ).unwrap()
+            .let { it as List<String>}
+            .let { it[0] }
+            .let {
+                assertEquals("test1", it)
+            }
 }

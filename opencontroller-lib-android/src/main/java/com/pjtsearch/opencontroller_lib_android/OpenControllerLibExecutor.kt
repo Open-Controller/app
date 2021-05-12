@@ -129,6 +129,18 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder,
                     else -> TODO()
                 }
             }
+            Lambda.InnerCase.INT32 -> listOf(lambda.int32)
+            Lambda.InnerCase.INT64 -> listOf(lambda.int64)
+            Lambda.InnerCase.FLOAT -> listOf(lambda.float)
+            Lambda.InnerCase.GET_INDEX -> lambda.getIndex.let {
+                when (val target = availableArgs.removeFirst()) {
+                    is List<*> -> {
+                        val index = if (it.hasIndex()) it.index else availableArgs.removeFirst() as Int
+                        listOf(target[index])
+                    }
+                    else -> TODO()
+                }
+            }
             Lambda.InnerCase.INNER_NOT_SET -> TODO()
             null -> TODO()
         }

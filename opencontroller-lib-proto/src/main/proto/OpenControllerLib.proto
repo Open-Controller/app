@@ -130,6 +130,10 @@ message Lambda {
     SwitchFunc switch = 13;
     IsEqualFunc is_equal = 14;
     GetPropFunc get_prop = 15;
+    int32 int32 = 16;
+    int64 int64 = 17;
+    float float = 18;
+    GetIndexFunc get_index = 19;
   }
 }
 
@@ -210,6 +214,10 @@ message IsEqualFunc {
 
 message GetPropFunc {
   optional string prop = 1;
+}
+
+message GetIndexFunc {
+  optional int32 index = 1;
 }
 
 enum Icon {
