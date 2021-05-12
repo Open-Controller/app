@@ -25,7 +25,7 @@ fun GreeterLayout(topContent: @Composable ColumnScope.() -> Unit,
                 topContent()
             }
         }
-        Row(Modifier.weight(0.5f), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.weight(0.5f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             bottomContent()
         }
     }
