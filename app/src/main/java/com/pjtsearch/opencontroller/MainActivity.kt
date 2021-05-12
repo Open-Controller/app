@@ -167,7 +167,7 @@ fun MainActivityView() {
                         }
                     }
                     Crossfade(pg) {
-                        when (pg) {
+                        when (it) {
                             is BackgroundPage.Homes -> HousesMenu(houseRefs.value,
                                 { e -> onError(e) }) { newHouse ->
                                 backgroundPage = BackgroundPage.Rooms(
@@ -176,8 +176,8 @@ fun MainActivityView() {
                                 )
                                 page = Page.HomeGreeter(newHouse)
                             }
-                            is BackgroundPage.Rooms -> RoomsMenu(pg.house) {
-                                page = Page.Controller(it)
+                            is BackgroundPage.Rooms -> RoomsMenu(it.house) { controller ->
+                                page = Page.Controller(controller)
                                 scope.launch { menuState.conceal() }
                             }
                         }
