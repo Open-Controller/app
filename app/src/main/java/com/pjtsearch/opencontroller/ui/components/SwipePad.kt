@@ -12,7 +12,7 @@ import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import com.pjtsearch.opencontroller.extensions.DirectionVector
-import com.pjtsearch.opencontroller.extensions.dragMagnitudeTimer
+import com.pjtsearch.opencontroller.extensions.DragMagnitudeTimer
 
 
 @Composable
@@ -33,7 +33,7 @@ fun SwipePad(modifier: Modifier = Modifier, onAction: (DirectionVector) -> Unit 
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
     }
 
-    dragMagnitudeTimer(swipeVector, nextActionTime) {
+    DragMagnitudeTimer(swipeVector, nextActionTime) {
         hasRun = true
         runAction(swipeVector)
     }

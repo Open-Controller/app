@@ -2,10 +2,11 @@ package com.pjtsearch.opencontroller.extensions
 
 import androidx.compose.runtime.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun dragMagnitudeTimer(swipeVector: DirectionVector, nextActionTime: MutableState<Long?>, onRun: () -> Unit) {
+fun DragMagnitudeTimer(swipeVector: DirectionVector, nextActionTime: MutableState<Long?>, onRun: () -> Unit) {
     DisposableEffect(key1 = swipeVector) {
         var stopped = false
         GlobalScope.launch {
@@ -16,7 +17,7 @@ fun dragMagnitudeTimer(swipeVector: DirectionVector, nextActionTime: MutableStat
                     onRun()
                     nextActionTime.value = System.currentTimeMillis() + time
                 }
-                Thread.sleep(time + 20)
+                delay(time + 20)
             }
         }
         onDispose { stopped = true }
