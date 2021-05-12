@@ -216,7 +216,7 @@ fun MainActivityView() {
                         )
                         is Page.Controller -> ControllerView(
                             it.controller,
-                            (backgroundPage as BackgroundPage.Rooms).executor!!,
+                            (backgroundPage as BackgroundPage.Rooms).executor,
                             onOpenMenu = { w -> onOpenMenu(w) },
                             onError = { e -> onError(e) }
                         )
