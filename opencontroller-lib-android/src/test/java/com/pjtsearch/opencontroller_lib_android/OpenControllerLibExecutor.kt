@@ -297,6 +297,20 @@ class OpenControllerLibExecutorTest {
                 assertEquals(1, it)
             }
 
+
+    @Test
+    fun testGetPropInput() =
+        executor.executeLambda(
+            Lambda.newBuilder().addAllArgs(listOf("input", "prop"))
+                .setGetProp(GetPropFunc.newBuilder().build()).build(),
+            listOf(hashMapOf("test" to 1), "test")
+        ).unwrap()
+            .let { it as List<String>}
+            .let { it[0] }
+            .let {
+                assertEquals("test", it)
+            }
+
     @Test
     fun testInt32() =
         executor.executeLambda(

@@ -118,13 +118,15 @@ class OpenControllerLibExecutor(private val house: HouseOrBuilder,
                 })
             }
             Lambda.InnerCase.GET_PROP -> lambda.getProp.let {
-                when (val target = availableArgs.removeFirst()) {
+                val target = availableArgs.removeFirst()
+                val prop = if (it.hasProp()) it.prop else availableArgs.removeFirst() as String
+                when (target) {
                     is Message -> {
-                        val descriptor = target.descriptorForType.findFieldByName(it.prop)
+                        val descriptor = target.descriptorForType.findFieldByName(prop)
                         listOf(target.getField(descriptor))
                     }
                     is Map<*, *> -> {
-                        listOf(target[it.prop])
+                        listOf(target[prop])
                     }
                     else -> TODO()
                 }
