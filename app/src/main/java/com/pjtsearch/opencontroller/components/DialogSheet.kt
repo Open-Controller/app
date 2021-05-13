@@ -17,7 +17,7 @@ fun DialogSheet(modifier: Modifier = Modifier,
                  state: ModalBottomSheetState,
                  content: @Composable () -> Unit) {
     val scope = rememberCoroutineScope()
-    var dialogContent: @Composable ColumnScope.() -> Unit by remember { mutableStateOf({}) }
+    var dialogContent: @Composable ColumnScope.(state: ModalBottomSheetState) -> Unit by remember { mutableStateOf({}) }
     ModalBottomSheetLayout(
         modifier = modifier,
         scrimColor = Color.Black.copy(0.5f),
@@ -29,7 +29,7 @@ fun DialogSheet(modifier: Modifier = Modifier,
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
-                dialogContent()
+                dialogContent(state)
             }
         }
     ) {
@@ -45,4 +45,5 @@ fun DialogSheet(modifier: Modifier = Modifier,
     }
 }
 
-val LocalDialogOpener = compositionLocalOf<(@Composable ColumnScope.() -> Unit) -> Unit> { {} }
+@ExperimentalMaterialApi
+val LocalDialogOpener = compositionLocalOf<(@Composable ColumnScope.(state: ModalBottomSheetState) -> Unit) -> Unit> { {} }

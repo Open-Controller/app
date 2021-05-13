@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,8 @@ import com.pjtsearch.opencontroller_lib_proto.Widget.InnerCase
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+@ExperimentalMaterialApi
+@ExperimentalComposeUiApi
 @Composable
 fun ColumnScope.Widget(
     widget: WidgetOrBuilder,

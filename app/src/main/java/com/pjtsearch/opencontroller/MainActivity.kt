@@ -10,6 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -42,6 +43,7 @@ val Context.settingsDataStore: DataStore<Settings> by dataStore(
 
 @ExperimentalMaterialApi
 class MainActivity : AppCompatActivity() {
+    @ExperimentalComposeUiApi
     @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +58,7 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+@ExperimentalComposeUiApi
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
