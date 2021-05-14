@@ -11,20 +11,31 @@ import com.pjtsearch.opencontroller_lib_proto.House
 import com.pjtsearch.opencontroller_lib_proto.Widget
 import java.io.Serializable
 
-sealed class Page {
+data class PageState(val frontPage: FrontPage, val backgroundPage: BackgroundPage, val concealed: Boolean)
+sealed class FrontPage {
     abstract val title: String
     open val bottomIcon: ImageVector? = null
     open val bottomText: String? = null
 
-    object EmptyGreeter : Page() {
+    object EmptyGreeter : FrontPage() {
         override val title = "Welcome"
         override val bottomIcon = Icons.Outlined.AutoAwesome
         override val bottomText = "Select a Home"
     }
-//    For when house already opened
-    data class HomeGreeter(val house: House) : Page() { override val title = "Welcome" }
-    object Settings : Page() { override val title = "Settings"}
-    data class Controller(val controller: com.pjtsearch.opencontroller_lib_proto.Controller) : Page() { override val title: String = controller.displayName }
+
+    //    For when house already opened
+    data class HomeGreeter(val house: House) : FrontPage() {
+        override val title = "Welcome"
+    }
+
+    object Settings : FrontPage() {
+        override val title = "Settings"
+    }
+
+    data class Controller(val controller: com.pjtsearch.opencontroller_lib_proto.Controller) :
+        FrontPage() {
+        override val title: String = controller.displayName
+    }
 
     fun serialize() =
         when (val page = this) {
@@ -33,26 +44,34 @@ sealed class Page {
             is Settings -> listOf("Settings")
             is Controller -> listOf("Controller", page.controller.toByteArray())
         }
+
     companion object {
         fun deserialize(from: List<Serializable>) =
             when (from[0]) {
                 "EmptyGreeter" -> EmptyGreeter
                 "HomeGreeter" -> HomeGreeter(House.parseFrom(from[1] as ByteArray))
-                "Controller" -> Controller(com.pjtsearch.opencontroller_lib_proto.Controller.parseFrom(from[1] as ByteArray))
+                "Controller" -> Controller(
+                    com.pjtsearch.opencontroller_lib_proto.Controller.parseFrom(
+                        from[1] as ByteArray
+                    )
+                )
                 "Settings" -> Settings
                 else -> EmptyGreeter
             }
     }
 }
 
-sealed class BackgroundPage {
+sealed class BackgroundPage  {
     object Homes : BackgroundPage()
-    data class Rooms(val house: House, val executor: OpenControllerLibExecutor) : BackgroundPage()
+    data class Rooms(val house: House, val executor: OpenControllerLibExecutor) :
+        BackgroundPage()
+
     fun serialize() =
         when (val page = this) {
             is Homes -> listOf("Homes")
             is Rooms -> listOf("Rooms", page.house.toByteArray())
         }
+
     companion object {
         fun deserialize(from: List<Serializable>) =
             when (from[0]) {
@@ -67,15 +86,20 @@ sealed class BackgroundPage {
 
 sealed class BottomSheetPage {
     data class Widgets(val widgets: List<Widget>) : BottomSheetPage()
-    data class EditHouseRef(var houseRef: MutableState<HouseRef>, val index: Int) : BottomSheetPage()
+    data class EditHouseRef(var houseRef: MutableState<HouseRef>, val index: Int) :
+        BottomSheetPage()
+
     data class AddHouseRef(var houseRef: MutableState<HouseRef>) : BottomSheetPage()
 
     fun serialize() =
         when (val page = this) {
-            is Widgets -> listOf("Widgets", page.widgets.map { it.toByteArray() } as Serializable)
+            is Widgets -> listOf(
+                "Widgets",
+                page.widgets.map { it.toByteArray() } as Serializable)
             is EditHouseRef -> listOf("Rooms", page.houseRef.value.toByteArray(), page.index)
             is AddHouseRef -> listOf("Rooms", page.houseRef.value.toByteArray())
         }
+
     companion object {
         fun deserialize(from: List<Serializable>) =
             when (from[0]) {

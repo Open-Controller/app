@@ -12,8 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.statusBarsPadding
-import com.pjtsearch.opencontroller.const.BackgroundPage
-import com.pjtsearch.opencontroller.const.Page
+import com.pjtsearch.opencontroller.const.PageState
 import com.pjtsearch.opencontroller.ui.components.*
 import com.pjtsearch.opencontroller.ui.theme.shapes
 import com.pjtsearch.opencontroller.ui.theme.typography
@@ -22,10 +21,9 @@ import com.pjtsearch.opencontroller.ui.theme.typography
 @Composable
 fun PagedBackdrop(
     menuState: BackdropScaffoldState,
-    page: Page,
-    backgroundPage: BackgroundPage,
-    backLayerContent: @Composable (BackgroundPage) -> Unit,
-    frontLayerContent: @Composable (Page) -> Unit,
+    page: PageState,
+    backLayerContent: @Composable () -> Unit,
+    frontLayerContent: @Composable () -> Unit,
 ) =
     BackdropScaffold(
         scaffoldState = menuState,
@@ -37,7 +35,7 @@ fun PagedBackdrop(
         appBar = {
             AppBar(
                 menuState = menuState,
-                concealedTitle = { Text(page.title, style = typography.h5) },
+                concealedTitle = { Text(page.frontPage.title, style = typography.h5) },
                 revealedTitle = { Text("Menu", style = typography.h5) }
             )
         },
@@ -47,17 +45,17 @@ fun PagedBackdrop(
                     .padding(10.dp)
                     .padding(bottom = 20.dp)
             ) {
-                backLayerContent(backgroundPage)
+                backLayerContent()
             }
         },
         frontLayerContent = {
             Box(Modifier.padding(25.dp)) {
                 Crossfade(menuState.targetValue, animationSpec = tween(100)) {
                     when (it) {
-                        BackdropValue.Concealed -> frontLayerContent(page)
+                        BackdropValue.Concealed -> frontLayerContent()
                         BackdropValue.Revealed -> Column {
                             Box(Modifier.fillMaxWidth()) {
-                                Text(page.title, style = typography.h5)
+                                Text(page.frontPage.title, style = typography.h5)
                                 Icon(
                                     Icons.Outlined.KeyboardArrowUp,
                                     "Close menu",
@@ -68,14 +66,14 @@ fun PagedBackdrop(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(20.dp)
                             ) {
-                                page.bottomIcon?.let { ic ->
+                                page.frontPage.bottomIcon?.let { ic ->
                                     Icon(
-                                        ic, page.bottomText ?: "Bottom Icon",
+                                        ic, page.frontPage.bottomText ?: "Bottom Icon",
                                         Modifier.align(Alignment.CenterHorizontally).size(200.dp),
                                         MaterialTheme.colors.onSurface.copy(0.3f)
                                     )
                                 }
-                                page.bottomText?.let { text ->
+                                page.frontPage.bottomText?.let { text ->
                                     Text(
                                         text,
                                         style = typography.h5,

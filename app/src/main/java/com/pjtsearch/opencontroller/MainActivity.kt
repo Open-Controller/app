@@ -16,6 +16,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
+import com.github.zsoltk.compose.backpress.BackPressHandler
+import com.github.zsoltk.compose.backpress.LocalBackPressHandler
+import com.github.zsoltk.compose.router.Router
 import com.pjtsearch.opencontroller.components.SystemUi
 import com.pjtsearch.opencontroller.extensions.SettingsSerializer
 import com.pjtsearch.opencontroller.extensions.copy
@@ -28,11 +31,10 @@ import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiControll
 import com.pjtsearch.opencontroller.components.DialogSheet
 import com.pjtsearch.opencontroller.components.PagedBackdrop
 import com.pjtsearch.opencontroller.components.PagedBottomSheet
-import com.pjtsearch.opencontroller.const.BackgroundPage
-import com.pjtsearch.opencontroller.const.BottomSheetPage
-import com.pjtsearch.opencontroller.const.Page
+import com.pjtsearch.opencontroller.const.*
 import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
 import com.pjtsearch.opencontroller_lib_proto.*
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -43,17 +45,25 @@ val Context.settingsDataStore: DataStore<Settings> by dataStore(
 
 @ExperimentalMaterialApi
 class MainActivity : AppCompatActivity() {
+    private val backPressHandler = BackPressHandler()
+
     @ExperimentalComposeUiApi
     @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val controller = rememberAndroidSystemUiController()
-            CompositionLocalProvider(LocalSystemUiController provides controller) {
+            CompositionLocalProvider(LocalSystemUiController provides controller,
+                LocalBackPressHandler provides backPressHandler) {
                 SystemUi(this.window) {
                     MainActivityView()
                 }
             }
+        }
+    }
+    override fun onBackPressed() {
+        if (!backPressHandler.handle()) {
+            super.onBackPressed()
         }
     }
 }
@@ -63,14 +73,6 @@ class MainActivity : AppCompatActivity() {
 @ExperimentalMaterialApi
 @Composable
 fun MainActivityView() {
-    var backgroundPage: BackgroundPage by rememberSaveable(
-        saver = Saver({it.value.serialize()}, {mutableStateOf(BackgroundPage.deserialize(it))})
-    ) {
-        mutableStateOf(BackgroundPage.Homes)
-    }
-    var page: Page by rememberSaveable(
-        saver = Saver({it.value.serialize()}, {mutableStateOf(Page.deserialize(it))})
-    ) { mutableStateOf(Page.EmptyGreeter) }
     val menuState = rememberBackdropScaffoldState(BackdropValue.Concealed)
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
@@ -104,128 +106,153 @@ fun MainActivityView() {
     }
 
     DialogSheet(state = dialogState) {
-        PagedBottomSheet(
-            state = sheetState,
-            page = sheetPage,
-            sheetContent = { pg ->
-                val bgPage = backgroundPage
-                when (pg) {
-                    is BottomSheetPage.Widgets -> if (bgPage is BackgroundPage.Rooms) {
-                        pg.widgets.map { w ->
-                            WidgetDisplay(
-                                w,
-                                bgPage.executor,
-                                Modifier.fillMaxWidth(),
-                                onOpenMenu = { onOpenMenu(it) },
-                                onError = { onError(it) }
+        Router("Page",
+            PageState(FrontPage.EmptyGreeter, BackgroundPage.Homes, true)) { pageBackStack ->
+            val page = pageBackStack.last()
+
+
+            DisposableEffect(page) {
+                if (page.concealed)
+                    scope.launch { menuState.conceal() }
+                else
+                    scope.launch { menuState.reveal() }
+                onDispose {  }
+            }
+
+            // TODO: Refactor
+            DisposableEffect(menuState.targetValue) {
+                if (menuState.targetValue.equals(BackdropValue.Concealed) != page.concealed) {
+                    pageBackStack.push(page.copy(concealed = menuState.targetValue.equals(BackdropValue.Concealed)))
+                }
+                onDispose {  }
+            }
+            PagedBottomSheet(
+                state = sheetState,
+                page = sheetPage,
+                sheetContent = { pg ->
+                    val bgPage = page.backgroundPage
+                    when (pg) {
+                        is BottomSheetPage.Widgets -> if (bgPage is BackgroundPage.Rooms) {
+                            pg.widgets.map { w ->
+                                WidgetDisplay(
+                                    w,
+                                    bgPage.executor,
+                                    Modifier.fillMaxWidth(),
+                                    onOpenMenu = { onOpenMenu(it) },
+                                    onError = { onError(it) }
+                                )
+                            }
+                        }
+                        is BottomSheetPage.AddHouseRef -> ModifyHouseRef(
+                            pg.houseRef.value,
+                            { pg.houseRef.value = it }) {
+                            scope.launch {
+                                ctx.settingsDataStore.updateData { settings ->
+                                    settings.toBuilder()
+                                        .addHouseRefs(it).build()
+                                }
+                                sheetState.hide()
+                            }
+                        }
+                        is BottomSheetPage.EditHouseRef -> ModifyHouseRef(
+                            pg.houseRef.value,
+                            { pg.houseRef.value = it }) {
+                            scope.launch {
+                                ctx.settingsDataStore.updateData { settings ->
+                                    settings.toBuilder()
+                                        .removeHouseRefs(pg.index)
+                                        .addHouseRefs(it).build()
+                                }
+                                sheetState.hide()
+                            }
+                        }
+                    }
+                }
+            ) {
+                PagedBackdrop(
+                    menuState = menuState,
+                    page = page,
+                    backLayerContent = {
+                        Row(
+                            Modifier.padding(start = 8.dp, bottom = 20.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button({
+                                pageBackStack.push(page.copy(frontPage = FrontPage.Settings, concealed = true))
+                            }) {
+                                Text("Settings")
+                            }
+                            Button({
+                                pageBackStack.pop()
+                            }) {
+                                Text("Back")
+                            }
+                            Crossfade(page.backgroundPage) {
+                                if (it is BackgroundPage.Rooms) {
+                                    Button({
+                                        pageBackStack.push(page.copy(FrontPage.EmptyGreeter, BackgroundPage.Homes))
+                                    }) {
+                                        Text("Exit house")
+                                    }
+                                }
+                            }
+                        }
+                        Crossfade(page.backgroundPage) {
+                            when (it) {
+                                is BackgroundPage.Homes -> HousesMenu(houseRefs.value,
+                                    { e -> onError(e) }) { newHouse ->
+                                    pageBackStack.push(page.copy(FrontPage.HomeGreeter(newHouse), BackgroundPage.Rooms(
+                                        newHouse,
+                                        OpenControllerLibExecutor(newHouse)
+                                    )))
+                                }
+                                is BackgroundPage.Rooms -> RoomsMenu(it.house) { controller ->
+                                    pageBackStack.push(page.copy(FrontPage.Controller(controller), concealed = true))
+                                }
+                            }
+                        }
+                    },
+                    frontLayerContent = {
+                        when (val it = page.frontPage) {
+                            is FrontPage.EmptyGreeter -> EmptyGreeterView(
+                                onRevealMenu = { scope.launch { menuState.reveal() } },
+                                onAddHome = {
+                                    scope.launch {
+                                        sheetPage =
+                                            BottomSheetPage.AddHouseRef(mutableStateOf(HouseRef.getDefaultInstance()))
+                                        sheetState.show()
+                                    }
+                                }
+                            )
+                            is FrontPage.HomeGreeter -> HomeGreeterView(
+                                house = it.house,
+                                onRevealMenu = { scope.launch { menuState.reveal() } },
+                                onExitHome = {
+                                    scope.launch {
+                                        pageBackStack.push(
+                                            page.copy(FrontPage.EmptyGreeter, BackgroundPage.Homes, false)
+                                        )
+                                    }
+                                }
+                            )
+                            is FrontPage.Settings -> SettingsView(
+                                onBottomSheetPage = { p ->
+                                    scope.launch {
+                                        sheetPage = p
+                                        sheetState.show()
+                                    }
+                                }
+                            )
+                            is FrontPage.Controller -> ControllerView(
+                                it.controller,
+                                (page.backgroundPage as BackgroundPage.Rooms).executor,
+                                onOpenMenu = { w -> onOpenMenu(w) },
+                                onError = { e -> onError(e) }
                             )
                         }
                     }
-                    is BottomSheetPage.AddHouseRef -> ModifyHouseRef(
-                        pg.houseRef.value,
-                        { pg.houseRef.value = it }) {
-                        scope.launch {
-                            ctx.settingsDataStore.updateData { settings ->
-                                settings.toBuilder()
-                                    .addHouseRefs(it).build()
-                            }
-                            sheetState.hide()
-                        }
-                    }
-                    is BottomSheetPage.EditHouseRef -> ModifyHouseRef(
-                        pg.houseRef.value,
-                        { pg.houseRef.value = it }) {
-                        scope.launch {
-                            ctx.settingsDataStore.updateData { settings ->
-                                settings.toBuilder()
-                                    .removeHouseRefs(pg.index)
-                                    .addHouseRefs(it).build()
-                            }
-                            sheetState.hide()
-                        }
-                    }
-                }
+                )
             }
-        ) {
-            PagedBackdrop(
-                menuState = menuState,
-                page = page,
-                backgroundPage = backgroundPage,
-                backLayerContent = { pg ->
-                    Row(
-                        Modifier.padding(start = 8.dp, bottom = 20.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Button({ page = Page.Settings; scope.launch { menuState.conceal() } }) {
-                            Text("Settings")
-                        }
-                        Crossfade(pg) {
-                            if (it is BackgroundPage.Rooms) {
-                                Button({
-                                    backgroundPage = BackgroundPage.Homes; page = Page.EmptyGreeter
-                                }) {
-                                    Text("Exit house")
-                                }
-                            }
-                        }
-                    }
-                    Crossfade(pg) {
-                        when (it) {
-                            is BackgroundPage.Homes -> HousesMenu(houseRefs.value,
-                                { e -> onError(e) }) { newHouse ->
-                                backgroundPage = BackgroundPage.Rooms(
-                                    newHouse,
-                                    OpenControllerLibExecutor(newHouse)
-                                )
-                                page = Page.HomeGreeter(newHouse)
-                            }
-                            is BackgroundPage.Rooms -> RoomsMenu(it.house) { controller ->
-                                page = Page.Controller(controller)
-                                scope.launch { menuState.conceal() }
-                            }
-                        }
-                    }
-                },
-                frontLayerContent = {
-                    when (it) {
-                        is Page.EmptyGreeter -> EmptyGreeterView(
-                            onRevealMenu = { scope.launch { menuState.reveal() } },
-                            onAddHome = {
-                                scope.launch {
-                                    sheetPage =
-                                        BottomSheetPage.AddHouseRef(mutableStateOf(HouseRef.getDefaultInstance()))
-                                    sheetState.show()
-                                }
-                            }
-                        )
-                        is Page.HomeGreeter -> HomeGreeterView(
-                            house = it.house,
-                            onRevealMenu = { scope.launch { menuState.reveal() } },
-                            onExitHome = {
-                                scope.launch {
-                                    page = Page.EmptyGreeter
-                                    menuState.reveal()
-                                    backgroundPage = BackgroundPage.Homes
-                                }
-                            }
-                        )
-                        is Page.Settings -> SettingsView(
-                            onBottomSheetPage = { p ->
-                                scope.launch {
-                                    sheetPage = p
-                                    sheetState.show()
-                                }
-                            }
-                        )
-                        is Page.Controller -> ControllerView(
-                            it.controller,
-                            (backgroundPage as BackgroundPage.Rooms).executor,
-                            onOpenMenu = { w -> onOpenMenu(w) },
-                            onError = { e -> onError(e) }
-                        )
-                    }
-                }
-            )
         }
     }
 }
