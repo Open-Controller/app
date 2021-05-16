@@ -1,5 +1,9 @@
 package com.pjtsearch.opencontroller.const
 
+import androidx.compose.material.BackdropValue
+import androidx.compose.material.BottomSheetValue
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.runtime.MutableState
@@ -11,7 +15,13 @@ import com.pjtsearch.opencontroller_lib_proto.House
 import com.pjtsearch.opencontroller_lib_proto.Widget
 import java.io.Serializable
 
-data class PageState(val frontPage: FrontPage, val backgroundPage: BackgroundPage, val concealed: Boolean)
+data class PageState @ExperimentalMaterialApi constructor(
+    val frontPage: FrontPage,
+    val backgroundPage: BackgroundPage,
+    val bottomSheetPage: BottomSheetPage,
+    val backdropValue: BackdropValue,
+    val bottomSheetValue: ModalBottomSheetValue
+)
 sealed class FrontPage {
     abstract val title: String
     open val bottomIcon: ImageVector? = null

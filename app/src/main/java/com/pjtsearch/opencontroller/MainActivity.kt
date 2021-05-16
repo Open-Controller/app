@@ -81,12 +81,6 @@ fun MainActivityView() {
     }.collectAsState(listOf())
 
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-    var sheetPage: BottomSheetPage by rememberSaveable(
-        saver = Saver({it.value.serialize()}, {mutableStateOf(BottomSheetPage.deserialize(it))})
-    ) {
-        mutableStateOf(BottomSheetPage.Widgets(listOf()))
-    }
-
     val dialogState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
     val onError = { err: Throwable ->
@@ -98,37 +92,61 @@ fun MainActivityView() {
             }
         }
     }
-    val onOpenMenu = { widgets: List<Widget> ->
-        scope.launch {
-            sheetPage = BottomSheetPage.Widgets(widgets)
-            sheetState.show()
-        }
-    }
 
     DialogSheet(state = dialogState) {
-        Router("Page",
-            PageState(FrontPage.EmptyGreeter, BackgroundPage.Homes, true)) { pageBackStack ->
+        Router(
+            "Page",
+            PageState(
+                FrontPage.EmptyGreeter,
+                BackgroundPage.Homes,
+                BottomSheetPage.Widgets(listOf()),
+                BackdropValue.Concealed,
+                ModalBottomSheetValue.Hidden
+            )
+        ) { pageBackStack ->
             val page = pageBackStack.last()
 
-
             DisposableEffect(page) {
-                if (page.concealed)
+                if (page.backdropValue == BackdropValue.Concealed)
                     scope.launch { menuState.conceal() }
                 else
                     scope.launch { menuState.reveal() }
+
+                if (page.bottomSheetValue == ModalBottomSheetValue.Hidden)
+                    scope.launch { sheetState.hide() }
+                else
+                    scope.launch { sheetState.show() }
                 onDispose {  }
             }
 
             // TODO: Refactor
             DisposableEffect(menuState.targetValue) {
-                if (menuState.targetValue.equals(BackdropValue.Concealed) != page.concealed) {
-                    pageBackStack.push(page.copy(concealed = menuState.targetValue.equals(BackdropValue.Concealed)))
+                if (menuState.targetValue != page.backdropValue) {
+                    pageBackStack.push(page.copy(backdropValue = menuState.targetValue))
                 }
                 onDispose {  }
             }
+
+            // TODO: Refactor
+            DisposableEffect(sheetState.targetValue) {
+                if (sheetState.targetValue != page.bottomSheetValue) {
+                    pageBackStack.push(page.copy(bottomSheetValue = sheetState.targetValue))
+                }
+                onDispose {  }
+            }
+
+            val onOpenMenu = { widgets: List<Widget> ->
+                scope.launch {
+                    pageBackStack.push(page.copy(
+                        bottomSheetPage = BottomSheetPage.Widgets(widgets),
+                        bottomSheetValue = ModalBottomSheetValue.HalfExpanded
+                    ))
+                }
+            }
+
             PagedBottomSheet(
                 state = sheetState,
-                page = sheetPage,
+                page = page.bottomSheetPage,
                 sheetContent = { pg ->
                     val bgPage = page.backgroundPage
                     when (pg) {
@@ -178,14 +196,9 @@ fun MainActivityView() {
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Button({
-                                pageBackStack.push(page.copy(frontPage = FrontPage.Settings, concealed = true))
+                                pageBackStack.push(page.copy(FrontPage.Settings, backdropValue = BackdropValue.Concealed))
                             }) {
                                 Text("Settings")
-                            }
-                            Button({
-                                pageBackStack.pop()
-                            }) {
-                                Text("Back")
                             }
                             Crossfade(page.backgroundPage) {
                                 if (it is BackgroundPage.Rooms) {
@@ -207,7 +220,7 @@ fun MainActivityView() {
                                     )))
                                 }
                                 is BackgroundPage.Rooms -> RoomsMenu(it.house) { controller ->
-                                    pageBackStack.push(page.copy(FrontPage.Controller(controller), concealed = true))
+                                    pageBackStack.push(page.copy(FrontPage.Controller(controller), backdropValue = BackdropValue.Concealed))
                                 }
                             }
                         }
@@ -218,9 +231,10 @@ fun MainActivityView() {
                                 onRevealMenu = { scope.launch { menuState.reveal() } },
                                 onAddHome = {
                                     scope.launch {
-                                        sheetPage =
-                                            BottomSheetPage.AddHouseRef(mutableStateOf(HouseRef.getDefaultInstance()))
-                                        sheetState.show()
+                                        pageBackStack.push(page.copy(
+                                            bottomSheetPage = BottomSheetPage.AddHouseRef(mutableStateOf(HouseRef.getDefaultInstance())),
+                                            bottomSheetValue = ModalBottomSheetValue.HalfExpanded
+                                        ))
                                     }
                                 }
                             )
@@ -230,7 +244,7 @@ fun MainActivityView() {
                                 onExitHome = {
                                     scope.launch {
                                         pageBackStack.push(
-                                            page.copy(FrontPage.EmptyGreeter, BackgroundPage.Homes, false)
+                                            page.copy(FrontPage.EmptyGreeter, BackgroundPage.Homes, backdropValue = BackdropValue.Revealed)
                                         )
                                     }
                                 }
@@ -238,8 +252,9 @@ fun MainActivityView() {
                             is FrontPage.Settings -> SettingsView(
                                 onBottomSheetPage = { p ->
                                     scope.launch {
-                                        sheetPage = p
-                                        sheetState.show()
+                                        pageBackStack.push(
+                                            page.copy(bottomSheetPage = p, bottomSheetValue = ModalBottomSheetValue.HalfExpanded)
+                                        )
                                     }
                                 }
                             )
