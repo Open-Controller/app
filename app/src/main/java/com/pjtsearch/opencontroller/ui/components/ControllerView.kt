@@ -18,8 +18,12 @@ fun ControllerView(
     executor: OpenControllerLibExecutor,
     onOpenMenu: (List<Widget>) -> Unit,
     onError: (Throwable) -> Unit) =
-    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        controller.widgetsList.map {
-            Widget(it, executor, Modifier.fillMaxWidth().padding(bottom = 10.dp), onOpenMenu, onError)
+    if (controller.hasDisplayInterface()) {
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            controller.displayInterface.widgetsList.map {
+                Widget(it, executor, Modifier.fillMaxWidth().padding(bottom = 10.dp), onOpenMenu, onError)
+            }
         }
+    } else {
+        TODO()
     }
