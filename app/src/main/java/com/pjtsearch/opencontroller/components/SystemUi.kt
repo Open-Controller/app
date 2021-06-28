@@ -7,7 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import com.pjtsearch.opencontroller.ui.theme.OpenControllerTheme
 import com.google.accompanist.insets.ProvideWindowInsets
-import com.google.accompanist.systemuicontroller.LocalSystemUiController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
 fun SystemUi(window: Window, content: @Composable () -> Unit) =
@@ -16,7 +16,7 @@ fun SystemUi(window: Window, content: @Composable () -> Unit) =
                 window.setDecorFitsSystemWindows(false)
             }
 
-            val systemUiController = LocalSystemUiController.current
+            val systemUiController = rememberSystemUiController()
             val useDarkIcons = MaterialTheme.colors.isLight
 
             SideEffect {

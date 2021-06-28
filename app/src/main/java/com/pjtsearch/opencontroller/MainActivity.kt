@@ -26,8 +26,6 @@ import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.ui.components.*
 import com.pjtsearch.opencontroller.ui.components.Widget as WidgetDisplay
-import com.google.accompanist.systemuicontroller.LocalSystemUiController
-import com.google.accompanist.systemuicontroller.rememberAndroidSystemUiController
 import com.pjtsearch.opencontroller.components.DialogSheet
 import com.pjtsearch.opencontroller.components.PagedBackdrop
 import com.pjtsearch.opencontroller.components.PagedBottomSheet
@@ -52,9 +50,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val controller = rememberAndroidSystemUiController()
-            CompositionLocalProvider(LocalSystemUiController provides controller,
-                LocalBackPressHandler provides backPressHandler) {
+            CompositionLocalProvider(LocalBackPressHandler provides backPressHandler) {
                 Navigator(
                     "Page",
                     PageState(
