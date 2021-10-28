@@ -6,12 +6,14 @@ import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import com.pjtsearch.opencontroller.Device
+import com.pjtsearch.opencontroller.Widget
 import com.pjtsearch.opencontroller.components.PagedBottomSheet
 import com.pjtsearch.opencontroller.const.BackgroundPage
 import com.pjtsearch.opencontroller.const.BottomSheetPage
 import com.pjtsearch.opencontroller.const.PageState
 import com.pjtsearch.opencontroller.settings.HouseRef
-import com.pjtsearch.opencontroller_lib_proto.Widget
+import com.pjtsearch.opencontroller_lib_proto.WidgetExpr
 import com.pjtsearch.opencontroller.ui.components.Widget as WidgetDisplay
 
 @ExperimentalComposeUiApi
@@ -32,11 +34,12 @@ fun BottomSheet(
         sheetContent = { pg ->
             val bgPage = page.backgroundPage
             when (pg) {
+//                TODO: Coordinate with fg Controller page instead?
                 is BottomSheetPage.Widgets -> if (bgPage is BackgroundPage.Rooms) {
                     pg.widgets.map { w ->
                         WidgetDisplay(
                             w,
-                            bgPage.executor,
+                            bgPage.house.scope,
                             Modifier.fillMaxWidth(),
                             onOpenMenu = { onOpenMenu(it) },
                             onError = { onError(it) }

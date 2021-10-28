@@ -85,7 +85,7 @@ fun MainActivityView() {
             err.printStackTrace()
             val result = menuState.snackbarHostState.showSnackbar(err.message ?: "Unknown error occurred", "Copy")
             if (result == SnackbarResult.ActionPerformed) {
-                copy(err.localizedMessage ?: "Unknown error", err.toString(), ctx)
+                copy(err.localizedMessage ?: "Unknown error", err.stackTraceToString(), ctx)
             }
         }
     }

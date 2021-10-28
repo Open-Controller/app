@@ -17,26 +17,24 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.ui.theme.shapes
-import com.pjtsearch.opencontroller_lib_proto.Icon
-import com.pjtsearch.opencontroller_lib_proto.Size
 
 @Composable
-fun OpenControllerButton(modifier: Modifier, text: String, icon: Icon?, size: Size?, onClick: () -> Unit) {
+fun OpenControllerButton(modifier: Modifier, text: String, icon: String?, size: Int?, onClick: () -> Unit) {
     val view = LocalView.current
     CompositionLocalProvider(LocalContentColor provides MaterialTheme.colors.secondary) {
         Box(
             modifier
                 .size(when (size) {
-                    Size.SMALL -> 65.dp
-                    Size.MEDIUM -> 77.dp
-                    Size.LARGE -> 156.dp
-                    null -> 65.dp
+                    0 -> 65.dp
+                    1 -> 77.dp
+                    2 -> 156.dp
+                    else -> 65.dp
                 })
                 .padding(when (size) {
-                    Size.SMALL -> 5.dp
-                    Size.MEDIUM -> 8.dp
-                    Size.LARGE -> 8.dp
-                    null -> 5.dp
+                    0 -> 5.dp
+                    1 -> 8.dp
+                    2 -> 8.dp
+                    else -> 5.dp
                 })
                 .clip(shapes.medium)
                 .background(

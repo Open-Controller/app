@@ -11,74 +11,72 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.R
-import com.pjtsearch.opencontroller_lib_proto.Icon
-import com.pjtsearch.opencontroller_lib_proto.Size
 
 var icons = hashMapOf(
-        Icon.STAR to Icons.Outlined.Star,
-        Icon.ARROW_UP to Icons.Outlined.KeyboardArrowUp,
-        Icon.ARROW_DOWN to Icons.Outlined.KeyboardArrowDown,
-        Icon.ARROW_LEFT to Icons.Outlined.KeyboardArrowLeft,
-        Icon.ARROW_RIGHT to Icons.Outlined.KeyboardArrowRight,
-        Icon.SELECT to Icons.Outlined.GpsFixed,
-        Icon.VOLUME_UP to Icons.Outlined.VolumeUp,
-        Icon.VOLUME_DOWN to Icons.Outlined.VolumeDown,
-        Icon.VOLUME_MUTE to Icons.Outlined.VolumeOff,
-        Icon.BACK to Icons.Outlined.Undo,
-        Icon.ON to R.drawable.power_on,
-        Icon.OFF to R.drawable.power_off,
-        Icon.FORWARD to Icons.Outlined.FastForward,
-        Icon.REVERSE to Icons.Outlined.FastRewind,
-        Icon.INFO to Icons.Outlined.Info,
-        Icon.HOME to Icons.Outlined.Home,
-        Icon.CHANNEL_UP to Icons.Outlined.ArrowDropUp,
-        Icon.CHANNEL_DOWN to Icons.Outlined.ArrowDropDown,
-        Icon.CHANNEL to Icons.Outlined.Copyright,
-        Icon.REMOVE to Icons.Outlined.Delete,
-        Icon.STOP to Icons.Outlined.Stop,
-        Icon.SKIP_FORWARD to Icons.Outlined.SkipNext,
-        Icon.SKIP_REVERSE to Icons.Outlined.SkipPrevious,
-        Icon.RECORD to Icons.Outlined.RadioButtonChecked,
-        Icon.PAUSE to Icons.Outlined.Pause,
-        Icon.PLAY to Icons.Outlined.PlayArrow,
-        Icon.GUIDE to Icons.Outlined.Dashboard,
-        Icon.DVR to Icons.Outlined.FiberDvr,
-        Icon.MENU to Icons.Outlined.Menu,
-        Icon.EXIT to Icons.Outlined.ExitToApp,
-        Icon.OPTIONS to Icons.Outlined.Settings,
-        Icon.ASTERISK to R.drawable.asterisk,
-        Icon.POUND to Icons.Outlined.Tag,
-        Icon.CLOSED_CAPTIONS to Icons.Outlined.ClosedCaption,
-        Icon.GARAGE to Icons.Outlined.DirectionsCar,
-        Icon.LAUNDRY to Icons.Outlined.LocalLaundryService,
-        Icon.KITCHEN to Icons.Outlined.Countertops,
-        Icon.NOOK to Icons.Outlined.BreakfastDining,
-        Icon.FAMILY_ROOM to Icons.Outlined.Weekend,
-        Icon.LIVING_ROOM to Icons.Outlined.Chair,
-        Icon.MEDIA_ROOM to Icons.Outlined.Theaters,
-        Icon.DINING_ROOM to Icons.Outlined.BrunchDining,
-        Icon.ENTRY to Icons.Outlined.DoorSliding,
-        Icon.MASTER_BEDROOM to Icons.Outlined.KingBed,
-        Icon.EXERCISE_ROOM to Icons.Outlined.FitnessCenter,
-        Icon.PLAY_ROOM to Icons.Outlined.Games,
-        Icon.BEDROOM to Icons.Outlined.SingleBed,
-        Icon.ROOM to Icons.Outlined.Room,
-        Icon.MENU_ALT to Icons.Outlined.MoreHoriz,
-        Icon.PLUS to Icons.Outlined.Add,
-        Icon.MINUS to Icons.Outlined.Remove
+    "STAR" to Icons.Outlined.Star,
+    "ARROW_UP" to Icons.Outlined.KeyboardArrowUp,
+    "ARROW_DOWN" to Icons.Outlined.KeyboardArrowDown,
+    "ARROW_LEFT" to Icons.Outlined.KeyboardArrowLeft,
+    "ARROW_RIGHT" to Icons.Outlined.KeyboardArrowRight,
+    "SELECT" to Icons.Outlined.GpsFixed,
+    "VOLUME_UP" to Icons.Outlined.VolumeUp,
+    "VOLUME_DOWN" to Icons.Outlined.VolumeDown,
+    "VOLUME_MUTE" to Icons.Outlined.VolumeOff,
+    "BACK" to Icons.Outlined.Undo,
+    "ON" to R.drawable.power_on,
+    "OFF" to R.drawable.power_off,
+    "FORWARD" to Icons.Outlined.FastForward,
+    "REVERSE" to Icons.Outlined.FastRewind,
+    "INFO" to Icons.Outlined.Info,
+    "HOME" to Icons.Outlined.Home,
+    "CHANNEL_UP" to Icons.Outlined.ArrowDropUp,
+    "CHANNEL_DOWN" to Icons.Outlined.ArrowDropDown,
+    "CHANNEL" to Icons.Outlined.Copyright,
+    "REMOVE" to Icons.Outlined.Delete,
+    "STOP" to Icons.Outlined.Stop,
+    "SKIP_FORWARD" to Icons.Outlined.SkipNext,
+    "SKIP_REVERSE" to Icons.Outlined.SkipPrevious,
+    "RECORD" to Icons.Outlined.RadioButtonChecked,
+    "PAUSE" to Icons.Outlined.Pause,
+    "PLAY" to Icons.Outlined.PlayArrow,
+    "GUIDE" to Icons.Outlined.Dashboard,
+    "DVR" to Icons.Outlined.FiberDvr,
+    "MENU" to Icons.Outlined.Menu,
+    "EXIT" to Icons.Outlined.ExitToApp,
+    "OPTIONS" to Icons.Outlined.Settings,
+    "ASTERISK" to R.drawable.asterisk,
+    "POUND" to Icons.Outlined.Tag,
+    "CLOSED_CAPTIONS" to Icons.Outlined.ClosedCaption,
+    "GARAGE" to Icons.Outlined.DirectionsCar,
+    "LAUNDRY" to Icons.Outlined.LocalLaundryService,
+    "KITCHEN" to Icons.Outlined.Countertops,
+    "NOOK" to Icons.Outlined.BreakfastDining,
+    "FAMILY_ROOM" to Icons.Outlined.Weekend,
+    "LIVING_ROOM" to Icons.Outlined.Chair,
+    "MEDIA_ROOM" to Icons.Outlined.Theaters,
+    "DINING_ROOM" to Icons.Outlined.BrunchDining,
+    "ENTRY" to Icons.Outlined.DoorSliding,
+    "MASTER_BEDROOM" to Icons.Outlined.KingBed,
+    "EXERCISE_ROOM" to Icons.Outlined.FitnessCenter,
+    "PLAY_ROOM" to Icons.Outlined.Games,
+    "BEDROOM" to Icons.Outlined.SingleBed,
+    "ROOM" to Icons.Outlined.Room,
+    "MENU_ALT" to Icons.Outlined.MoreHoriz,
+    "PLUS" to Icons.Outlined.Add,
+    "MINUS" to Icons.Outlined.Remove
 )
 
 @Composable
-fun OpenControllerIcon(icon: Icon, text: String, size: Size? = Size.SMALL) =
-        (when (size) {
-                Size.SMALL -> 24.dp
-                Size.MEDIUM -> 24.dp
-                Size.LARGE -> 30.dp
-                null -> 24.dp
-        }).let { sz ->
-                when (val iconValue = icons[icon] ?: throw Error("Could not find icon $icon")) {
-                        is Int -> Icon(painterResource(iconValue), text, Modifier.size(sz))
-                        is ImageVector -> Icon(iconValue, text, Modifier.size(sz))
-                        else -> Text(text)
-                }
+fun OpenControllerIcon(icon: String, text: String, size: Int? = 0) =
+    (when (size) {
+        0 -> 24.dp
+        1 -> 24.dp
+        2 -> 30.dp
+        else -> 24.dp
+    }).let { sz ->
+        when (val iconValue = icons[icon] ?: throw Error("Could not find icon $icon")) {
+            is Int -> Icon(painterResource(iconValue), text, Modifier.size(sz))
+            is ImageVector -> Icon(iconValue, text, Modifier.size(sz))
+            else -> Text(text)
         }
+    }

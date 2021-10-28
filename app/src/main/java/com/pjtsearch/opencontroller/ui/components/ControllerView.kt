@@ -6,24 +6,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
-import com.pjtsearch.opencontroller_lib_proto.ControllerOrBuilder
-import com.pjtsearch.opencontroller_lib_proto.Widget
+import com.pjtsearch.opencontroller.Controller
+import com.pjtsearch.opencontroller.Device
+import com.pjtsearch.opencontroller.OpenControllerLibExecutor
+import com.pjtsearch.opencontroller.Widget
 
 @ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 @Composable
 fun ControllerView(
-    controller: ControllerOrBuilder,
-    executor: OpenControllerLibExecutor,
+    controller: Controller,
+    houseScope: Map<String, Device>,
     onOpenMenu: (List<Widget>) -> Unit,
-    onError: (Throwable) -> Unit) =
-    if (controller.hasDisplayInterface()) {
-        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            controller.displayInterface.widgetsList.map {
-                Widget(it, executor, Modifier.fillMaxWidth().padding(bottom = 10.dp), onOpenMenu, onError)
-            }
+    onError: (Throwable) -> Unit
+) =
+    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        controller.displayInterface?.widgets?.map {
+            Widget(
+                it,
+                houseScope,
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
+                onOpenMenu,
+                onError
+            )
         }
-    } else {
-        TODO()
     }

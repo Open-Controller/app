@@ -14,10 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.pjtsearch.opencontroller.House
 import com.pjtsearch.opencontroller.components.GreeterLayout
 import com.pjtsearch.opencontroller.components.LargeButton
 import com.pjtsearch.opencontroller.ui.theme.typography
-import com.pjtsearch.opencontroller_lib_proto.House
 
 @Composable
 fun HomeGreeterView(house: House, onRevealMenu: () -> Unit, onExitHome: () -> Unit) =
@@ -25,7 +25,9 @@ fun HomeGreeterView(house: House, onRevealMenu: () -> Unit, onExitHome: () -> Un
         {
             Icon(
                 Icons.Outlined.Villa, "OpenController logo",
-                Modifier.align(Alignment.CenterHorizontally).size(250.dp),
+                Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .size(250.dp),
             )
             Text(
                 "Welcome to ${house.displayName}",
@@ -34,14 +36,28 @@ fun HomeGreeterView(house: House, onRevealMenu: () -> Unit, onExitHome: () -> Un
             )
         },
         {
-            LargeButton(modifier = Modifier.fillMaxHeight().weight(1f), onClick = onRevealMenu, icon = {
-                Icon(Icons.Outlined.ArrowDownward, "Open Homes Menu", Modifier.size(40.dp))
-            }) {
-                Text("Select Controller", style = typography.subtitle1, textAlign = TextAlign.Center)
+            LargeButton(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f),
+                onClick = onRevealMenu,
+                icon = {
+                    Icon(Icons.Outlined.ArrowDownward, "Open Homes Menu", Modifier.size(40.dp))
+                }) {
+                Text(
+                    "Select Controller",
+                    style = typography.subtitle1,
+                    textAlign = TextAlign.Center
+                )
             }
-            LargeButton(modifier = Modifier.fillMaxHeight().weight(1f), onClick = onExitHome, icon = {
-                Icon(Icons.Outlined.ExitToApp, "Add Home", Modifier.size(40.dp))
-            }) {
+            LargeButton(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f),
+                onClick = onExitHome,
+                icon = {
+                    Icon(Icons.Outlined.ExitToApp, "Add Home", Modifier.size(40.dp))
+                }) {
                 Text("Exit Home", style = typography.subtitle1, textAlign = TextAlign.Center)
             }
         }

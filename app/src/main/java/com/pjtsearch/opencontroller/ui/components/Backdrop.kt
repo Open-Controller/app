@@ -11,14 +11,13 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.github.zsoltk.compose.router.BackStack
+import com.pjtsearch.opencontroller.Widget
 import com.pjtsearch.opencontroller.components.PagedBackdrop
 import com.pjtsearch.opencontroller.const.BackgroundPage
 import com.pjtsearch.opencontroller.const.BottomSheetPage
 import com.pjtsearch.opencontroller.const.FrontPage
 import com.pjtsearch.opencontroller.const.PageState
 import com.pjtsearch.opencontroller.settings.HouseRef
-import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
-import com.pjtsearch.opencontroller_lib_proto.Widget
 
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
@@ -44,7 +43,12 @@ fun Backdrop(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button({
-                pageBackStack.push(page.copy(FrontPage.Settings, backdropValue = BackdropValue.Concealed))
+                pageBackStack.push(
+                    page.copy(
+                        FrontPage.Settings,
+                        backdropValue = BackdropValue.Concealed
+                    )
+                )
             }) {
                 Text("Settings")
             }
@@ -62,14 +66,21 @@ fun Backdrop(
             when (it) {
                 is BackgroundPage.Homes -> HousesMenu(houseRefs,
                     { e -> onError(e) }) { newHouse ->
-                    pageBackStack.push(page.copy(
-                        FrontPage.HomeGreeter(newHouse), BackgroundPage.Rooms(
-                        newHouse,
-                        OpenControllerLibExecutor(newHouse)
-                    )))
+                    pageBackStack.push(
+                        page.copy(
+                            FrontPage.HomeGreeter(newHouse), BackgroundPage.Rooms(
+                                newHouse
+                            )
+                        )
+                    )
                 }
                 is BackgroundPage.Rooms -> RoomsMenu(it.house) { controller ->
-                    pageBackStack.push(page.copy(FrontPage.Controller(controller), backdropValue = BackdropValue.Concealed))
+                    pageBackStack.push(
+                        page.copy(
+                            FrontPage.Controller(controller, it.house.scope),
+                            backdropValue = BackdropValue.Concealed
+                        )
+                    )
                 }
             }
         }
@@ -90,7 +101,7 @@ fun Backdrop(
             )
             is FrontPage.Controller -> ControllerView(
                 it.controller,
-                (page.backgroundPage as BackgroundPage.Rooms).executor,
+                it.houseScope,
                 onOpenMenu = { w -> onOpenMenu(w) },
                 onError = { e -> onError(e) }
             )

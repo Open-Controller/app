@@ -1,71 +1,225 @@
-package com.pjtsearch.opencontroller_lib_android
+package com.pjtsearch.opencontroller
 
+import com.github.kittinunf.fuel.*
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.runCatching
 import com.github.michaelbull.result.unwrap
 import com.pjtsearch.opencontroller_lib_proto.Expr
 import com.pjtsearch.opencontroller_lib_proto.ExprOrBuilder
-import com.pjtsearch.opencontroller_lib_proto.LambdaExpr
 import java.io.Serializable
 import java.net.Socket
 
 
-data class House(val id: String, val displayName: String, val rooms: List<Room>)
-data class Room(val id: String, val displayName: String, val icon: String, val controllers: List<Controller>)
-data class Controller(val id: String, val displayName: String, val brandColor: String, val displayInterface: DisplayInterface)
-data class DisplayInterface(val widgets: List<Widget>)
+data class House(
+    val id: String,
+    val displayName: String,
+    val rooms: Map<String, Room>,
+    val scope: Map<String, Device>
+)
 
-typealias NativeFn = (List<Any?>) -> Any
+data class Room(
+    val displayName: String,
+    val icon: String,
+    val controllers: Map<String, Controller>
+)
+
+data class Controller(
+    val displayName: String,
+    val brandColor: String?,
+    val displayInterface: DisplayInterface?
+)
+
+data class DisplayInterface(
+    val widgets: List<Widget>
+)
+
+data class Device(
+    val lambdas: Map<String, Fn>
+)
+
+data class Widget(
+    val expand: Boolean,
+    val widgetType: String,
+    val params: Map<String, Any?>,
+    val children: List<Widget>
+)
+
+typealias Fn = (List<Any?>, Map<String, Device>?) -> Any
 
 class OpenControllerLibExecutor(
     private var sockets: Map<String, Socket> = hashMapOf()
 ) : Serializable {
-    fun interpretExpr(
+    private val builtins: Map<String, Fn> = mapOf(
+        "httpRequest" to { args: List<Any?>, scope: Map<String, Device>? ->
+            val url = args[0] as String
+            when (args[1] as String) {
+                "GET" -> url.httpGet().response().third.get().decodeToString()
+                "HEAD" -> url.httpHead().response().third.get().decodeToString()
+                "POST" -> url.httpPost().response().third.get().decodeToString()
+                "PUT" -> url.httpPut().response().third.get().decodeToString()
+                "PATCH" -> url.httpPatch().response().third.get().decodeToString()
+                "DELETE" -> url.httpDelete().response().third.get().decodeToString()
+                else -> TODO()
+            }
+        },
+        "concat" to { args: List<Any?>, scope: Map<String, Device>? ->
+            args[0] as String + args[1] as String
+        }
+    )
+    fun <T> interpretExpr(
         expr: ExprOrBuilder,
         localScope: Map<String, Any?>,
-        globalScope: Map<String, Any?>
-    ): Result<Any?, Throwable> =
+        houseScope: Map<String, Device>?,
+    ): Result<T?, Throwable> =
         runCatching {
             when (expr.innerCase) {
                 Expr.InnerCase.REF -> expr.ref.let {
-                    localScope[it.ref] ?: globalScope[it.ref]
+                    localScope[it.ref] as T ?: builtins[it.ref] as T ?: it.ref.split("_")
+                        .let { path ->
+                            houseScope?.get(path[0])?.lambdas?.get(path[1])
+                        } as T
                 }
-                Expr.InnerCase.WIDGET -> expr.widget.let {
-                    null
-                }
-                Expr.InnerCase.LAMBDA -> expr.lambda
-                Expr.InnerCase.CALL -> expr.call.let {
-                    when (val calling = interpretExpr(it.calling, localScope, globalScope).unwrap()) {
-                        is LambdaExpr -> interpretExpr(
-                            calling.`return`,
-                            mapOf(*calling.argsList.mapIndexed { i, arg ->
-                                Pair(
-                                    arg,
-                                    interpretExpr(it.getArgs(i), localScope, globalScope).unwrap()
-                                )
+                Expr.InnerCase.LAMBDA -> expr.lambda.let {
+                    { args: List<Any?>, houseScope: Map<String, Device>? ->
+                        interpretExpr<T>(
+                            it.`return`,
+                            mapOf(*it.argsList.mapIndexed { i, arg ->
+                                arg to args[i]
                             }.toTypedArray()),
-                            globalScope
+                            houseScope,
                         ).unwrap()
-                        is Function<*> -> (calling as NativeFn)(it.argsList.map { arg ->
-                            interpretExpr(
+                    } as T
+                }
+                Expr.InnerCase.CALL -> expr.call.let {
+                    interpretExpr<Fn>(
+                        it.calling,
+                        localScope,
+                        houseScope,
+                    ).unwrap()!!(
+                        it.argsList.map { arg ->
+                            interpretExpr<Any>(
                                 arg,
                                 localScope,
-                                globalScope
+                                houseScope,
                             ).unwrap()
-                        })
-                        else -> throw Error("Invalid call $calling")
-                    }
+                        },
+                        houseScope,
+                    ) as T
                 }
-                Expr.InnerCase.STRING -> expr.string
-                Expr.InnerCase.INT64 -> expr.int64
-                Expr.InnerCase.INT32 -> expr.int32
-                Expr.InnerCase.FLOAT -> expr.float
-                Expr.InnerCase.BOOL -> expr.bool
-                Expr.InnerCase.HOUSE -> House()
-                Expr.InnerCase.ROOM -> TODO()
-                Expr.InnerCase.CONTROLLER -> TODO()
-                Expr.InnerCase.DISPLAY_INTERFACE -> TODO()
-                Expr.InnerCase.DEVICE -> TODO()
+                Expr.InnerCase.STRING -> expr.string as T
+                Expr.InnerCase.INT64 -> expr.int64 as T
+                Expr.InnerCase.INT32 -> expr.int32 as T
+                Expr.InnerCase.FLOAT -> expr.float as T
+                Expr.InnerCase.BOOL -> expr.bool as T
+                Expr.InnerCase.HOUSE -> expr.house.let {
+                    val scope = it.devicesMap.mapValues { (_, device) ->
+                        interpretExpr<Device>(
+                            device,
+                            localScope,
+//                          Evaluate with old house scope
+                            houseScope,
+                        ).unwrap()!!
+                    }
+                    House(
+//                      Evaluate with old house scope
+                        interpretExpr<String>(
+                            it.id,
+                            localScope,
+                            houseScope,
+                        ).unwrap()!!,
+                        interpretExpr<String>(
+                            it.displayName,
+                            localScope,
+                            houseScope,
+                        ).unwrap()!!,
+                        it.roomsMap.mapValues { (_, roomExpr) ->
+                            interpretExpr<Room>(
+                                roomExpr,
+                                localScope,
+                                scope,
+                            ).unwrap()!!
+                        },
+                        scope
+                    ) as T
+                }
+                Expr.InnerCase.ROOM -> expr.room.let {
+                    Room(
+                        interpretExpr<String>(
+                            it.displayName,
+                            localScope,
+                            houseScope,
+                        ).unwrap()!!,
+                        interpretExpr<String>(
+                            it.icon,
+                            localScope,
+                            houseScope,
+                        ).unwrap()!!,
+                        it.controllersMap.mapValues { (_, controllerExpr) ->
+                            interpretExpr<Controller>(
+                                controllerExpr,
+                                localScope,
+                                houseScope,
+                            ).unwrap()!!
+                        }
+                    ) as T
+                }
+                Expr.InnerCase.CONTROLLER -> expr.controller.let {
+                    Controller(
+                        interpretExpr<String>(
+                            it.displayName,
+                            localScope,
+                            houseScope,
+                        ).unwrap()!!,
+                        interpretExpr<String>(
+                            it.brandColor,
+                            localScope,
+                            houseScope,
+                        ).unwrap()!!,
+                        interpretExpr<DisplayInterface>(
+                            it.displayInterface,
+                            localScope,
+                            houseScope,
+                        ).unwrap()!!
+                    ) as T
+                }
+                Expr.InnerCase.DISPLAY_INTERFACE -> expr.displayInterface.let {
+                    DisplayInterface(it.widgetsList.map { widget ->
+                        interpretExpr<Widget>(
+                            widget,
+                            localScope,
+                            houseScope,
+                        ).unwrap()!!
+                    }) as T
+                }
+                Expr.InnerCase.DEVICE -> expr.device.let {
+                    Device(it.lambdasMap.mapValues { (_, lambdaExpr) ->
+                        interpretExpr<Fn>(
+                            lambdaExpr,
+                            localScope,
+                            houseScope,
+                        ).unwrap()!!
+                    }) as T
+                }
+                Expr.InnerCase.WIDGET -> expr.widget.let {
+                    Widget(
+                        it.expand,
+                        it.widgetType,
+                        it.paramsMap.mapValues { (_, paramExpr) ->
+                            interpretExpr<Any>(
+                                paramExpr,
+                                localScope,
+                                houseScope,
+                            ).unwrap()!!
+                        },
+                        it.childrenList.map { childExpr ->
+                            interpretExpr<Widget>(
+                                childExpr,
+                                localScope,
+                                houseScope,
+                            ).unwrap()!!
+                        }
+                    ) as T
+                }
                 Expr.InnerCase.INNER_NOT_SET -> TODO()
                 null -> TODO()
             }
