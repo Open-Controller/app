@@ -62,10 +62,53 @@ class OpenControllerLibExecutor(
                 else -> TODO()
             }
         },
-        "concat" to { args: List<Any?>, scope: Map<String, Device>? ->
-            args[0] as String + args[1] as String
+        "add" to { args: List<Any?>, scope: Map<String, Device>? ->
+            val first = args[0]
+            val second = args[1]
+            if (first is String) {
+                if (second is String || second is Int || second is Float || second is Long || second is Double) {
+                    first + second
+                } else {
+                    TODO()
+                }
+            } else if (first is Int) {
+                when (second) {
+                    is Int -> first + second
+                    is Float -> first + second
+                    is Long -> first + second
+                    is Double -> first + second
+                    else -> TODO()
+                }
+            } else if (first is Float) {
+                when (second) {
+                    is Int -> first + second
+                    is Float -> first + second
+                    is Long -> first + second
+                    is Double -> first + second
+                    else -> TODO()
+                }
+            } else if (first is Long) {
+                when (second) {
+                    is Int -> first + second
+                    is Float -> first + second
+                    is Long -> first + second
+                    is Double -> first + second
+                    else -> TODO()
+                }
+            } else if (first is Double) {
+                when (second) {
+                    is Int -> first + second
+                    is Float -> first + second
+                    is Long -> first + second
+                    is Double -> first + second
+                    else -> TODO()
+                }
+            } else {
+                TODO()
+            }
         }
     )
+
     fun <T> interpretExpr(
         expr: ExprOrBuilder,
         localScope: Map<String, Any?>,

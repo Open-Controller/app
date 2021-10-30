@@ -111,7 +111,7 @@ class OpenControllerLibExecutorTest {
                                 .addArgs(Expr.newBuilder().setString("https://jsonplaceholder.typicode.com/posts/"))
                                 .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("postNumber")))
                                 .setCalling(
-                                    Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("concat"))
+                                    Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("add"))
                                 )
                             )
                         )
