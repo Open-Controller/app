@@ -17,7 +17,6 @@ import com.pjtsearch.opencontroller.Widget
 fun ControllerView(
     controller: Controller,
     houseScope: Map<String, Device>,
-    onOpenMenu: (List<Widget>) -> Unit,
     onError: (Throwable) -> Unit
 ) =
     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -28,7 +27,6 @@ fun ControllerView(
                 Modifier
                     .fillMaxWidth()
                     .padding(bottom = 10.dp),
-                onOpenMenu,
                 onError
             )
         }

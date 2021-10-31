@@ -29,7 +29,6 @@ fun ColumnScope.Widget(
     widget: Widget,
     houseScope: Map<String, Device>,
     modifier: Modifier = Modifier,
-    onOpenMenu: (List<Widget>) -> Unit,
     onError: (Throwable) -> Unit
 ) {
     fun callParam(paramName: String, vararg params: Any?) {
@@ -54,12 +53,12 @@ fun ColumnScope.Widget(
             }
         "row" -> Row(sizedModifier, Arrangement.SpaceBetween) {
             widget.children.map {
-                this@Widget.Widget(it, houseScope, onOpenMenu = onOpenMenu, onError = onError)
+                this@Widget.Widget(it, houseScope, onError = onError)
             }
         }
         "column" -> Column(sizedModifier, Arrangement.Top) {
             widget.children.map {
-                Widget(it, houseScope, onOpenMenu = onOpenMenu, onError = onError)
+                Widget(it, houseScope, onError = onError)
             }
         }
         "arrowlayout" -> Column(sizedModifier, Arrangement.Top) {
@@ -67,7 +66,7 @@ fun ColumnScope.Widget(
                 this@Widget.Widget(
                     widget.params["top"] as Widget,
                     houseScope,
-                    onOpenMenu = onOpenMenu,
+
                     onError = onError
                 )
             }
@@ -75,19 +74,19 @@ fun ColumnScope.Widget(
                 this@Widget.Widget(
                     widget.params["left"] as Widget,
                     houseScope,
-                    onOpenMenu = onOpenMenu,
+
                     onError = onError
                 )
                 this@Widget.Widget(
                     widget.params["center"] as Widget,
                     houseScope,
-                    onOpenMenu = onOpenMenu,
+
                     onError = onError
                 )
                 this@Widget.Widget(
                     widget.params["right"] as Widget,
                     houseScope,
-                    onOpenMenu = onOpenMenu,
+
                     onError = onError
                 )
             }
@@ -95,7 +94,7 @@ fun ColumnScope.Widget(
                 this@Widget.Widget(
                     widget.params["bottom"] as Widget,
                     houseScope,
-                    onOpenMenu = onOpenMenu,
+
                     onError = onError
                 )
             }
@@ -158,15 +157,15 @@ fun ColumnScope.Widget(
             }
         }
         "space" -> Spacer(sizedModifier)
-        "menubutton" ->
-            OpenControllerButton(
-                sizedModifier,
-                widget.params["text"] as String,
-                widget.params["icon"] as String?,
-                widget.params["size"] as Int?
-            ) {
-                onOpenMenu(widget.children)
-            }
+//        "menubutton" ->
+//            OpenControllerButton(
+//                sizedModifier,
+//                widget.params["text"] as String,
+//                widget.params["icon"] as String?,
+//                widget.params["size"] as Int?
+//            ) {
+//                onOpenMenu(widget.children)
+//            }
         "textinput" -> TextInput(
             sizedModifier,
             widget.params["text"] as String,
