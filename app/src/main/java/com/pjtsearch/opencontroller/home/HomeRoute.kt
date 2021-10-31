@@ -1,11 +1,14 @@
 package com.pjtsearch.opencontroller.home
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.unit.IntOffset
 
 @Composable
 fun HomeRoute(
@@ -23,7 +26,7 @@ fun HomeRoute(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, androidx.compose.animation.ExperimentalAnimationApi::class)
 @Composable
 fun HomeRoute(
     uiState: HomeUiState,
@@ -32,7 +35,26 @@ fun HomeRoute(
     onInteractWithRooms: () -> Unit,
 ) {
     val homeScreenType = getHomeScreenType(isExpandedScreen, uiState)
-    Crossfade(homeScreenType) {
+    AnimatedContent(
+        targetState = homeScreenType,
+        transitionSpec = {
+            val intSpec = tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing)
+            val floatSpec = tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
+            val dir = if (targetState == HomeScreenType.Rooms) {
+                -1
+            } else {
+                1
+            }
+            slideInVertically(
+                { height -> dir * height / 10 },
+                intSpec
+            ) + fadeIn(0f, floatSpec) with
+                    slideOutVertically(
+                        { height -> -dir * height / 10 },
+                        intSpec
+                    ) + fadeOut(0f, floatSpec)
+        },
+    ) {
         when (it) {
             HomeScreenType.RoomsWithController -> TODO()
             HomeScreenType.Rooms -> {
