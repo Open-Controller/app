@@ -2,9 +2,8 @@ package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.settings.HouseRef
@@ -21,6 +20,8 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit, onSave: (Ho
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+//        FIXME: Figure out inputs
+        /*
         TextField(
             label = { Text("Name") },
             value = houseRefBuilder.displayName,
@@ -35,7 +36,7 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit, onSave: (Ho
                 houseRefBuilder = houseRefBuilder.toBuilder().setNetworkHouseRef(
                     houseRefBuilder.networkHouseRef.toBuilder().setUrl(it)
                 ).build()
-            })
+            })*/
         Button(onClick = { scope.launch {
             onSave(houseRefBuilder)
         }}) {

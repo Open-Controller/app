@@ -10,7 +10,7 @@ import com.pjtsearch.opencontroller.Controller
 import com.pjtsearch.opencontroller.Device
 import com.pjtsearch.opencontroller.ui.components.ControllerView
 
-@OptIn(ExperimentalComposeUiApi::class, androidx.compose.material.ExperimentalMaterialApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun HomeControllerScreen(
     controller: Controller,

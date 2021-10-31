@@ -5,9 +5,13 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
@@ -18,9 +22,6 @@ import com.pjtsearch.opencontroller.extensions.SettingsSerializer
 import com.pjtsearch.opencontroller.extensions.copy
 import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.Settings
-import com.pjtsearch.opencontroller.ui.components.*
-import com.pjtsearch.opencontroller.const.*
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 val Context.settingsDataStore: DataStore<Settings> by dataStore(
@@ -28,7 +29,6 @@ val Context.settingsDataStore: DataStore<Settings> by dataStore(
     serializer = SettingsSerializer
 )
 
-@ExperimentalMaterialApi
 class MainActivity : AppCompatActivity() {
     @ExperimentalComposeUiApi
     @ExperimentalAnimationApi
@@ -44,15 +44,11 @@ class MainActivity : AppCompatActivity() {
 
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
-@ExperimentalMaterialApi
 @Composable
 fun MainActivityView() {
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
     val navController = rememberNavController()
-    val houseRefs = ctx.settingsDataStore.data.map {
-        it.houseRefsList
-    }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute =
@@ -121,13 +117,13 @@ fun MainActivityView() {
 //        scope.launch { menuState.reveal() }
     }
 
-    val onBottomSheetPage = { p: BottomSheetPage ->
-        scope.launch {
-//            pageBackStack.push(
-//                page.copy(bottomSheetPage = p, bottomSheetValue = ModalBottomSheetValue.HalfExpanded)
-//            )
-        }
-    }
+//    val onBottomSheetPage = { p: BottomSheetPage ->
+//        scope.launch {
+////            pageBackStack.push(
+////                page.copy(bottomSheetPage = p, bottomSheetValue = ModalBottomSheetValue.HalfExpanded)
+////            )
+//        }
+//    }
 
 //    DisposableEffect(page) {
 //        scope.launch { menuState.animateTo(page.backdropValue) }
@@ -178,6 +174,7 @@ fun MainActivityView() {
     NavigationGraph(
         isExpandedScreen = isExpandedScreen,
         navController = navController,
+        modifier = Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize()
 //        openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },
     )
 }

@@ -3,10 +3,9 @@ package com.pjtsearch.opencontroller.ui.components
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -18,11 +17,9 @@ import com.pjtsearch.opencontroller.Fn
 import com.pjtsearch.opencontroller.Widget
 import com.pjtsearch.opencontroller.extensions.DirectionVector
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
-import com.pjtsearch.opencontroller.ui.theme.shapes
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-@ExperimentalMaterialApi
 @ExperimentalComposeUiApi
 @Composable
 fun ColumnScope.Widget(
@@ -101,7 +98,7 @@ fun ColumnScope.Widget(
         }
         "swipepad" -> Column(
             sizedModifier.background(
-                MaterialTheme.colors.secondary.copy(alpha = 0.07f), shapes.large
+                MaterialTheme.colorScheme.secondary.copy(alpha = 0.07f)
             )
         ) {
             SwipePad(
@@ -166,14 +163,15 @@ fun ColumnScope.Widget(
 //            ) {
 //                onOpenMenu(widget.children)
 //            }
-        "textinput" -> TextInput(
-            sizedModifier,
-            widget.params["text"] as String,
-            widget.params["icon"] as String,
-            widget.params["size"] as Int
-        ) {
-            callParam("onInput")
-        }
+//        FIXME: readd
+//        "textinput" -> TextInput(
+//            sizedModifier,
+//            widget.params["text"] as String,
+//            widget.params["icon"] as String,
+//            widget.params["size"] as Int
+//        ) {
+//            callParam("onInput")
+//        }
         null -> Text("Widget type must be set")
     }
 }
