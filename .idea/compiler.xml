@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="1.8">
+      <module name="android.OpenController.app.main" target="17" />
       <module name="OpenController.opencontroller-lib-android" target="17" />
     </bytecodeTargetLevel>
   </component>
