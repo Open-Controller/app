@@ -14,6 +14,7 @@ import com.pjtsearch.opencontroller.home.HomeRoute
 import com.pjtsearch.opencontroller.home.HomeViewModel
 import com.pjtsearch.opencontroller.houses.HousesRoute
 import com.pjtsearch.opencontroller.settings.HouseRef
+import com.pjtsearch.opencontroller.settingsui.SettingsRoute
 
 @Composable
 fun NavigationGraph(
@@ -23,7 +24,7 @@ fun NavigationGraph(
     navigationActions: NavigationActions = remember(navController) {
         NavigationActions(navController)
     },
-    startDestination: String = Destinations.HOUSES_ROUTE
+    startDestination: String = Destinations.SETTINGS_ROUTE
 ) {
     NavHost(
         navController = navController,
@@ -53,6 +54,10 @@ fun NavigationGraph(
                 isExpandedScreen = isExpandedScreen,
                 onHouseSelected = { navigationActions.navigateToHome(it) }
             )
+        }
+        composable(Destinations.SETTINGS_ROUTE) {
+//            TODO: View model
+            SettingsRoute()
         }
     }
 }

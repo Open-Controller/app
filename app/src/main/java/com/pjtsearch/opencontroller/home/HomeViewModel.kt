@@ -3,7 +3,6 @@ package com.pjtsearch.opencontroller.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.kittinunf.result.Result
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.pjtsearch.opencontroller.Controller
@@ -13,12 +12,10 @@ import com.pjtsearch.opencontroller.settings.HouseRef
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 /**
  * UI state for the Home route.

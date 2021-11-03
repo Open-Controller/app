@@ -15,10 +15,26 @@ private val DarkColorPalette = darkColorScheme(
 )
 
 private val LightColorPalette = lightColorScheme(
-    secondary = Color.Black,
-    primary = blueA400,
-    background = blueGrey50,
-    onPrimary = Color.White
+    primary = blueA100,
+    onPrimary = Color.White,
+    primaryContainer = blueA100,
+    onPrimaryContainer = Color.White,
+    inversePrimary = blueA100,
+    secondary = blueA100,
+    onSecondary = Color.White,
+    secondaryContainer = blueA100,
+    onSecondaryContainer = Color.White,
+    tertiaryContainer = blueA100,
+    onTertiaryContainer = Color.White,
+    background = Color(0xFFc0cfff),
+    onBackground = Color.White,
+    surface = blueA100,
+    onSurface = Color.White,
+    surfaceVariant = blueA100,
+    onSurfaceVariant = Color.White,
+    inverseSurface = blueA100,
+    inverseOnSurface = Color.White,
+    outline = blueA100,
 
     /* Other default colors to override
     background = Color.White,

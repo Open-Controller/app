@@ -1,21 +1,13 @@
 package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.settingsDataStore
-import kotlinx.coroutines.launch
 
 @ExperimentalAnimationApi
 @Composable
