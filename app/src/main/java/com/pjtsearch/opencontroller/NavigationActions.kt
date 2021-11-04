@@ -8,7 +8,6 @@ import java.net.URLEncoder
 object Destinations {
     const val HOME_ROUTE = "home"
     const val HOUSES_ROUTE = "houses"
-    const val SETTINGS_ROUTE = "settings"
 }
 
 class NavigationActions(navController: NavHostController) {
@@ -29,15 +28,6 @@ class NavigationActions(navController: NavHostController) {
     }
     val navigateToHouses: () -> Unit = {
         navController.navigate(Destinations.HOUSES_ROUTE) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
-    }
-    val navigateToSettings: () -> Unit = {
-        navController.navigate(Destinations.SETTINGS_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
