@@ -1,6 +1,8 @@
 package com.pjtsearch.opencontroller.houses
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
@@ -41,101 +43,110 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
         ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
     val scope = rememberCoroutineScope()
     var editMode: EditMode by remember { mutableStateOf(EditMode.NotEditing) }
+    val scrollState = rememberScrollState()
 
     Column(
         Modifier
-            .systemBarsPadding()
-            .padding(5.dp)
+            .verticalScroll(state = scrollState)
     ) {
-        Button(onClick = { editMode = !editMode }) {
-            Text("Edit")
-        }
-        settings.value.houseRefsList.forEachIndexed { i, it ->
-            FilledTonalButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                onClick = {
-                    when (editMode) {
-                        is EditMode.Editing -> editMode =
-                            EditMode.Editing(DialogMode.EditDialog(i, it))
-                        is EditMode.NotEditing -> onHouseSelected(it)
+        Column (Modifier
+            .systemBarsPadding()
+            .padding(5.dp)) {
+            Button(onClick = { editMode = !editMode }) {
+                Text("Edit")
+            }
+            settings.value.houseRefsList.forEachIndexed { i, it ->
+                FilledTonalButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    onClick = {
+                        when (editMode) {
+                            is EditMode.Editing -> editMode =
+                                EditMode.Editing(DialogMode.EditDialog(i, it))
+                            is EditMode.NotEditing -> onHouseSelected(it)
+                        }
                     }
-                }
-            ) {
-                Box(Modifier.fillMaxWidth()) {
-                    Text(it.displayName, Modifier.align(Alignment.CenterStart))
-                    if (editMode is EditMode.Editing) {
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    ctx.settingsDataStore.updateData { settings ->
-                                        settings.toBuilder().removeHouseRefs(i).build()
+                ) {
+                    Box(Modifier.fillMaxWidth()) {
+                        Text(it.displayName, Modifier.align(Alignment.CenterStart))
+                        if (editMode is EditMode.Editing) {
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        ctx.settingsDataStore.updateData { settings ->
+                                            settings.toBuilder().removeHouseRefs(i).build()
+                                        }
                                     }
-                                }
-                            },
-                            Modifier.align(Alignment.CenterEnd)
-                        ) {
-                            Icon(Icons.Outlined.Delete, "Delete this house")
+                                },
+                                Modifier.align(Alignment.CenterEnd)
+                            ) {
+                                Icon(Icons.Outlined.Delete, "Delete this house")
+                            }
                         }
                     }
                 }
             }
-        }
-        if (editMode is EditMode.Editing) {
-            FilledTonalButton(
-                onClick = {
-                    editMode = EditMode.Editing(DialogMode.AddDialog(HouseRef.getDefaultInstance()))
-                }
-            ) {
-                Text("Add house")
-                Icon(Icons.Outlined.Add, "Add a house")
-            }
-            val mode = (editMode as EditMode.Editing).dialogMode
-            when (mode) {
-                is DialogMode.EditDialog -> AlertDialog(
-                    onDismissRequest = { editMode = EditMode.Editing(DialogMode.NoDialog) },
-                    confirmButton = {
-                        Button(onClick = {
-                            scope.launch {
-                                ctx.settingsDataStore.updateData { settings ->
-                                    settings.toBuilder()
-                                        .removeHouseRefs(mode.index)
-                                        .addHouseRefs(mode.current).build()
-                                }
-                                editMode = EditMode.Editing(DialogMode.NoDialog)
-                            }
-                        }) { Text("Save") }
-                    },
-                    text = {
-                        ModifyHouseRef(
-                            houseRef = mode.current,
-                            onChange = { n -> editMode = EditMode.Editing(DialogMode.EditDialog(mode.index, n)) },
-                        )
-                    },
-                )
-                is DialogMode.AddDialog -> AlertDialog(
-                    onDismissRequest = { editMode = EditMode.Editing(DialogMode.NoDialog) },
-                    confirmButton = {
-                        Button(onClick = {
-                            scope.launch {
-                                ctx.settingsDataStore.updateData { settings ->
-                                    settings.toBuilder()
-                                        .addHouseRefs(mode.current).build()
-                                }
-                                editMode = EditMode.Editing(DialogMode.NoDialog)
-                            }
-                        }) { Text("Save") }
-                    },
-                    text = {
-                        ModifyHouseRef(
-                            houseRef = mode.current,
-                            onChange = { n -> editMode = EditMode.Editing(DialogMode.AddDialog(n)) }
-                        )
+            if (editMode is EditMode.Editing) {
+                FilledTonalButton(
+                    onClick = {
+                        editMode =
+                            EditMode.Editing(DialogMode.AddDialog(HouseRef.getDefaultInstance()))
                     }
-                )
+                ) {
+                    Text("Add house")
+                    Icon(Icons.Outlined.Add, "Add a house")
+                }
+                val mode = (editMode as EditMode.Editing).dialogMode
+                when (mode) {
+                    is DialogMode.EditDialog -> AlertDialog(
+                        onDismissRequest = { editMode = EditMode.Editing(DialogMode.NoDialog) },
+                        confirmButton = {
+                            Button(onClick = {
+                                scope.launch {
+                                    ctx.settingsDataStore.updateData { settings ->
+                                        settings.toBuilder()
+                                            .removeHouseRefs(mode.index)
+                                            .addHouseRefs(mode.current).build()
+                                    }
+                                    editMode = EditMode.Editing(DialogMode.NoDialog)
+                                }
+                            }) { Text("Save") }
+                        },
+                        text = {
+                            ModifyHouseRef(
+                                houseRef = mode.current,
+                                onChange = { n ->
+                                    editMode =
+                                        EditMode.Editing(DialogMode.EditDialog(mode.index, n))
+                                },
+                            )
+                        },
+                    )
+                    is DialogMode.AddDialog -> AlertDialog(
+                        onDismissRequest = { editMode = EditMode.Editing(DialogMode.NoDialog) },
+                        confirmButton = {
+                            Button(onClick = {
+                                scope.launch {
+                                    ctx.settingsDataStore.updateData { settings ->
+                                        settings.toBuilder()
+                                            .addHouseRefs(mode.current).build()
+                                    }
+                                    editMode = EditMode.Editing(DialogMode.NoDialog)
+                                }
+                            }) { Text("Save") }
+                        },
+                        text = {
+                            ModifyHouseRef(
+                                houseRef = mode.current,
+                                onChange = { n ->
+                                    editMode = EditMode.Editing(DialogMode.AddDialog(n))
+                                }
+                            )
+                        }
+                    )
+                }
             }
         }
-
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -22,32 +23,44 @@ import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun HomeRoomsScreen(house: House?, isLoading: Boolean, onSelectController: (Pair<String, String>) -> Unit) =
-    Column(modifier = Modifier.fillMaxHeight().systemBarsPadding()) {
-        house?.rooms?.map { (roomId, room) ->
-            ControlledExpandableListItem(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(5.dp),
-                { Text(room.displayName) },
-                { OpenControllerIcon(room.icon, room.displayName) }) {
-                Row(
+fun HomeRoomsScreen(house: House?, isLoading: Boolean, onSelectController: (Pair<String, String>) -> Unit) {
+    val scrollState = rememberScrollState()
+    Column(
+        Modifier
+            .verticalScroll(state = scrollState)
+            .fillMaxHeight()
+    ) {
+        Column(
+            Modifier
+                .systemBarsPadding()
+                .padding(5.dp)
+        ) {
+            house?.rooms?.map { (roomId, room) ->
+                ControlledExpandableListItem(
                     Modifier
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    room.controllers.map { (controllerId, controller) ->
-                        ControllerButton(
-                            controller,
-                            controllerId,
-                            roomId,
-                            onSelectController
-                        )
+                        .fillMaxWidth()
+                        .padding(5.dp),
+                    { Text(room.displayName) },
+                    { OpenControllerIcon(room.icon, room.displayName) }) {
+                    Row(
+                        Modifier
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        room.controllers.map { (controllerId, controller) ->
+                            ControllerButton(
+                                controller,
+                                controllerId,
+                                roomId,
+                                onSelectController
+                            )
+                        }
                     }
                 }
-            }
-        } ?: Text("Loading")
+            } ?: Text("Loading")
+        }
     }
+}
 
 @Composable
 fun ControllerButton(
