@@ -23,6 +23,7 @@ fun NavigationGraph(
     navigationActions: NavigationActions = remember(navController) {
         NavigationActions(navController)
     },
+    onError: (Throwable) -> Unit,
     startDestination: String = Destinations.HOUSES_ROUTE
 ) {
     NavHost(
@@ -40,12 +41,14 @@ fun NavigationGraph(
                 factory = HomeViewModel.provideFactory(
                     HouseRef.parseFrom(
                         it.arguments?.getString("house")!!.encodeToByteArray()
-                    )
+                    ),
+                    onError
                 )
             )
             HomeRoute(
                 homeViewModel = homeViewModel,
                 isExpandedScreen = isExpandedScreen,
+                onError = onError
             )
         }
         composable(Destinations.HOUSES_ROUTE) {

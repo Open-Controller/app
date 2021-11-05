@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.IntOffset
 fun HomeRoute(
     homeViewModel: HomeViewModel,
     isExpandedScreen: Boolean,
+    onError: (Throwable) -> Unit,
 ) {
     // UiState of the HomeScreen
     val uiState by homeViewModel.uiState.collectAsState()
@@ -22,6 +23,7 @@ fun HomeRoute(
         isExpandedScreen = isExpandedScreen,
         onSelectController = { homeViewModel.selectController(it) },
         onInteractWithRooms = { homeViewModel.interactedWithRooms() },
+        onError = onError
     )
 }
 
@@ -32,6 +34,7 @@ fun HomeRoute(
     isExpandedScreen: Boolean,
     onSelectController: (Pair<String, String>) -> Unit,
     onInteractWithRooms: () -> Unit,
+    onError: (Throwable) -> Unit,
 ) {
     val homeScreenType = getHomeScreenType(isExpandedScreen, uiState)
     AnimatedContent(
@@ -71,7 +74,8 @@ fun HomeRoute(
                     controller = uiState.selectedController,
                     houseScope = uiState.house.scope,
                     isExpandedScreen = isExpandedScreen,
-                    onBack = onInteractWithRooms
+                    onBack = onInteractWithRooms,
+                    onError = onError
                 )
 
                 // If we are just showing the detail, have a back press switch to the list.

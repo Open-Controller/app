@@ -16,11 +16,12 @@ fun HomeControllerScreen(
     controller: Controller,
     houseScope: Map<String, Device>,
     isExpandedScreen: Boolean,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onError: (Throwable) -> Unit
 ) = Column(modifier = Modifier.systemBarsPadding()) {
     ControllerView(
         controller,
         houseScope,
-        onError = { TODO() }
+        onError = onError
     )
 }

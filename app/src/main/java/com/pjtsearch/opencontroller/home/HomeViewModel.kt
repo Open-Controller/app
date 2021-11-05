@@ -93,7 +93,8 @@ private data class HomeViewModelState(
  * ViewModel that handles the business logic of the Home screen
  */
 class HomeViewModel(
-    private val houseRef: HouseRef
+    private val houseRef: HouseRef,
+    private val onError: (Throwable) -> Unit
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(HomeViewModelState(isLoading = true))
@@ -124,9 +125,8 @@ class HomeViewModel(
                 when (result) {
                     is Ok -> it.copy(house = result.value, isLoading = false)
                     is Err -> {
-//                        TODO: onError?
-                        result.error.printStackTrace()
-                        TODO()
+                        onError(result.error)
+                        it
                     }
                 }
             }
@@ -167,10 +167,11 @@ class HomeViewModel(
     companion object {
         fun provideFactory(
             houseRef: HouseRef,
+            onError: (Throwable) -> Unit
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return HomeViewModel(houseRef) as T
+                return HomeViewModel(houseRef, onError) as T
             }
         }
     }
