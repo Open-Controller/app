@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -78,21 +79,12 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
         topBar = {
             ExpandingBar(
                 title = { Text("Houses") },
-                navigationIcon = {
-                    SmallIconButton(onClick = { /* doSomething() */ }) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Localized description"
-                        )
-                    }
-                },
                 actions = {
                     when (val editingState = editing) {
-                        is EditingState.NotEditing -> SmallIconButton(onClick = { /* doSomething() */ }) {
-                            Icon(
-                                imageVector = Icons.Filled.Favorite,
-                                contentDescription = "Localized description"
-                            )
+                        is EditingState.NotEditing -> SmallIconButton(
+                            onClick = { }
+                        ) {
+                            Icon(Icons.Outlined.MoreVert, "More")
                         }
                         is EditingState.Editing -> Row {
                             SmallIconButton(
