@@ -12,6 +12,7 @@ message HouseRef {
   oneof inner {
     NetworkHouseRef network_house_ref = 2;
   }
+  string icon = 3;
 }
 
 message NetworkHouseRef {

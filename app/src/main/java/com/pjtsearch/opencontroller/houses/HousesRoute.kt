@@ -25,6 +25,7 @@ import com.google.accompanist.insets.*
 import com.pjtsearch.opencontroller.components.ExpandingBar
 import com.pjtsearch.opencontroller.components.ListItem
 import com.pjtsearch.opencontroller.components.SmallIconButton
+import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.settingsDataStore
@@ -169,7 +170,10 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                                 indication = rememberRipple()
                             )
                         ) {
-                            Text(it.displayName)
+                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                OpenControllerIcon(icon = it.icon, text = "No Room Icon")
+                                Text(it.displayName)
+                            }
                         }
                     }
                 }

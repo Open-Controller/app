@@ -74,7 +74,7 @@ fun OpenControllerIcon(icon: String, text: String, size: Int? = 0) =
         2 -> 30.dp
         else -> 24.dp
     }).let { sz ->
-        when (val iconValue = icons[icon] ?: throw Error("Could not find icon $icon")) {
+        when (val iconValue = icons[icon]) {
             is Int -> Icon(painterResource(iconValue), text, Modifier.size(sz))
             is ImageVector -> Icon(iconValue, text, Modifier.size(sz))
             else -> Text(text)

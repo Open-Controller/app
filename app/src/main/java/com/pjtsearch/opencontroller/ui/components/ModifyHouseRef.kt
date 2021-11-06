@@ -19,6 +19,12 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
 //        FIXME: Figure out inputs
         BasicTextField(
+            value = houseRefBuilder.icon,
+            onValueChange = {
+                houseRefBuilder =
+                    houseRefBuilder.toBuilder().setIcon(it).build()
+            })
+        BasicTextField(
             value = houseRefBuilder.displayName,
             onValueChange = {
                 houseRefBuilder =
