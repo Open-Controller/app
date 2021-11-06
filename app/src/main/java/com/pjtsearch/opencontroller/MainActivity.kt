@@ -5,21 +5,19 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.gestures.LocalOverScrollConfiguration
+import androidx.compose.foundation.gestures.OverScrollConfiguration
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.platform.LocalContext
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
@@ -36,13 +34,20 @@ val Context.settingsDataStore: DataStore<Settings> by dataStore(
 )
 
 class MainActivity : AppCompatActivity() {
+    @OptIn(ExperimentalFoundationApi::class)
     @ExperimentalComposeUiApi
     @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SystemUi(this.window) {
-                MainActivityView()
+            CompositionLocalProvider(
+                LocalOverScrollConfiguration provides OverScrollConfiguration(
+                    forceShowAlways = true
+                )
+            ) {
+                SystemUi(this.window) {
+                    MainActivityView()
+                }
             }
         }
     }
