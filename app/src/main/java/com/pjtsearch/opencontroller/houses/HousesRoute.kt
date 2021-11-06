@@ -5,7 +5,9 @@ import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
@@ -138,41 +140,46 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
         },
         floatingActionButtonPosition = FabPosition.Center,
         content = { innerPadding ->
-            LazyColumn(
-                contentPadding = innerPadding,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .padding(horizontal = 5.dp)
-                    .fillMaxSize()
-            ) {
-                settings.value.houseRefsList.forEachIndexed { i, it ->
-                    item {
-                        ListItem(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            selected = editing.takeIf { it is EditingState.Editing }
-                                ?.let { (it as EditingState.Editing).index } == i,
-                            clickAndSemanticsModifier =
-                            Modifier.combinedClickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                onClick = {
-                                    when (editing) {
-                                        is EditingState.NotEditing -> onHouseSelected(it)
-                                        is EditingState.Editing -> editing = EditingState.NotEditing
-                                    }
-                                },
-                                onLongClick = {
-                                    view.performHapticFeedback(
-                                        HapticFeedbackConstants.LONG_PRESS
-                                    )
-                                    editing = EditingState.Editing(i, it, false)
-                                },
-                                indication = rememberRipple()
-                            )
-                        ) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                OpenControllerIcon(icon = it.icon, text = "No Room Icon")
-                                Text(it.displayName)
+            BoxWithConstraints {
+                LazyVerticalGrid(
+                    cells = GridCells.Fixed(maxOf((maxWidth / 150.dp).toInt(), 1)),
+                    contentPadding = innerPadding,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 5.dp)
+                        .fillMaxHeight()
+                ) {
+                    settings.value.houseRefsList.forEachIndexed { i, it ->
+                        item {
+                            ListItem(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                selected = editing.takeIf { it is EditingState.Editing }
+                                    ?.let { (it as EditingState.Editing).index } == i,
+                                clickAndSemanticsModifier =
+                                Modifier.combinedClickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    onClick = {
+                                        when (editing) {
+                                            is EditingState.NotEditing -> onHouseSelected(it)
+                                            is EditingState.Editing -> editing =
+                                                EditingState.NotEditing
+                                        }
+                                    },
+                                    onLongClick = {
+                                        view.performHapticFeedback(
+                                            HapticFeedbackConstants.LONG_PRESS
+                                        )
+                                        editing = EditingState.Editing(i, it, false)
+                                    },
+                                    indication = rememberRipple()
+                                )
+                            ) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    OpenControllerIcon(icon = it.icon, text = "No Room Icon")
+                                    Text(it.displayName)
+                                }
                             }
                         }
                     }
