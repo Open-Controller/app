@@ -15,6 +15,24 @@ val LexendDeca = FontFamily(
 
 // Set of Material typography styles to start with
 val typography = Typography(
+    displayLarge = Typography().displayMedium.copy(fontFamily = LexendDeca),
+    displayMedium = Typography().displayMedium.copy(fontFamily = LexendDeca),
+    displaySmall = Typography().displaySmall.copy(fontFamily = LexendDeca),
+    headlineLarge = Typography().headlineLarge.copy(fontFamily = LexendDeca),
+    headlineMedium = TextStyle(
+        fontFamily = LexendDeca,
+        fontSize = 38.sp
+    ),
+    headlineSmall = Typography().headlineSmall.copy(fontFamily = LexendDeca),
+    titleLarge = Typography().titleLarge.copy(fontFamily = LexendDeca),
+    titleMedium = Typography().titleMedium.copy(fontFamily = LexendDeca),
+    titleSmall = Typography().titleSmall.copy(fontFamily = LexendDeca),
+    bodyLarge = Typography().bodyLarge.copy(fontFamily = LexendDeca),
+    bodyMedium = Typography().bodyMedium.copy(fontFamily = LexendDeca),
+    bodySmall = Typography().bodySmall.copy(fontFamily = LexendDeca),
+    labelLarge = Typography().labelLarge.copy(fontFamily = LexendDeca),
+    labelMedium = Typography().labelMedium.copy(fontFamily = LexendDeca),
+    labelSmall = Typography().labelSmall.copy(fontFamily = LexendDeca),
 //    FIXME: Readd
 //    h1 = Typography().h1.copy(fontFamily = LexendDeca),
 //    h2 = Typography().h2.copy(fontFamily = LexendDeca),
