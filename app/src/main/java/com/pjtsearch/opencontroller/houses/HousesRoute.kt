@@ -67,8 +67,10 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
     val settings =
         ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
     val scope = rememberCoroutineScope()
-    var editing: EditingState by remember { mutableStateOf(EditingState.NotEditing) }
+    var selected: List<Int> by remember { mutableStateOf(listOf()) }
     var adding: HouseRef? by remember { mutableStateOf(null) }
+    var editing: Pair<Int, HouseRef>? by remember { mutableStateOf(null) }
+
     val view = LocalView.current
     val decayAnimationSpec = rememberSplineBasedDecay<Float>()
     val scrollBehavior = remember(decayAnimationSpec) {
@@ -83,37 +85,38 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
             ExpandingBar(
                 title = { Text("Houses") },
                 actions = {
-                    when (val editingState = editing) {
-                        is EditingState.NotEditing -> SmallIconButton(
+                    when (selected.size) {
+                        0 -> SmallIconButton(
                             onClick = { }
                         ) {
                             Icon(Icons.Outlined.MoreVert, "More")
                         }
-                        is EditingState.Editing -> Row {
+                        1 -> Row {
                             SmallIconButton(
                                 onClick = {
-                                    scope.launch {
-                                        ctx.settingsDataStore.updateData { settings ->
-                                            settings.toBuilder().removeHouseRefs(editingState.index)
-                                                .build()
-                                        }
-                                        editing = EditingState.NotEditing
-                                    }
-                                }
-                            ) {
-                                Icon(Icons.Outlined.Delete, "Delete this house")
-                            }
-                            SmallIconButton(
-                                onClick = {
-                                    editing = EditingState.Editing(
-                                        editingState.index,
-                                        editingState.current,
-                                        true
-                                    )
+                                    editing = Pair(selected[0], settings.value.getHouseRefs(selected[0]))
                                 }
                             ) {
                                 Icon(Icons.Outlined.Edit, "Edit this house")
                             }
+                        }
+                    }
+                    if (selected.isNotEmpty()) {
+                        SmallIconButton(
+                            onClick = {
+                                scope.launch {
+                                    ctx.settingsDataStore.updateData { settings ->
+                                        settings.toBuilder().clearHouseRefs().addAllHouseRefs(
+                                            settings.houseRefsList.filterIndexed { i, _ ->
+                                                !selected.contains(i)
+                                            }
+                                        ).build()
+                                    }
+                                    selected = listOf()
+                                }
+                            }
+                        ) {
+                            Icon(Icons.Outlined.Delete, "Delete this house")
                         }
                     }
                 },
@@ -155,23 +158,28 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                             ListItem(
                                 modifier = Modifier
                                     .fillMaxWidth(),
-                                selected = editing.takeIf { it is EditingState.Editing }
-                                    ?.let { (it as EditingState.Editing).index } == i,
+                                selected = selected.contains(i),
                                 clickAndSemanticsModifier =
                                 Modifier.combinedClickable(
                                     interactionSource = remember { MutableInteractionSource() },
                                     onClick = {
-                                        when (editing) {
-                                            is EditingState.NotEditing -> onHouseSelected(it)
-                                            is EditingState.Editing -> editing =
-                                                EditingState.NotEditing
+                                        if (selected.isEmpty()) {
+                                            onHouseSelected(it)
+                                        } else if (!selected.contains(i)) {
+                                            selected = selected + i
+                                        } else {
+                                            selected = selected - i
                                         }
                                     },
                                     onLongClick = {
                                         view.performHapticFeedback(
                                             HapticFeedbackConstants.LONG_PRESS
                                         )
-                                        editing = EditingState.Editing(i, it, false)
+                                        if (!selected.contains(i)) {
+                                            selected = selected + i
+                                        } else {
+                                            selected = selected - i
+                                        }
                                     },
                                     indication = rememberRipple()
                                 )
@@ -187,39 +195,39 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
             }
         }
     )
-    when (val editingState = editing) {
-        is EditingState.Editing -> if (editingState.dialogOpen) {
-            AlertDialog(
-                onDismissRequest = {
-                    editing = EditingState.NotEditing
-                },
-                confirmButton = {
-                    Button(onClick = {
-                        scope.launch {
-                            ctx.settingsDataStore.updateData { settings ->
-                                settings.toBuilder()
-                                    .removeHouseRefs(editingState.index)
-                                    .addHouseRefs(editingState.current).build()
-                            }
-                            editing = EditingState.NotEditing
+    val editingState = editing
+    if (editingState != null) {
+        AlertDialog(
+            onDismissRequest = {
+                editing = null
+                selected = listOf()
+            },
+            confirmButton = {
+                Button(onClick = {
+                    scope.launch {
+                        ctx.settingsDataStore.updateData { settings ->
+                            settings.toBuilder()
+                                .removeHouseRefs(editingState.first)
+                                .addHouseRefs(editingState.second).build()
                         }
-                    }) { Text("Save") }
-                },
-                text = {
-                    ModifyHouseRef(
-                        houseRef = editingState.current,
-                        onChange = { n ->
-                            editing =
-                                EditingState.Editing(
-                                    editingState.index,
-                                    n,
-                                    true
-                                )
-                        },
-                    )
-                },
-            )
-        }
+                        editing = null
+                        selected = listOf()
+                    }
+                }) { Text("Save") }
+            },
+            text = {
+                ModifyHouseRef(
+                    houseRef = editingState.second,
+                    onChange = { n ->
+                        editing =
+                            Pair(
+                                editingState.first,
+                                n
+                            )
+                    },
+                )
+            },
+        )
     }
     when (val addingState = adding) {
         is HouseRef -> AlertDialog(
