@@ -207,8 +207,8 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                     scope.launch {
                         ctx.settingsDataStore.updateData { settings ->
                             settings.toBuilder()
-                                .removeHouseRefs(editingState.first)
-                                .addHouseRefs(editingState.second).build()
+                                .setHouseRefs(editingState.first, editingState.second)
+                                .build()
                         }
                         editing = null
                         selected = listOf()
