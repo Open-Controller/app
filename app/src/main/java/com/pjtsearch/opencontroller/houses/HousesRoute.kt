@@ -18,6 +18,7 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -150,7 +151,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
-                        .padding(horizontal = 5.dp)
+                        .padding(horizontal = 15.dp)
                         .fillMaxHeight()
                 ) {
                     settings.value.houseRefsList.forEachIndexed { i, it ->
@@ -184,8 +185,12 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                                     indication = rememberRipple()
                                 )
                             ) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    OpenControllerIcon(icon = it.icon, text = "No Room Icon")
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    OpenControllerIcon(icon = it.icon, text = "No Room Icon", size = 2)
                                     Text(it.displayName)
                                 }
                             }
