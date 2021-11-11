@@ -68,7 +68,7 @@ class OpenControllerLibExecutorTest {
             ).build()
         val res = executor.interpretExpr<House>(house, mapOf(), null).unwrap()!!
         val fn = res.rooms["TestRoom"]!!.controllers["test"]!!.displayInterface!!.widgets[0].params["test"]!! as Fn
-        Assert.assertEquals("123", fn(listOf(), res.scope))
+        Assert.assertEquals("123", fn(listOf()))
     }
 
     @Test
@@ -94,7 +94,7 @@ class OpenControllerLibExecutorTest {
               "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
               "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
             }
-        """.trimIndent(), res(listOf(), null))
+        """.trimIndent(), res(listOf()))
     }
 
     @Test
@@ -130,6 +130,6 @@ class OpenControllerLibExecutorTest {
               "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
               "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
             }
-        """.trimIndent(), res(listOf("GET", "1"), null))
+        """.trimIndent(), res(listOf("GET", "1")))
     }
 }

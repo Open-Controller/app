@@ -12,14 +12,12 @@ import com.pjtsearch.opencontroller.Device
 @Composable
 fun ControllerView(
     controller: Controller,
-    houseScope: Map<String, Device>,
     onError: (Throwable) -> Unit
 ) =
     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
         controller.displayInterface?.widgets?.map {
             Widget(
                 it,
-                houseScope,
                 Modifier
                     .fillMaxWidth()
                     .padding(bottom = 10.dp),

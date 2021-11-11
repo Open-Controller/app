@@ -72,7 +72,6 @@ fun HomeRoute(
 
                 HomeControllerScreen(
                     controller = uiState.selectedController,
-                    houseScope = uiState.house.scope,
                     isExpandedScreen = isExpandedScreen,
                     onBack = onInteractWithRooms,
                     onError = onError

@@ -8,13 +8,13 @@ import com.pjtsearch.opencontroller_lib_proto.Expr
 import com.pjtsearch.opencontroller_lib_proto.ExprOrBuilder
 import java.io.Serializable
 import java.net.Socket
+import kotlin.reflect.KMutableProperty0
 
 
 data class House(
     val id: String,
     val displayName: String,
     val rooms: Map<String, Room>,
-    val scope: Map<String, Device>
 )
 
 data class Room(
@@ -44,13 +44,17 @@ data class Widget(
     val children: List<Widget>
 )
 
-typealias Fn = (List<Any?>, Map<String, Device>?) -> Any
+class HouseScope(
+    var scope: Map<String, Device>
+)
+
+typealias Fn = (List<Any?>) -> Any
 
 class OpenControllerLibExecutor(
     private var sockets: Map<String, Socket> = hashMapOf()
 ) : Serializable {
     private val builtins: Map<String, Fn> = mapOf(
-        "httpRequest" to { args: List<Any?>, scope: Map<String, Device>? ->
+        "httpRequest" to { args: List<Any?> ->
             val url = args[0] as String
             when (args[1] as String) {
                 "GET" -> url.httpGet().response().third.get().decodeToString()
@@ -62,7 +66,7 @@ class OpenControllerLibExecutor(
                 else -> TODO()
             }
         },
-        "add" to { args: List<Any?>, scope: Map<String, Device>? ->
+        "add" to { args: List<Any?> ->
             val first = args[0]
             val second = args[1]
             if (first is String) {
@@ -112,18 +116,18 @@ class OpenControllerLibExecutor(
     fun <T> interpretExpr(
         expr: ExprOrBuilder,
         localScope: Map<String, Any?>,
-        houseScope: Map<String, Device>?,
+        houseScope: HouseScope?,
     ): Result<T?, Throwable> =
         runCatching {
             when (expr.innerCase) {
                 Expr.InnerCase.REF -> expr.ref.let {
                     localScope[it.ref] as T ?: builtins[it.ref] as T ?: it.ref.split("_")
                         .let { path ->
-                            houseScope?.get(path[0])?.lambdas?.get(path[1])
+                            houseScope?.scope?.get(path[0])?.lambdas?.get(path[1])
                         } as T
                 }
                 Expr.InnerCase.LAMBDA -> expr.lambda.let {
-                    { args: List<Any?>, houseScope: Map<String, Device>? ->
+                    { args: List<Any?> ->
                         interpretExpr<T>(
                             it.`return`,
                             mapOf(*it.argsList.mapIndexed { i, arg ->
@@ -146,7 +150,6 @@ class OpenControllerLibExecutor(
                                 houseScope,
                             ).unwrap()
                         },
-                        houseScope,
                     ) as T
                 }
                 Expr.InnerCase.STRING -> expr.string as T
@@ -155,13 +158,16 @@ class OpenControllerLibExecutor(
                 Expr.InnerCase.FLOAT -> expr.float as T
                 Expr.InnerCase.BOOL -> expr.bool as T
                 Expr.InnerCase.HOUSE -> expr.house.let {
-                    val scope = it.devicesMap.mapValues { (_, device) ->
-                        interpretExpr<Device>(
-                            device,
-                            localScope,
-//                          Evaluate with old house scope
-                            houseScope,
-                        ).unwrap()!!
+                    val scope = houseScope ?: HouseScope(mapOf())
+                    it.devicesMap.forEach { (id, device) ->
+                        scope.scope += mapOf(
+                            id to interpretExpr<Device>(
+                                device,
+                                localScope,
+    //                          Evaluate with old house scope
+                                scope,
+                            ).unwrap()!!
+                        )
                     }
                     House(
 //                      Evaluate with old house scope
@@ -182,7 +188,6 @@ class OpenControllerLibExecutor(
                                 scope,
                             ).unwrap()!!
                         },
-                        scope
                     ) as T
                 }
                 Expr.InnerCase.ROOM -> expr.room.let {

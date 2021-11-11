@@ -24,13 +24,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun ColumnScope.Widget(
     widget: Widget,
-    houseScope: Map<String, Device>,
     modifier: Modifier = Modifier,
     onError: (Throwable) -> Unit
 ) {
     fun callParam(paramName: String, vararg params: Any?) {
         GlobalScope.launch {
-            (widget.params[paramName] as Fn)(params.toList(), houseScope)
+            (widget.params[paramName] as Fn)(params.toList())
         }
     }
 
@@ -50,48 +49,38 @@ fun ColumnScope.Widget(
             }
         "row" -> Row(sizedModifier, Arrangement.SpaceBetween) {
             widget.children.map {
-                this@Widget.Widget(it, houseScope, onError = onError)
+                this@Widget.Widget(it, onError = onError)
             }
         }
         "column" -> Column(sizedModifier, Arrangement.Top) {
             widget.children.map {
-                Widget(it, houseScope, onError = onError)
+                Widget(it, onError = onError)
             }
         }
         "arrowlayout" -> Column(sizedModifier, Arrangement.Top) {
             Row(Modifier.align(Alignment.CenterHorizontally)) {
                 this@Widget.Widget(
                     widget.params["top"] as Widget,
-                    houseScope,
-
                     onError = onError
                 )
             }
             Row {
                 this@Widget.Widget(
                     widget.params["left"] as Widget,
-                    houseScope,
-
                     onError = onError
                 )
                 this@Widget.Widget(
                     widget.params["center"] as Widget,
-                    houseScope,
-
                     onError = onError
                 )
                 this@Widget.Widget(
                     widget.params["right"] as Widget,
-                    houseScope,
-
                     onError = onError
                 )
             }
             Row(Modifier.align(Alignment.CenterHorizontally)) {
                 this@Widget.Widget(
                     widget.params["bottom"] as Widget,
-                    houseScope,
-
                     onError = onError
                 )
             }

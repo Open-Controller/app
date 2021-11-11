@@ -14,14 +14,12 @@ import com.pjtsearch.opencontroller.ui.components.ControllerView
 @Composable
 fun HomeControllerScreen(
     controller: Controller,
-    houseScope: Map<String, Device>,
     isExpandedScreen: Boolean,
     onBack: () -> Unit,
     onError: (Throwable) -> Unit
 ) = Column(modifier = Modifier.systemBarsPadding()) {
     ControllerView(
         controller,
-        houseScope,
         onError = onError
     )
 }
