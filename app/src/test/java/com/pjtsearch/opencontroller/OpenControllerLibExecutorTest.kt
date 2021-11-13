@@ -20,7 +20,11 @@ class OpenControllerLibExecutorTest {
                             .putLambdas("test", Expr.newBuilder().setLambda(
                                 LambdaExpr.newBuilder().setReturn(
                                     Expr.newBuilder().setCall(CallExpr.newBuilder().setCalling(
-                                        Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("Test1_test"))
+                                        Expr.newBuilder().setCall(CallExpr.newBuilder()
+                                            .setCalling(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("getLambda")))
+                                            .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("Test1")))
+                                            .addArgs(Expr.newBuilder().setString("test"))
+                                        )
                                     ))
                                 )
                             ).build())
@@ -56,7 +60,11 @@ class OpenControllerLibExecutorTest {
                                                         LambdaExpr.newBuilder()
                                                             .setReturn(
                                                                 Expr.newBuilder().setCall(CallExpr.newBuilder().setCalling(
-                                                                    Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("Test_test"))
+                                                                    Expr.newBuilder().setCall(CallExpr.newBuilder()
+                                                                        .setCalling(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("getLambda")))
+                                                                        .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("Test1")))
+                                                                        .addArgs(Expr.newBuilder().setString("test"))
+                                                                    )
                                                                 ))
                                                             )
                                                     ).build())

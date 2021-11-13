@@ -48,7 +48,7 @@ class HouseScope(
     var scope: Map<String, Device>
 )
 
-typealias Fn = (List<Any?>) -> Any
+typealias Fn = (List<Any?>) -> Any?
 
 class OpenControllerLibExecutor(
     private var sockets: Map<String, Socket> = hashMapOf()
@@ -110,6 +110,11 @@ class OpenControllerLibExecutor(
             } else {
                 TODO()
             }
+        },
+        "getLambda" to { args: List<Any?> ->
+            val device = args[0] as Device
+            val lambda = args[1] as String
+            device.lambdas.get(lambda)
         }
     )
 
@@ -121,10 +126,7 @@ class OpenControllerLibExecutor(
         runCatching {
             when (expr.innerCase) {
                 Expr.InnerCase.REF -> expr.ref.let {
-                    localScope[it.ref] as T ?: builtins[it.ref] as T ?: it.ref.split("_")
-                        .let { path ->
-                            houseScope?.scope?.get(path[0])?.lambdas?.get(path[1])
-                        } as T
+                    localScope[it.ref] as T ?: builtins[it.ref] as T ?: houseScope?.scope?.get(it.ref) as T
                 }
                 Expr.InnerCase.LAMBDA -> expr.lambda.let {
                     { args: List<Any?> ->
