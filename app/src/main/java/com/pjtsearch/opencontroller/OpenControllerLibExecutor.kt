@@ -132,7 +132,7 @@ class OpenControllerLibExecutor(
                     { args: List<Any?> ->
                         interpretExpr<T>(
                             it.`return`,
-                            mapOf(*it.argsList.mapIndexed { i, arg ->
+                            localScope + mapOf(*it.argsList.mapIndexed { i, arg ->
                                 arg to args[i]
                             }.toTypedArray()),
                             houseScope,

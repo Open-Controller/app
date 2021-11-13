@@ -80,6 +80,22 @@ class OpenControllerLibExecutorTest {
     }
 
     @Test
+    fun closureScope() {
+        val executor = OpenControllerLibExecutor()
+        val lambda = Expr.newBuilder().setLambda(
+            LambdaExpr.newBuilder().addArgs("arg").setReturn(
+                Expr.newBuilder().setCall(CallExpr.newBuilder().setCalling(
+                    Expr.newBuilder().setLambda(LambdaExpr.newBuilder().setReturn(
+                        Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("arg"))
+                    ))
+                ))
+            )
+        ).build()
+        val res = executor.interpretExpr<Fn>(lambda, mapOf(), null).unwrap()!!
+        Assert.assertEquals("123", res(listOf("123")))
+    }
+
+    @Test
     fun builtins() {
         val executor = OpenControllerLibExecutor()
         val lambda = Expr.newBuilder().setLambda(
