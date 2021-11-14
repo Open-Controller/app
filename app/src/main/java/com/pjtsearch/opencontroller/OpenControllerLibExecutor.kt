@@ -6,6 +6,7 @@ import com.github.michaelbull.result.runCatching
 import com.github.michaelbull.result.unwrap
 import com.pjtsearch.opencontroller_lib_proto.Expr
 import com.pjtsearch.opencontroller_lib_proto.ExprOrBuilder
+import com.pjtsearch.opencontroller_lib_proto.ModuleOrBuilder
 import java.io.Serializable
 import java.net.Socket
 import kotlin.reflect.KMutableProperty0
@@ -120,18 +121,23 @@ class OpenControllerLibExecutor(
 
     fun <T> interpretExpr(
         expr: ExprOrBuilder,
+        moduleScope: Map<String, Any?>,
         localScope: Map<String, Any?>,
         houseScope: HouseScope?,
     ): Result<T?, Throwable> =
         runCatching {
             when (expr.innerCase) {
                 Expr.InnerCase.REF -> expr.ref.let {
-                    localScope[it.ref] as T ?: builtins[it.ref] as T ?: houseScope?.scope?.get(it.ref) as T
+                    localScope[it.ref] as T ?:
+                    builtins[it.ref] as T ?:
+                    houseScope?.scope?.get(it.ref) as T ?:
+                    moduleScope[it.ref] as T
                 }
                 Expr.InnerCase.LAMBDA -> expr.lambda.let {
                     { args: List<Any?> ->
                         interpretExpr<T>(
                             it.`return`,
+                            moduleScope,
                             localScope + mapOf(*it.argsList.mapIndexed { i, arg ->
                                 arg to args[i]
                             }.toTypedArray()),
@@ -142,12 +148,14 @@ class OpenControllerLibExecutor(
                 Expr.InnerCase.CALL -> expr.call.let {
                     interpretExpr<Fn>(
                         it.calling,
+                        moduleScope,
                         localScope,
                         houseScope,
                     ).unwrap()!!(
                         it.argsList.map { arg ->
                             interpretExpr<Any>(
                                 arg,
+                                moduleScope,
                                 localScope,
                                 houseScope,
                             ).unwrap()
@@ -165,6 +173,7 @@ class OpenControllerLibExecutor(
                         scope.scope += mapOf(
                             id to interpretExpr<Device>(
                                 device,
+                                moduleScope,
                                 localScope,
     //                          Evaluate with old house scope
                                 scope,
@@ -175,17 +184,20 @@ class OpenControllerLibExecutor(
 //                      Evaluate with old house scope
                         interpretExpr<String>(
                             it.id,
+                            moduleScope,
                             localScope,
                             houseScope,
                         ).unwrap()!!,
                         interpretExpr<String>(
                             it.displayName,
+                            moduleScope,
                             localScope,
                             houseScope,
                         ).unwrap()!!,
                         it.roomsMap.mapValues { (_, roomExpr) ->
                             interpretExpr<Room>(
                                 roomExpr,
+                                moduleScope,
                                 localScope,
                                 scope,
                             ).unwrap()!!
@@ -196,17 +208,20 @@ class OpenControllerLibExecutor(
                     Room(
                         interpretExpr<String>(
                             it.displayName,
+                            moduleScope,
                             localScope,
                             houseScope,
                         ).unwrap()!!,
                         interpretExpr<String>(
                             it.icon,
+                            moduleScope,
                             localScope,
                             houseScope,
                         ).unwrap()!!,
                         it.controllersMap.mapValues { (_, controllerExpr) ->
                             interpretExpr<Controller>(
                                 controllerExpr,
+                                moduleScope,
                                 localScope,
                                 houseScope,
                             ).unwrap()!!
@@ -217,16 +232,19 @@ class OpenControllerLibExecutor(
                     Controller(
                         interpretExpr<String>(
                             it.displayName,
+                            moduleScope,
                             localScope,
                             houseScope,
                         ).unwrap()!!,
                         interpretExpr<String>(
                             it.brandColor,
+                            moduleScope,
                             localScope,
                             houseScope,
                         ).unwrap()!!,
                         interpretExpr<DisplayInterface>(
                             it.displayInterface,
+                            moduleScope,
                             localScope,
                             houseScope,
                         ).unwrap()!!
@@ -236,6 +254,7 @@ class OpenControllerLibExecutor(
                     DisplayInterface(it.widgetsList.map { widget ->
                         interpretExpr<Widget>(
                             widget,
+                            moduleScope,
                             localScope,
                             houseScope,
                         ).unwrap()!!
@@ -245,6 +264,7 @@ class OpenControllerLibExecutor(
                     Device(it.lambdasMap.mapValues { (_, lambdaExpr) ->
                         interpretExpr<Fn>(
                             lambdaExpr,
+                            moduleScope,
                             localScope,
                             houseScope,
                         ).unwrap()!!
@@ -257,6 +277,7 @@ class OpenControllerLibExecutor(
                         it.paramsMap.mapValues { (_, paramExpr) ->
                             interpretExpr<Any>(
                                 paramExpr,
+                                moduleScope,
                                 localScope,
                                 houseScope,
                             ).unwrap()!!
@@ -264,6 +285,7 @@ class OpenControllerLibExecutor(
                         it.childrenList.map { childExpr ->
                             interpretExpr<Widget>(
                                 childExpr,
+                                moduleScope,
                                 localScope,
                                 houseScope,
                             ).unwrap()!!
@@ -274,6 +296,17 @@ class OpenControllerLibExecutor(
                 null -> TODO()
             }
         }
+
+    fun <T> interpretModule(
+        module: ModuleOrBuilder,
+    ): Result<T?, Throwable> = runCatching {
+        interpretExpr<T>(
+            module.body,
+            module.importsMap.mapValues { (_, m) -> interpretModule<Any>(m).unwrap() },
+            mapOf(),
+            HouseScope(mapOf())
+        ).unwrap()
+    }
 //        if (args.size < lambda.argsList.size) throw Error("${lambda.id} Expected ${lambda.argsList.size} args, but got ${args.size}")
 //        val capturedArgs = args.subList(0, lambda.argsList.size)
 //        val availableArgs = ArrayDeque(capturedArgs)

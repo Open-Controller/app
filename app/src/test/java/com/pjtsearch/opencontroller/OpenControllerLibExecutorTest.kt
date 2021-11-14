@@ -74,7 +74,7 @@ class OpenControllerLibExecutorTest {
                     ).build()
                 ).build()
             ).build()
-        val res = executor.interpretExpr<House>(house, mapOf(), null).unwrap()!!
+        val res = executor.interpretExpr<House>(house, mapOf(), mapOf(), null).unwrap()!!
         val fn = res.rooms["TestRoom"]!!.controllers["test"]!!.displayInterface!!.widgets[0].params["test"]!! as Fn
         Assert.assertEquals("123", fn(listOf()))
     }
@@ -91,8 +91,38 @@ class OpenControllerLibExecutorTest {
                 ))
             )
         ).build()
-        val res = executor.interpretExpr<Fn>(lambda, mapOf(), null).unwrap()!!
+        val res = executor.interpretExpr<Fn>(lambda, mapOf(), mapOf(), null).unwrap()!!
         Assert.assertEquals("123", res(listOf("123")))
+    }
+
+    @Test
+    fun module() {
+        val executor = OpenControllerLibExecutor()
+        val module = Module.newBuilder()
+            .putImports("otherModule", Module.newBuilder().setBody(Expr.newBuilder().setLambda(
+                LambdaExpr.newBuilder().addArgs("arg").setReturn(
+                    Expr.newBuilder().setCall(CallExpr.newBuilder()
+                        .setCalling(
+                            Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("add"))
+                        )
+                        .addArgs(Expr.newBuilder().setString("added "))
+                        .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("arg")))
+                    )
+                )
+            )).build())
+            .setBody(Expr.newBuilder().setLambda(
+                LambdaExpr.newBuilder().setReturn(
+                    Expr.newBuilder().setCall(
+                        CallExpr.newBuilder()
+                            .setCalling(
+                                Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("otherModule"))
+                            )
+                            .addArgs(Expr.newBuilder().setString("123"))
+                    )
+                )
+            ).build())
+        val res = executor.interpretModule<Fn>(module).unwrap()!!
+        Assert.assertEquals("added 123", res(listOf()))
     }
 
     @Test
@@ -110,7 +140,7 @@ class OpenControllerLibExecutorTest {
                 )
             )
         ).build()
-        val res = executor.interpretExpr<Fn>(lambda, mapOf(), null).unwrap()!!
+        val res = executor.interpretExpr<Fn>(lambda, mapOf(), mapOf(), null).unwrap()!!
         Assert.assertEquals("""
             {
               "userId": 1,
@@ -146,7 +176,7 @@ class OpenControllerLibExecutorTest {
                     )
                 )
         ).build()
-        val res = executor.interpretExpr<Fn>(lambda, mapOf(), null).unwrap()!!
+        val res = executor.interpretExpr<Fn>(lambda, mapOf(), mapOf(), null).unwrap()!!
         Assert.assertEquals("""
             {
               "userId": 1,
