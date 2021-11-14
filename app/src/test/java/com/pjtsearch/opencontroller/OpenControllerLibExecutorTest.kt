@@ -128,19 +128,23 @@ class OpenControllerLibExecutorTest {
     @Test
     fun builtins() {
         val executor = OpenControllerLibExecutor()
-        val lambda = Expr.newBuilder().setLambda(
+        val lambda = Module.newBuilder().setBody(Expr.newBuilder().setLambda(
         LambdaExpr.newBuilder()
             .setReturn(
                 Expr.newBuilder().setCall(CallExpr.newBuilder()
                     .addArgs(Expr.newBuilder().setString("https://jsonplaceholder.typicode.com/posts/1"))
                     .addArgs(Expr.newBuilder().setString("GET"))
                     .setCalling(
-                        Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("httpRequest"))
+                        Expr.newBuilder().setCall(CallExpr.newBuilder()
+                            .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("std")))
+                            .addArgs(Expr.newBuilder().setString("httpRequest"))
+                            .setCalling(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("getLambda")))
+                        )
                     )
                 )
             )
-        ).build()
-        val res = executor.interpretExpr<Fn>(lambda, mapOf(), mapOf(), null).unwrap()!!
+        )).build()
+        val res = executor.interpretModule<Fn>(lambda).unwrap()!!
         Assert.assertEquals("""
             {
               "userId": 1,
@@ -154,7 +158,7 @@ class OpenControllerLibExecutorTest {
     @Test
     fun args() {
         val executor = OpenControllerLibExecutor()
-        val lambda = Expr.newBuilder().setLambda(
+        val lambda = Module.newBuilder().setBody(Expr.newBuilder().setLambda(
             LambdaExpr.newBuilder()
                 .addArgs("method")
                 .addArgs("postNumber")
@@ -171,12 +175,16 @@ class OpenControllerLibExecutorTest {
                         )
                         .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("method")))
                         .setCalling(
-                            Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("httpRequest"))
+                            Expr.newBuilder().setCall(CallExpr.newBuilder()
+                                .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("std")))
+                                .addArgs(Expr.newBuilder().setString("httpRequest"))
+                                .setCalling(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("getLambda")))
+                            )
                         )
                     )
                 )
-        ).build()
-        val res = executor.interpretExpr<Fn>(lambda, mapOf(), mapOf(), null).unwrap()!!
+        )).build()
+        val res = executor.interpretModule<Fn>(lambda).unwrap()!!
         Assert.assertEquals("""
             {
               "userId": 1,

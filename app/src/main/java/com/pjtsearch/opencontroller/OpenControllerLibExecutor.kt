@@ -55,18 +55,6 @@ class OpenControllerLibExecutor(
     private var sockets: Map<String, Socket> = hashMapOf()
 ) : Serializable {
     private val builtins: Map<String, Fn> = mapOf(
-        "httpRequest" to { args: List<Any?> ->
-            val url = args[0] as String
-            when (args[1] as String) {
-                "GET" -> url.httpGet().response().third.get().decodeToString()
-                "HEAD" -> url.httpHead().response().third.get().decodeToString()
-                "POST" -> url.httpPost().response().third.get().decodeToString()
-                "PUT" -> url.httpPut().response().third.get().decodeToString()
-                "PATCH" -> url.httpPatch().response().third.get().decodeToString()
-                "DELETE" -> url.httpDelete().response().third.get().decodeToString()
-                else -> TODO()
-            }
-        },
         "add" to { args: List<Any?> ->
             val first = args[0]
             val second = args[1]
@@ -118,6 +106,21 @@ class OpenControllerLibExecutor(
             device.lambdas.get(lambda)
         }
     )
+
+    private val stdModule = Device(mapOf(
+        "httpRequest" to { args: List<Any?> ->
+            val url = args[0] as String
+            when (args[1] as String) {
+                "GET" -> url.httpGet().response().third.get().decodeToString()
+                "HEAD" -> url.httpHead().response().third.get().decodeToString()
+                "POST" -> url.httpPost().response().third.get().decodeToString()
+                "PUT" -> url.httpPut().response().third.get().decodeToString()
+                "PATCH" -> url.httpPatch().response().third.get().decodeToString()
+                "DELETE" -> url.httpDelete().response().third.get().decodeToString()
+                else -> TODO()
+            }
+        }
+    ))
 
     fun <T> interpretExpr(
         expr: ExprOrBuilder,
@@ -302,7 +305,8 @@ class OpenControllerLibExecutor(
     ): Result<T?, Throwable> = runCatching {
         interpretExpr<T>(
             module.body,
-            module.importsMap.mapValues { (_, m) -> interpretModule<Any>(m).unwrap() },
+            mapOf("std" to stdModule) +
+                    module.importsMap.mapValues { (_, m) -> interpretModule<Any>(m).unwrap() },
             mapOf(),
             HouseScope(mapOf())
         ).unwrap()
