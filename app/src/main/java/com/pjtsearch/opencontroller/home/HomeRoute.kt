@@ -4,9 +4,11 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 
 @Composable
@@ -39,6 +41,7 @@ fun HomeRoute(
     val homeScreenType = getHomeScreenType(isExpandedScreen, uiState)
     AnimatedContent(
         targetState = homeScreenType,
+        modifier = Modifier.fillMaxHeight(),
         transitionSpec = {
             val intSpec = tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing)
             val floatSpec = tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
