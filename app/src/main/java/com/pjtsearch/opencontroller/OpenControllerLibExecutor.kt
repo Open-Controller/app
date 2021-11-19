@@ -100,6 +100,12 @@ class OpenControllerLibExecutor(
             val device = args[0] as Device
             val lambda = args[1] as String
             device.lambdas.get(lambda)
+        },
+        "pipe" to { args: List<Any?> ->
+            val value = args[0]
+            args.drop(1).fold(value) { lastResult, curr ->
+                (curr as Fn)(listOf(lastResult))
+            }
         }
     )
 
