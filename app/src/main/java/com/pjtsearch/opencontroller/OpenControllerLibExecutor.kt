@@ -51,7 +51,7 @@ class OpenControllerLibExecutor(
     private var sockets: Map<String, Socket> = hashMapOf()
 ) : Serializable {
     private val builtins: Map<String, Fn> = mapOf(
-        "add" to { args: List<Any?> ->
+        "+" to { args: List<Any?> ->
             val first = args[0]
             val second = args[1]
             if (first is String) {
@@ -94,6 +94,186 @@ class OpenControllerLibExecutor(
                 }
             } else {
                 TODO()
+            }
+        },
+        "-" to { args: List<Any?> ->
+            val first = args[0]
+            val second = args[1]
+            when (first) {
+                is Int -> {
+                    when (second) {
+                        is Int -> first - second
+                        is Float -> first - second
+                        is Long -> first - second
+                        is Double -> first - second
+                        else -> TODO()
+                    }
+                }
+                is Float -> {
+                    when (second) {
+                        is Int -> first - second
+                        is Float -> first - second
+                        is Long -> first - second
+                        is Double -> first - second
+                        else -> TODO()
+                    }
+                }
+                is Long -> {
+                    when (second) {
+                        is Int -> first - second
+                        is Float -> first - second
+                        is Long -> first - second
+                        is Double -> first - second
+                        else -> TODO()
+                    }
+                }
+                is Double -> {
+                    when (second) {
+                        is Int -> first - second
+                        is Float -> first - second
+                        is Long -> first - second
+                        is Double -> first - second
+                        else -> TODO()
+                    }
+                }
+                else -> {
+                    TODO()
+                }
+            }
+        },
+        "*" to { args: List<Any?> ->
+            val first = args[0]
+            val second = args[1]
+            when (first) {
+                is Int -> {
+                    when (second) {
+                        is Int -> first * second
+                        is Float -> first * second
+                        is Long -> first * second
+                        is Double -> first * second
+                        else -> TODO()
+                    }
+                }
+                is Float -> {
+                    when (second) {
+                        is Int -> first * second
+                        is Float -> first * second
+                        is Long -> first * second
+                        is Double -> first * second
+                        else -> TODO()
+                    }
+                }
+                is Long -> {
+                    when (second) {
+                        is Int -> first * second
+                        is Float -> first * second
+                        is Long -> first * second
+                        is Double -> first * second
+                        else -> TODO()
+                    }
+                }
+                is Double -> {
+                    when (second) {
+                        is Int -> first * second
+                        is Float -> first * second
+                        is Long -> first * second
+                        is Double -> first * second
+                        else -> TODO()
+                    }
+                }
+                else -> {
+                    TODO()
+                }
+            }
+        },
+        "/" to { args: List<Any?> ->
+            val first = args[0]
+            val second = args[1]
+            when (first) {
+                is Int -> {
+                    when (second) {
+                        is Int -> first / second
+                        is Float -> first / second
+                        is Long -> first / second
+                        is Double -> first / second
+                        else -> TODO()
+                    }
+                }
+                is Float -> {
+                    when (second) {
+                        is Int -> first / second
+                        is Float -> first / second
+                        is Long -> first / second
+                        is Double -> first / second
+                        else -> TODO()
+                    }
+                }
+                is Long -> {
+                    when (second) {
+                        is Int -> first / second
+                        is Float -> first / second
+                        is Long -> first / second
+                        is Double -> first / second
+                        else -> TODO()
+                    }
+                }
+                is Double -> {
+                    when (second) {
+                        is Int -> first / second
+                        is Float -> first / second
+                        is Long -> first / second
+                        is Double -> first / second
+                        else -> TODO()
+                    }
+                }
+                else -> {
+                    TODO()
+                }
+            }
+        },
+        "%" to { args: List<Any?> ->
+            val first = args[0]
+            val second = args[1]
+            when (first) {
+                is Int -> {
+                    when (second) {
+                        is Int -> first % second
+                        is Float -> first % second
+                        is Long -> first % second
+                        is Double -> first % second
+                        else -> TODO()
+                    }
+                }
+                is Float -> {
+                    when (second) {
+                        is Int -> first % second
+                        is Float -> first % second
+                        is Long -> first % second
+                        is Double -> first % second
+                        else -> TODO()
+                    }
+                }
+                is Long -> {
+                    when (second) {
+                        is Int -> first % second
+                        is Float -> first % second
+                        is Long -> first % second
+                        is Double -> first % second
+                        else -> TODO()
+                    }
+                }
+                is Double -> {
+                    when (second) {
+                        is Int -> first % second
+                        is Float -> first % second
+                        is Long -> first % second
+                        is Double -> first % second
+                        else -> TODO()
+                    }
+                }
+                else -> {
+                    TODO()
+                }
             }
         },
         "getLambda" to { args: List<Any?> ->
