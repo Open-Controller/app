@@ -7,6 +7,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -18,6 +20,8 @@ import com.pjtsearch.opencontroller.Widget
 import com.pjtsearch.opencontroller.extensions.DirectionVector
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @ExperimentalComposeUiApi
@@ -38,6 +42,13 @@ fun ColumnScope.Widget(
         modifier.weight(1f, false)
     } else modifier
     when (widget.widgetType) {
+        "reactive" -> {
+            val state by (widget.params["observe"] as Flow<*>)
+                .collectAsState(initial = null)
+            state?.let {
+                this@Widget.Widget((widget.params["child"] as Fn)(listOf(it)) as Widget, onError = onError)
+            }
+        }
         "button" ->
             OpenControllerButton(
                 sizedModifier,
