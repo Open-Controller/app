@@ -14,14 +14,12 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
-import com.pjtsearch.opencontroller.Device
 import com.pjtsearch.opencontroller.Fn
 import com.pjtsearch.opencontroller.Widget
 import com.pjtsearch.opencontroller.extensions.DirectionVector
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @ExperimentalComposeUiApi
@@ -36,9 +34,8 @@ fun ColumnScope.Widget(
             (widget.params[paramName] as Fn)(params.toList())
         }
     }
-
     val view = LocalView.current
-    val sizedModifier = if (widget.expand) {
+    val sizedModifier = if (widget.params["expand"] as Boolean? == true) {
         modifier.weight(1f, false)
     } else modifier
     when (widget.widgetType) {
@@ -107,7 +104,7 @@ fun ColumnScope.Widget(
             )
         ) {
             SwipePad(
-                if (widget.expand)
+                if (widget.params["expand"] as Boolean? == true)
                     Modifier
                         .weight(1f, true)
                         .fillMaxWidth()
@@ -129,7 +126,7 @@ fun ColumnScope.Widget(
                         Modifier
                             .padding(8.dp)
                             .then(
-                                if (widget.expand) Modifier.fillMaxWidth() else Modifier.defaultMinSize(
+                                if (widget.params["expand"] as Boolean? == true) Modifier.fillMaxWidth() else Modifier.defaultMinSize(
                                     200.dp,
                                     10.dp
                                 )

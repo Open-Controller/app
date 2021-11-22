@@ -44,7 +44,6 @@ data class Device(
 )
 
 data class Widget(
-    val expand: Boolean,
     val widgetType: String,
     val params: Map<String, Any?>,
     val children: List<Widget>
@@ -456,7 +455,6 @@ class OpenControllerLibExecutor(
                 }
                 Expr.InnerCase.WIDGET -> expr.widget.let {
                     Widget(
-                        it.expand,
                         it.widgetType,
                         it.paramsMap.mapValues { (_, paramExpr) ->
                             interpretExpr<Any>(
