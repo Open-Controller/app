@@ -46,7 +46,12 @@ fun ColumnScope.Widget(
             val state by (widget.params["observe"] as Flow<*>)
                 .collectAsState(initial = null)
             state?.let {
-                this@Widget.Widget((widget.params["child"] as Fn)(listOf(it)) as Widget, onError = onError)
+                Column(sizedModifier, Arrangement.Top) {
+                    this@Widget.Widget(
+                        (widget.params["child"] as Fn)(listOf(it)) as Widget,
+                        onError = onError
+                    )
+                }
             }
         }
         "button" ->
