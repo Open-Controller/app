@@ -7,8 +7,13 @@ import com.github.michaelbull.result.unwrap
 import com.pjtsearch.opencontroller_lib_proto.Expr
 import com.pjtsearch.opencontroller_lib_proto.ExprOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.ModuleOrBuilder
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import java.io.Serializable
 import java.net.Socket
+import java.util.*
 import kotlin.reflect.KMutableProperty0
 
 
@@ -66,6 +71,7 @@ class OpenControllerLibExecutor(
                     is Float -> first + second
                     is Long -> first + second
                     is Double -> first + second
+                    is String -> first.toString() + second
                     else -> TODO()
                 }
             } else if (first is Float) {
@@ -74,6 +80,7 @@ class OpenControllerLibExecutor(
                     is Float -> first + second
                     is Long -> first + second
                     is Double -> first + second
+                    is String -> first.toString() + second
                     else -> TODO()
                 }
             } else if (first is Long) {
@@ -82,6 +89,7 @@ class OpenControllerLibExecutor(
                     is Float -> first + second
                     is Long -> first + second
                     is Double -> first + second
+                    is String -> first.toString() + second
                     else -> TODO()
                 }
             } else if (first is Double) {
@@ -90,6 +98,7 @@ class OpenControllerLibExecutor(
                     is Float -> first + second
                     is Long -> first + second
                     is Double -> first + second
+                    is String -> first.toString() + second
                     else -> TODO()
                 }
             } else {
@@ -286,6 +295,15 @@ class OpenControllerLibExecutor(
             args.drop(1).fold(value) { lastResult, curr ->
                 (curr as Fn)(listOf(lastResult))
             }
+        },
+        "map" to { args: List<Any?> ->
+            val transformer = args[0] as Fn
+            { innerArgs: List<Any?> ->
+                val input = innerArgs[0] as Flow<*>
+                input.map {
+                    transformer(listOf(it))
+                }
+            }
         }
     )
 
@@ -301,7 +319,16 @@ class OpenControllerLibExecutor(
                 "DELETE" -> url.httpDelete().response().third.get().decodeToString()
                 else -> TODO()
             }
-        }
+        },
+        "observeTime" to { args: List<Any?> ->
+            val interval = args[0] as Number
+            flow {
+                while (true) {
+                    emit(Date().time)
+                    delay(interval.toLong())
+                }
+            }
+        },
     ))
 
     fun <T> interpretExpr(
