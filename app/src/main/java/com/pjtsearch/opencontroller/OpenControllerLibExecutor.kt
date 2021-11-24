@@ -472,6 +472,40 @@ class OpenControllerLibExecutor(
                         }
                     ) as T
                 }
+                Expr.InnerCase.IF -> expr.`if`.let {
+                    if (interpretExpr<Boolean>(
+                        it.condition,
+                        moduleScope,
+                        localScope,
+                    ).unwrap()!!) {
+                        interpretExpr<T>(
+                            it.then,
+                            moduleScope,
+                            localScope,
+                        ).unwrap()!!
+                    } else {
+                        val elif = it.elifList.find { elif ->
+                            interpretExpr<Boolean>(
+                                elif.condition,
+                                moduleScope,
+                                localScope,
+                            ).unwrap()!!
+                        }
+                        if (elif != null) {
+                            interpretExpr<T>(
+                                elif.then,
+                                moduleScope,
+                                localScope,
+                            ).unwrap()!!
+                        } else {
+                            interpretExpr<T>(
+                                it.`else`,
+                                moduleScope,
+                                localScope,
+                            ).unwrap()!!
+                        }
+                    }
+                }
                 Expr.InnerCase.INNER_NOT_SET -> TODO()
                 null -> TODO()
             }
