@@ -1,9 +1,7 @@
 package com.pjtsearch.opencontroller
 
 import com.github.kittinunf.fuel.*
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.runCatching
-import com.github.michaelbull.result.unwrap
+import com.github.michaelbull.result.*
 import com.pjtsearch.opencontroller_lib_proto.Expr
 import com.pjtsearch.opencontroller_lib_proto.ExprOrBuilder
 import com.pjtsearch.opencontroller_lib_proto.ModuleOrBuilder
@@ -14,7 +12,7 @@ import kotlinx.coroutines.flow.map
 import java.io.Serializable
 import java.net.Socket
 import java.util.*
-import kotlin.reflect.KMutableProperty0
+import kotlin.collections.fold
 
 
 data class House(
@@ -306,203 +304,234 @@ class OpenControllerLibExecutor(
         }
     )
 
-    private val stdModule = Device(mapOf(
-        "httpRequest" to { args: List<Any?> ->
-            val url = args[0] as String
-            when (args[1] as String) {
-                "GET" -> url.httpGet().response().third.get().decodeToString()
-                "HEAD" -> url.httpHead().response().third.get().decodeToString()
-                "POST" -> url.httpPost().response().third.get().decodeToString()
-                "PUT" -> url.httpPut().response().third.get().decodeToString()
-                "PATCH" -> url.httpPatch().response().third.get().decodeToString()
-                "DELETE" -> url.httpDelete().response().third.get().decodeToString()
-                else -> TODO()
-            }
-        },
-        "observeTime" to { args: List<Any?> ->
-            val interval = args[0] as Number
-            flow {
-                while (true) {
-                    emit(Date().time)
-                    delay(interval.toLong())
+    private val stdModule = Device(
+        mapOf(
+            "httpRequest" to { args: List<Any?> ->
+                val url = args[0] as String
+                when (args[1] as String) {
+                    "GET" -> url.httpGet().response().third.get().decodeToString()
+                    "HEAD" -> url.httpHead().response().third.get().decodeToString()
+                    "POST" -> url.httpPost().response().third.get().decodeToString()
+                    "PUT" -> url.httpPut().response().third.get().decodeToString()
+                    "PATCH" -> url.httpPatch().response().third.get().decodeToString()
+                    "DELETE" -> url.httpDelete().response().third.get().decodeToString()
+                    else -> TODO()
                 }
-            }
-        },
-    ))
+            },
+            "observeTime" to { args: List<Any?> ->
+                val interval = args[0] as Number
+                flow {
+                    while (true) {
+                        emit(Date().time)
+                        delay(interval.toLong())
+                    }
+                }
+            },
+        )
+    )
 
-    fun <T> interpretExpr(
+    fun interpretExpr(
         expr: ExprOrBuilder,
         moduleScope: Map<String, Any?>,
         localScope: Map<String, Any?>,
-    ): Result<T?, Throwable> =
-        runCatching {
+    ): Result<Any?, Throwable> =
+        binding {
             when (expr.innerCase) {
                 Expr.InnerCase.REF -> expr.ref.let {
-                    localScope[it.ref] as T ?:
-                    builtins[it.ref] as T ?:
-                    moduleScope[it.ref] as T
+                    runCatching {
+                        localScope[it.ref] ?: builtins[it.ref] ?: moduleScope[it.ref]
+                    }.bind()
                 }
                 Expr.InnerCase.LAMBDA -> expr.lambda.let {
                     { args: List<Any?> ->
-                        interpretExpr<T>(
+                        interpretExpr(
                             it.`return`,
                             moduleScope,
                             localScope + mapOf(*it.argsList.mapIndexed { i, arg ->
                                 arg to args[i]
                             }.toTypedArray()),
                         ).unwrap()
-                    } as T
+                    }
                 }
                 Expr.InnerCase.CALL -> expr.call.let {
-                    interpretExpr<Fn>(
+                    val fn = interpretExpr(
                         it.calling,
                         moduleScope,
                         localScope,
-                    ).unwrap()!!(
+                    ).bind()
+                    runCatching { fn as Fn }.mapError { Error("Expected function, was $fn") }.bind()(
                         it.argsList.map { arg ->
-                            interpretExpr<Any>(
+                            interpretExpr(
                                 arg,
                                 moduleScope,
                                 localScope,
-                            ).unwrap()
+                            ).bind()
                         },
-                    ) as T
+                    )
                 }
-                Expr.InnerCase.STRING -> expr.string as T
-                Expr.InnerCase.INT64 -> expr.int64 as T
-                Expr.InnerCase.INT32 -> expr.int32 as T
-                Expr.InnerCase.FLOAT -> expr.float as T
-                Expr.InnerCase.BOOL -> expr.bool as T
+                Expr.InnerCase.STRING -> expr.string
+                Expr.InnerCase.INT64 -> expr.int64
+                Expr.InnerCase.INT32 -> expr.int32
+                Expr.InnerCase.FLOAT -> expr.float
+                Expr.InnerCase.BOOL -> expr.bool
                 Expr.InnerCase.HOUSE -> expr.house.let {
                     House(
 //                      Evaluate with old house scope
-                        interpretExpr<String>(
-                            it.id,
-                            moduleScope,
-                            localScope,
-                        ).unwrap()!!,
-                        interpretExpr<String>(
-                            it.displayName,
-                            moduleScope,
-                            localScope,
-                        ).unwrap()!!,
-                        it.roomsMap.mapValues { (_, roomExpr) ->
-                            interpretExpr<Room>(
-                                roomExpr,
+                        runCatching {
+                            interpretExpr(
+                                it.id,
                                 moduleScope,
                                 localScope,
-                            ).unwrap()!!
+                            ).bind() as String
+                        }.mapError { Error("Expected id") }.bind(),
+                        runCatching {
+                            interpretExpr(
+                                it.displayName,
+                                moduleScope,
+                                localScope,
+                            ).bind() as String
+                        }.mapError { Error("Expected display name") }.bind(),
+                        it.roomsMap.mapValues { (_, roomExpr) ->
+                            runCatching {
+                                interpretExpr(
+                                    roomExpr,
+                                    moduleScope,
+                                    localScope,
+                                ).bind() as Room
+                            }.mapError { Error("Expected room") }.bind()
                         },
-                    ) as T
+                    )
                 }
                 Expr.InnerCase.ROOM -> expr.room.let {
                     Room(
-                        interpretExpr<String>(
-                            it.displayName,
-                            moduleScope,
-                            localScope,
-                        ).unwrap()!!,
-                        interpretExpr<String>(
-                            it.icon,
-                            moduleScope,
-                            localScope,
-                        ).unwrap()!!,
-                        it.controllersMap.mapValues { (_, controllerExpr) ->
-                            interpretExpr<Controller>(
-                                controllerExpr,
+                        runCatching {
+                            interpretExpr(
+                                it.displayName,
                                 moduleScope,
                                 localScope,
-                            ).unwrap()!!
+                            ).bind() as String
+                        }.mapError { Error("Expected display name") }.bind(),
+                        runCatching {
+                            interpretExpr(
+                                it.icon,
+                                moduleScope,
+                                localScope,
+                            ).bind() as String
+                        }.mapError { Error("Expected icon") }.bind(),
+                        it.controllersMap.mapValues { (_, controllerExpr) ->
+                            runCatching {
+                                interpretExpr(
+                                    controllerExpr,
+                                    moduleScope,
+                                    localScope,
+                                ).bind() as Controller
+                            }.mapError { Error("Expected controller") }.bind()
                         }
-                    ) as T
+                    )
                 }
                 Expr.InnerCase.CONTROLLER -> expr.controller.let {
                     Controller(
-                        interpretExpr<String>(
-                            it.displayName,
-                            moduleScope,
-                            localScope,
-                        ).unwrap()!!,
-                        interpretExpr<String>(
-                            it.brandColor,
-                            moduleScope,
-                            localScope,
-                        ).unwrap()!!,
-                        interpretExpr<DisplayInterface>(
-                            it.displayInterface,
-                            moduleScope,
-                            localScope,
-                        ).unwrap()!!
-                    ) as T
+                        runCatching {
+                            interpretExpr(
+                                it.displayName,
+                                moduleScope,
+                                localScope,
+                            ).bind() as String
+                        }.mapError { Error("Expected display name") }.bind(),
+                        runCatching {
+                            interpretExpr(
+                                it.brandColor,
+                                moduleScope,
+                                localScope,
+                            ).bind() as String
+                        }.mapError { Error("Expected brand color") }.bind(),
+                        runCatching {
+                            interpretExpr(
+                                it.displayInterface,
+                                moduleScope,
+                                localScope,
+                            ).bind() as DisplayInterface
+                        }.mapError { Error("Expected display interface") }.bind()
+                    )
                 }
                 Expr.InnerCase.DISPLAY_INTERFACE -> expr.displayInterface.let {
                     DisplayInterface(it.widgetsList.map { widget ->
-                        interpretExpr<Widget>(
-                            widget,
-                            moduleScope,
-                            localScope,
-                        ).unwrap()!!
-                    }) as T
+                        runCatching {
+                            interpretExpr(
+                                widget,
+                                moduleScope,
+                                localScope,
+                            ).bind() as Widget
+                        }.mapError { Error("Expected widget") }.bind()
+                    })
                 }
                 Expr.InnerCase.DEVICE -> expr.device.let {
                     Device(it.lambdasMap.mapValues { (_, lambdaExpr) ->
-                        interpretExpr<Fn>(
-                            lambdaExpr,
-                            moduleScope,
-                            localScope,
-                        ).unwrap()!!
-                    }) as T
+                        runCatching {
+                            interpretExpr(
+                                lambdaExpr,
+                                moduleScope,
+                                localScope,
+                            ).bind() as Fn
+                        }.mapError { Error("Expected function") }.bind()
+                    })
                 }
                 Expr.InnerCase.WIDGET -> expr.widget.let {
                     Widget(
                         it.widgetType,
                         it.paramsMap.mapValues { (_, paramExpr) ->
-                            interpretExpr<Any>(
+                            interpretExpr(
                                 paramExpr,
                                 moduleScope,
                                 localScope,
-                            ).unwrap()!!
+                            ).bind()
                         },
                         it.childrenList.map { childExpr ->
-                            interpretExpr<Widget>(
-                                childExpr,
-                                moduleScope,
-                                localScope,
-                            ).unwrap()!!
+                            runCatching {
+                                interpretExpr(
+                                    childExpr,
+                                    moduleScope,
+                                    localScope,
+                                ).bind() as Widget
+                            }.mapError { Error("Expected widget") }.bind()
                         }
-                    ) as T
+                    )
                 }
                 Expr.InnerCase.IF -> expr.`if`.let {
-                    if (interpretExpr<Boolean>(
-                        it.condition,
-                        moduleScope,
-                        localScope,
-                    ).unwrap()!!) {
-                        interpretExpr<T>(
+                    if (runCatching {
+                            interpretExpr(
+                                it.condition,
+                                moduleScope,
+                                localScope,
+                            ).bind() as Boolean
+                        }.mapError { Error("Expected condition") }.bind()) {
+                        interpretExpr(
                             it.then,
                             moduleScope,
                             localScope,
-                        ).unwrap()!!
+                        ).bind()
                     } else {
                         val elif = it.elifList.find { elif ->
-                            interpretExpr<Boolean>(
-                                elif.condition,
-                                moduleScope,
-                                localScope,
-                            ).unwrap()!!
+                            runCatching {
+                                interpretExpr(
+                                    elif.condition,
+                                    moduleScope,
+                                    localScope,
+                                ).bind() as Boolean
+                            }.mapError { Error("Expected condition") }.bind()
                         }
                         if (elif != null) {
-                            interpretExpr<T>(
+                            interpretExpr(
                                 elif.then,
                                 moduleScope,
                                 localScope,
-                            ).unwrap()!!
+                            ).bind()
                         } else {
-                            interpretExpr<T>(
+                            interpretExpr(
                                 it.`else`,
                                 moduleScope,
                                 localScope,
-                            ).unwrap()!!
+                            ).bind()
                         }
                     }
                 }
@@ -511,15 +540,15 @@ class OpenControllerLibExecutor(
             }
         }
 
-    fun <T> interpretModule(
+    fun interpretModule(
         module: ModuleOrBuilder,
-    ): Result<T?, Throwable> = runCatching {
-        interpretExpr<T>(
+    ): Result<Any?, Throwable> = binding {
+        interpretExpr(
             module.body,
             mapOf("std" to stdModule) +
-                    module.importsMap.mapValues { (_, m) -> interpretModule<Any>(m).unwrap() },
+                    module.importsMap.mapValues { (_, m) -> interpretModule(m).bind() },
             mapOf(),
-        ).unwrap()
+        ).bind()
     }
 //        if (args.size < lambda.argsList.size) throw Error("${lambda.id} Expected ${lambda.argsList.size} args, but got ${args.size}")
 //        val capturedArgs = args.subList(0, lambda.argsList.size)

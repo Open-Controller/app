@@ -14,11 +14,11 @@ import com.pjtsearch.opencontroller_lib_proto.Module
 fun resolveHouseRef(houseRef: HouseRef): Result<House, Throwable> = runCatching {
     when (houseRef.innerCase) {
         HouseRef.InnerCase.NETWORK_HOUSE_REF ->
-            OpenControllerLibExecutor().interpretModule<House>(
+            OpenControllerLibExecutor().interpretModule(
                 Module.parseFrom(
                     houseRef.networkHouseRef.url.httpGet().response().third.get()
                 )
-            ).unwrap()!!
+            ).unwrap() as House
         HouseRef.InnerCase.INNER_NOT_SET -> throw Error("House ref not set")
         null -> throw Error("House ref is null")
     }

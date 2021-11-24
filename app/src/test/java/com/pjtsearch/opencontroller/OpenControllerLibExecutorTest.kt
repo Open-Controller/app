@@ -92,7 +92,7 @@ class OpenControllerLibExecutorTest {
                 ))
             )
         ).build()
-        val res = executor.interpretExpr<Fn>(lambda, mapOf(), mapOf()).unwrap()!!
+        val res = executor.interpretExpr(lambda, mapOf(), mapOf()).unwrap() as Fn
         Assert.assertEquals("123", res(listOf("123")))
     }
 
@@ -104,7 +104,7 @@ class OpenControllerLibExecutorTest {
                 LambdaExpr.newBuilder().addArgs("arg").setReturn(
                     Expr.newBuilder().setCall(CallExpr.newBuilder()
                         .setCalling(
-                            Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("add"))
+                            Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("+"))
                         )
                         .addArgs(Expr.newBuilder().setString("added "))
                         .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("arg")))
@@ -122,7 +122,7 @@ class OpenControllerLibExecutorTest {
                     )
                 )
             ).build())
-        val res = executor.interpretModule<Fn>(module).unwrap()!!
+        val res = executor.interpretModule(module).unwrap() as Fn
         Assert.assertEquals("added 123", res(listOf()))
     }
 
@@ -145,7 +145,7 @@ class OpenControllerLibExecutorTest {
                 )
             )
         )).build()
-        val res = executor.interpretModule<Fn>(lambda).unwrap()!!
+        val res = executor.interpretModule(lambda).unwrap() as Fn
         Assert.assertEquals("""
             {
               "userId": 1,
@@ -170,7 +170,7 @@ class OpenControllerLibExecutorTest {
                                 .addArgs(Expr.newBuilder().setString("https://jsonplaceholder.typicode.com/posts/"))
                                 .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("postNumber")))
                                 .setCalling(
-                                    Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("add"))
+                                    Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("+"))
                                 )
                             )
                         )
@@ -185,7 +185,7 @@ class OpenControllerLibExecutorTest {
                     )
                 )
         )).build()
-        val res = executor.interpretModule<Fn>(lambda).unwrap()!!
+        val res = executor.interpretModule(lambda).unwrap() as Fn
         Assert.assertEquals("""
             {
               "userId": 1,
