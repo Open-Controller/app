@@ -195,4 +195,40 @@ class OpenControllerLibExecutorTest {
             }
         """.trimIndent(), res(listOf("GET", "1")))
     }
+
+
+    @Test
+    fun list() {
+        val executor = OpenControllerLibExecutor()
+        val lambda = Module.newBuilder().setBody(Expr.newBuilder().setCall(
+            CallExpr.newBuilder()
+                .setCalling(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("listOf")))
+                .addArgs(Expr.newBuilder().setString("1"))
+                .addArgs(Expr.newBuilder().setString("2"))
+                .addArgs(Expr.newBuilder().setString("3"))
+        )).build()
+        val res = executor.interpretModule(lambda).unwrap() as List<String>
+        Assert.assertEquals(listOf("1", "2", "3"), res)
+    }
+
+    @Test
+    fun map() {
+        val executor = OpenControllerLibExecutor()
+        val lambda = Module.newBuilder().setBody(Expr.newBuilder().setCall(
+            CallExpr.newBuilder()
+                .setCalling(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("mapOf")))
+                .addArgs(Expr.newBuilder().setCall(CallExpr.newBuilder()
+                    .setCalling(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("pair")))
+                    .addArgs(Expr.newBuilder().setString("1"))
+                    .addArgs(Expr.newBuilder().setString("a"))
+                ))
+                .addArgs(Expr.newBuilder().setCall(CallExpr.newBuilder()
+                    .setCalling(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("pair")))
+                    .addArgs(Expr.newBuilder().setString("2"))
+                    .addArgs(Expr.newBuilder().setString("b"))
+                ))
+        )).build()
+        val res = executor.interpretModule(lambda).unwrap() as Map<String, String>
+        Assert.assertEquals(mapOf("1" to "a", "2" to "b"), res)
+    }
 }

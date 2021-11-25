@@ -56,50 +56,60 @@ class OpenControllerLibExecutor(
         "+" to { args: List<Any?> ->
             val first = args[0]
             val second = args[1]
-            if (first is String) {
-                if (second is String || second is Int || second is Float || second is Long || second is Double) {
-                    first + second
-                } else {
+            when (first) {
+                is String -> {
+                    when (second) {
+                        is String, is Int, is Float, is Long, is Double -> {
+                            first + second
+                        }
+                        else -> {
+                            TODO()
+                        }
+                    }
+                }
+                is Int -> {
+                    when (second) {
+                        is Int -> first + second
+                        is Float -> first + second
+                        is Long -> first + second
+                        is Double -> first + second
+                        is String -> first.toString() + second
+                        else -> TODO()
+                    }
+                }
+                is Float -> {
+                    when (second) {
+                        is Int -> first + second
+                        is Float -> first + second
+                        is Long -> first + second
+                        is Double -> first + second
+                        is String -> first.toString() + second
+                        else -> TODO()
+                    }
+                }
+                is Long -> {
+                    when (second) {
+                        is Int -> first + second
+                        is Float -> first + second
+                        is Long -> first + second
+                        is Double -> first + second
+                        is String -> first.toString() + second
+                        else -> TODO()
+                    }
+                }
+                is Double -> {
+                    when (second) {
+                        is Int -> first + second
+                        is Float -> first + second
+                        is Long -> first + second
+                        is Double -> first + second
+                        is String -> first.toString() + second
+                        else -> TODO()
+                    }
+                }
+                else -> {
                     TODO()
                 }
-            } else if (first is Int) {
-                when (second) {
-                    is Int -> first + second
-                    is Float -> first + second
-                    is Long -> first + second
-                    is Double -> first + second
-                    is String -> first.toString() + second
-                    else -> TODO()
-                }
-            } else if (first is Float) {
-                when (second) {
-                    is Int -> first + second
-                    is Float -> first + second
-                    is Long -> first + second
-                    is Double -> first + second
-                    is String -> first.toString() + second
-                    else -> TODO()
-                }
-            } else if (first is Long) {
-                when (second) {
-                    is Int -> first + second
-                    is Float -> first + second
-                    is Long -> first + second
-                    is Double -> first + second
-                    is String -> first.toString() + second
-                    else -> TODO()
-                }
-            } else if (first is Double) {
-                when (second) {
-                    is Int -> first + second
-                    is Float -> first + second
-                    is Long -> first + second
-                    is Double -> first + second
-                    is String -> first.toString() + second
-                    else -> TODO()
-                }
-            } else {
-                TODO()
             }
         },
         "-" to { args: List<Any?> ->
@@ -293,12 +303,29 @@ class OpenControllerLibExecutor(
                 (curr as Fn)(listOf(lastResult))
             }
         },
+        "listOf" to { args: List<Any?> ->
+            args
+        },
+        "mapOf" to { args: List<Any?> ->
+            val pairs = args as List<Pair<Any?, Any?>>
+            mapOf(*pairs.toTypedArray())
+        },
+        "pair" to { args: List<Any?> ->
+            val key = args[0]
+            val value = args[1]
+            key to value
+        },
         "map" to { args: List<Any?> ->
             val transformer = args[0] as Fn
             { innerArgs: List<Any?> ->
-                val input = innerArgs[0] as Flow<*>
-                input.map {
-                    transformer(listOf(it))
+                when (val input = innerArgs[0]) {
+                    is Flow<*> -> input.map {
+                        transformer(listOf(it))
+                    }
+                    is List<*> -> input.map {
+                        transformer(listOf(it))
+                    }
+                    else -> TODO()
                 }
             }
         }
@@ -359,7 +386,8 @@ class OpenControllerLibExecutor(
                         moduleScope,
                         localScope,
                     ).bind()
-                    runCatching { fn as Fn }.mapError { Error("Expected function, was $fn") }.bind()(
+                    runCatching { fn as Fn }.mapError { Error("Expected function, was $fn") }
+                        .bind()(
                         it.argsList.map { arg ->
                             interpretExpr(
                                 arg,
