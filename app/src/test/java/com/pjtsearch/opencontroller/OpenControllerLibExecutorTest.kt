@@ -231,4 +231,23 @@ class OpenControllerLibExecutorTest {
         val res = executor.interpretModule(lambda).unwrap() as Map<String, String>
         Assert.assertEquals(mapOf("1" to "a", "2" to "b"), res)
     }
+    @Test
+    fun index() {
+        val executor = OpenControllerLibExecutor()
+        val lambda = Module.newBuilder().setBody(Expr.newBuilder().setLambda(
+            LambdaExpr.newBuilder()
+                .addArgs("of")
+                .addArgs("i")
+                .setReturn(
+                    Expr.newBuilder().setCall(CallExpr.newBuilder()
+                        .setCalling(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("index")))
+                        .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("of")))
+                        .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("i")))
+                    )
+                )
+        )).build()
+        val res = executor.interpretModule(lambda).unwrap() as Fn
+        Assert.assertEquals("a", res(listOf(mapOf("1" to "a", "2" to "b"), "1")))
+        Assert.assertEquals("2", res(listOf(listOf("1", "2", "3"), 1)))
+    }
 }

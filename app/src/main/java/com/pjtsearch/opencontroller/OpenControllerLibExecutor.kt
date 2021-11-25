@@ -315,6 +315,15 @@ class OpenControllerLibExecutor(
             val value = args[1]
             key to value
         },
+        "index" to { args: List<Any?> ->
+            val input = args[0]
+            val index = args[1]
+            when (input) {
+                is List<*> -> input[index as Int]
+                is Map<*, *> -> input[index]
+                else -> TODO()
+            }
+        },
         "map" to { args: List<Any?> ->
             val transformer = args[0] as Fn
             { innerArgs: List<Any?> ->
