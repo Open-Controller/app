@@ -317,12 +317,19 @@ class OpenControllerLibExecutor(
         },
         "index" to { args: List<Any?> ->
             val input = args[0]
-            val index = args[1]
-            when (input) {
-                is List<*> -> input[index as Int]
-                is Map<*, *> -> input[index]
-                else -> TODO()
+            val path = args.drop(1)
+            fun getIndex(input: Any?, path: List<Any?>): Any? {
+                return if (path.isEmpty()) {
+                    input
+                } else {
+                    when (input) {
+                        is List<*> -> getIndex(input[path[0] as Int], path.drop(1))
+                        is Map<*, *> -> getIndex(input[path[0]], path.drop(1))
+                        else -> TODO()
+                    }
+                }
             }
+            getIndex(input, path)
         },
         "map" to { args: List<Any?> ->
             val transformer = args[0] as Fn

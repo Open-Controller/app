@@ -231,6 +231,7 @@ class OpenControllerLibExecutorTest {
         val res = executor.interpretModule(lambda).unwrap() as Map<String, String>
         Assert.assertEquals(mapOf("1" to "a", "2" to "b"), res)
     }
+
     @Test
     fun index() {
         val executor = OpenControllerLibExecutor()
@@ -249,5 +250,31 @@ class OpenControllerLibExecutorTest {
         val res = executor.interpretModule(lambda).unwrap() as Fn
         Assert.assertEquals("a", res(listOf(mapOf("1" to "a", "2" to "b"), "1")))
         Assert.assertEquals("2", res(listOf(listOf("1", "2", "3"), 1)))
+    }
+
+    @Test
+    fun indexDeep() {
+        val executor = OpenControllerLibExecutor()
+        val lambda = Module.newBuilder().setBody(Expr.newBuilder().setLambda(
+            LambdaExpr.newBuilder()
+                .addArgs("of")
+                .addArgs("i")
+                .addArgs("i2")
+                .addArgs("i3")
+                .setReturn(
+                    Expr.newBuilder().setCall(CallExpr.newBuilder()
+                        .setCalling(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("index")))
+                        .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("of")))
+                        .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("i")))
+                        .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("i2")))
+                        .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("i3")))
+                    )
+                )
+        )).build()
+        val res = executor.interpretModule(lambda).unwrap() as Fn
+        Assert.assertEquals(
+            "b",
+            res(listOf(mapOf("1" to listOf("1", mapOf("a" to "b"), "3"), "2" to "b"), "1", 1, "a"))
+        )
     }
 }
