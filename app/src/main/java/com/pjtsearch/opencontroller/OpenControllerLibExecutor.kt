@@ -344,6 +344,10 @@ class OpenControllerLibExecutor(
                     else -> TODO()
                 }
             }
+        },
+        "delay" to { args: List<Any?> ->
+            val amount = args[0] as Int
+            Thread.sleep(amount.toLong())
         }
     )
 
@@ -360,6 +364,23 @@ class OpenControllerLibExecutor(
                     "DELETE" -> url.httpDelete().response().third.get().decodeToString()
                     else -> TODO()
                 }
+            },
+            "tcpRequest" to { args: List<Any?> ->
+                val (host, port) = (args[0] as String).split(":")
+                var client:Socket? = null
+                try {
+                    client = sockets["$host:$port"] ?: Socket(host, port.toInt()).let { s ->
+                        sockets = sockets + ("$host:$port" to s)
+                        s
+                    }
+                } catch (err: Exception) {
+                    err.printStackTrace()
+                }
+                val command = args[1] as String
+                client?.outputStream?.write((command+"\r\n").toByteArray())
+                Thread.sleep(300)
+                client?.close()
+                sockets = sockets - "$host:$port"
             },
             "observeTime" to { args: List<Any?> ->
                 val interval = args[0] as Number
