@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 fun ColumnScope.Widget(
     widget: Widget,
     modifier: Modifier = Modifier,
+    onOpenMenu: (List<Widget>) -> Unit,
     onError: (Throwable) -> Unit
 ) {
     fun callParam(paramName: String, vararg params: Any?) {
@@ -50,7 +51,8 @@ fun ColumnScope.Widget(
                 Column(sizedModifier, Arrangement.Top) {
                     this@Widget.Widget(
                         (widget.params["child"] as Fn)(listOf(it)) as Widget,
-                        onError = onError
+                        onError = onError,
+                        onOpenMenu = onOpenMenu
                     )
                 }
             }
@@ -66,39 +68,44 @@ fun ColumnScope.Widget(
             }
         "row" -> Row(sizedModifier, Arrangement.SpaceBetween) {
             widget.children.map {
-                this@Widget.Widget(it, onError = onError)
+                this@Widget.Widget(it, onError = onError, onOpenMenu = onOpenMenu)
             }
         }
         "column" -> Column(sizedModifier, Arrangement.Top) {
             widget.children.map {
-                Widget(it, onError = onError)
+                Widget(it, onError = onError, onOpenMenu = onOpenMenu)
             }
         }
         "arrowlayout" -> Column(sizedModifier, Arrangement.Top) {
             Row(Modifier.align(Alignment.CenterHorizontally)) {
                 this@Widget.Widget(
                     widget.params["top"] as Widget,
-                    onError = onError
+                    onError = onError,
+                    onOpenMenu = onOpenMenu
                 )
             }
             Row {
                 this@Widget.Widget(
                     widget.params["left"] as Widget,
-                    onError = onError
+                    onError = onError,
+                    onOpenMenu = onOpenMenu
                 )
                 this@Widget.Widget(
                     widget.params["center"] as Widget,
-                    onError = onError
+                    onError = onError,
+                    onOpenMenu = onOpenMenu
                 )
                 this@Widget.Widget(
                     widget.params["right"] as Widget,
-                    onError = onError
+                    onError = onError,
+                    onOpenMenu = onOpenMenu
                 )
             }
             Row(Modifier.align(Alignment.CenterHorizontally)) {
                 this@Widget.Widget(
                     widget.params["bottom"] as Widget,
-                    onError = onError
+                    onError = onError,
+                    onOpenMenu = onOpenMenu
                 )
             }
         }
@@ -165,15 +172,15 @@ fun ColumnScope.Widget(
             }
         }
         "space" -> Spacer(sizedModifier)
-//        "menubutton" ->
-//            OpenControllerButton(
-//                sizedModifier,
-//                widget.params["text"] as String,
-//                widget.params["icon"] as String?,
-//                widget.params["size"] as Int?
-//            ) {
-//                onOpenMenu(widget.children)
-//            }
+        "menubutton" ->
+            OpenControllerButton(
+                sizedModifier,
+                widget.params["text"] as String,
+                widget.params["icon"] as String?,
+                widget.params["size"] as Int?
+            ) {
+                onOpenMenu(widget.children)
+            }
 //        FIXME: readd
 //        "textinput" -> TextInput(
 //            sizedModifier,
