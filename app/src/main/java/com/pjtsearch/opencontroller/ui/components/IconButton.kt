@@ -4,6 +4,7 @@ import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FilledTonalButton
@@ -63,6 +64,7 @@ fun OpenControllerButton(
             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             onClick()
         },
+        contentPadding = PaddingValues(3.dp),
         interactionSource = interactionSource
     ) {
         icon?.let {
