@@ -48,6 +48,7 @@ fun NavigationGraph(
             HomeRoute(
                 homeViewModel = homeViewModel,
                 isExpandedScreen = isExpandedScreen,
+                onExit = { navigationActions.navigateToHouses() },
                 onError = onError
             )
         }

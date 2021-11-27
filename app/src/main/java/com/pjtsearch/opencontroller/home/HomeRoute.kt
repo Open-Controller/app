@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.IntOffset
 fun HomeRoute(
     homeViewModel: HomeViewModel,
     isExpandedScreen: Boolean,
+    onExit: () -> Unit,
     onError: (Throwable) -> Unit,
 ) {
     // UiState of the HomeScreen
@@ -25,6 +26,7 @@ fun HomeRoute(
         isExpandedScreen = isExpandedScreen,
         onSelectController = { homeViewModel.selectController(it) },
         onInteractWithRooms = { homeViewModel.interactedWithRooms() },
+        onExit = onExit,
         onError = onError
     )
 }
@@ -36,6 +38,7 @@ fun HomeRoute(
     isExpandedScreen: Boolean,
     onSelectController: (Pair<String, String>) -> Unit,
     onInteractWithRooms: () -> Unit,
+    onExit: () -> Unit,
     onError: (Throwable) -> Unit,
 ) {
     val homeScreenType = getHomeScreenType(isExpandedScreen, uiState)
@@ -66,7 +69,8 @@ fun HomeRoute(
                 HomeRoomsScreen(
                     house = uiState.house,
                     isLoading = uiState.isLoading,
-                    onSelectController = onSelectController
+                    onSelectController = onSelectController,
+                    onExit = onExit
                 )
             }
             HomeScreenType.Controller -> {
