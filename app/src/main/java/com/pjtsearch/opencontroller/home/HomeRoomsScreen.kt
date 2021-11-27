@@ -8,9 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -27,23 +25,27 @@ import com.pjtsearch.opencontroller.Controller
 import com.pjtsearch.opencontroller.House
 import com.pjtsearch.opencontroller.components.CenterBar
 import com.pjtsearch.opencontroller.components.ControlledExpandableListItem
+import com.pjtsearch.opencontroller.components.ExpandingBar
 import com.pjtsearch.opencontroller.components.SmallIconButton
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeRoomsScreen(house: House?, isLoading: Boolean, onSelectController: (Pair<String, String>) -> Unit, onExit: () -> Unit) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior { true }
+    val decayAnimationSpec = rememberSplineBasedDecay<Float>()
+    val scrollBehavior = remember(decayAnimationSpec) {
+        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(decayAnimationSpec)
+    }
     Scaffold(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            CenterBar(
+            ExpandingBar(
                 title = { house?.displayName?.let { Text(it) } },
                 navigationIcon = {
                     SmallIconButton(onClick = onExit) {
                         Icon(
-                            imageVector = Icons.Filled.Close,
+                            imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Exit house"
                         )
                     }
