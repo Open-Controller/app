@@ -110,6 +110,13 @@ class OpenControllerLibExecutor(
                 is List<*> -> {
                     first + second
                 }
+                is Map<*, *> -> {
+                    when (second) {
+                        is Map<*, *> -> first + second
+                        is Pair<*, *> -> first + second
+                        else -> TODO()
+                    }
+                }
                 else -> {
                     TODO()
                 }
