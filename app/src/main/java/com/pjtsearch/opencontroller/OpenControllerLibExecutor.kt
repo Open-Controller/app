@@ -107,6 +107,9 @@ class OpenControllerLibExecutor(
                         else -> TODO()
                     }
                 }
+                is List<*> -> {
+                    first + second
+                }
                 else -> {
                     TODO()
                 }
