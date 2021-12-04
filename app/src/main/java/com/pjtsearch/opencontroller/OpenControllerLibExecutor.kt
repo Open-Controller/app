@@ -53,13 +53,210 @@ class OpenControllerLibExecutor(
     private var sockets: Map<String, Socket> = hashMapOf()
 ) : Serializable {
     private val builtins: Map<String, Fn> = mapOf(
+        "=" to { args: List<Any?> ->
+            val first = args[0]
+            val second = args[1]
+            when (first) {
+                is String -> first == second as String
+                is Number -> first == second as Number
+                is List<*> -> first == second as List<*>
+                is Map<*, *> -> first == second as Map<*, *>
+                else -> TODO()
+            }
+        },
+        "<=" to { args: List<Any?> ->
+            val first = args[0]
+            val second = args[1]
+            when (first) {
+                is Int -> {
+                    when (second) {
+                        is Int -> first <= second
+                        is Float -> first <= second
+                        is Long -> first <= second
+                        is Double -> first <= second
+                        else -> TODO()
+                    }
+                }
+                is Float -> {
+                    when (second) {
+                        is Int -> first <= second
+                        is Float -> first <= second
+                        is Long -> first <= second
+                        is Double -> first <= second
+                        else -> TODO()
+                    }
+                }
+                is Long -> {
+                    when (second) {
+                        is Int -> first <= second
+                        is Float -> first <= second
+                        is Long -> first <= second
+                        is Double -> first <= second
+                        else -> TODO()
+                    }
+                }
+                is Double -> {
+                    when (second) {
+                        is Int -> first <= second
+                        is Float -> first <= second
+                        is Long -> first <= second
+                        is Double -> first <= second
+                        else -> TODO()
+                    }
+                }
+                else -> {
+                    TODO()
+                }
+            }
+        },
+        "<" to { args: List<Any?> ->
+            val first = args[0]
+            val second = args[1]
+            when (first) {
+                is Int -> {
+                    when (second) {
+                        is Int -> first < second
+                        is Float -> first < second
+                        is Long -> first < second
+                        is Double -> first < second
+                        else -> TODO()
+                    }
+                }
+                is Float -> {
+                    when (second) {
+                        is Int -> first < second
+                        is Float -> first < second
+                        is Long -> first < second
+                        is Double -> first < second
+                        else -> TODO()
+                    }
+                }
+                is Long -> {
+                    when (second) {
+                        is Int -> first < second
+                        is Float -> first < second
+                        is Long -> first < second
+                        is Double -> first < second
+                        else -> TODO()
+                    }
+                }
+                is Double -> {
+                    when (second) {
+                        is Int -> first < second
+                        is Float -> first < second
+                        is Long -> first < second
+                        is Double -> first < second
+                        else -> TODO()
+                    }
+                }
+                else -> {
+                    TODO()
+                }
+            }
+        },
+        ">" to { args: List<Any?> ->
+            val first = args[0]
+            val second = args[1]
+            when (first) {
+                is Int -> {
+                    when (second) {
+                        is Int -> first > second
+                        is Float -> first > second
+                        is Long -> first > second
+                        is Double -> first > second
+                        else -> TODO()
+                    }
+                }
+                is Float -> {
+                    when (second) {
+                        is Int -> first > second
+                        is Float -> first > second
+                        is Long -> first > second
+                        is Double -> first > second
+                        else -> TODO()
+                    }
+                }
+                is Long -> {
+                    when (second) {
+                        is Int -> first > second
+                        is Float -> first > second
+                        is Long -> first > second
+                        is Double -> first > second
+                        else -> TODO()
+                    }
+                }
+                is Double -> {
+                    when (second) {
+                        is Int -> first > second
+                        is Float -> first > second
+                        is Long -> first > second
+                        is Double -> first > second
+                        else -> TODO()
+                    }
+                }
+                else -> {
+                    TODO()
+                }
+            }
+        },
+        ">=" to { args: List<Any?> ->
+            val first = args[0]
+            val second = args[1]
+            when (first) {
+                is Int -> {
+                    when (second) {
+                        is Int -> first >= second
+                        is Float -> first >= second
+                        is Long -> first >= second
+                        is Double -> first >= second
+                        else -> TODO()
+                    }
+                }
+                is Float -> {
+                    when (second) {
+                        is Int -> first >= second
+                        is Float -> first >= second
+                        is Long -> first >= second
+                        is Double -> first >= second
+                        else -> TODO()
+                    }
+                }
+                is Long -> {
+                    when (second) {
+                        is Int -> first >= second
+                        is Float -> first >= second
+                        is Long -> first >= second
+                        is Double -> first >= second
+                        else -> TODO()
+                    }
+                }
+                is Double -> {
+                    when (second) {
+                        is Int -> first >= second
+                        is Float -> first >= second
+                        is Long -> first >= second
+                        is Double -> first >= second
+                        else -> TODO()
+                    }
+                }
+                else -> {
+                    TODO()
+                }
+            }
+        },
+        "&&" to { args: List<Any?> ->
+            args[0] as Boolean && args[1] as Boolean
+        },
+        "||" to { args: List<Any?> ->
+            args[0] as Boolean || args[1] as Boolean
+        },
         "+" to { args: List<Any?> ->
             val first = args[0]
             val second = args[1]
             when (first) {
                 is String -> {
                     when (second) {
-                        is String, is Int, is Float, is Long, is Double -> {
+                        is String, is Number -> {
                             first + second
                         }
                         else -> {
