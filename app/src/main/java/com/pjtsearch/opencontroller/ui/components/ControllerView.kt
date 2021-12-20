@@ -1,29 +1,55 @@
 package com.pjtsearch.opencontroller.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
-import com.pjtsearch.opencontroller_lib_proto.ControllerOrBuilder
-import com.pjtsearch.opencontroller_lib_proto.Widget
+import com.pjtsearch.opencontroller.Controller
+import com.pjtsearch.opencontroller.Device
+import com.pjtsearch.opencontroller.Widget
 
+@OptIn(ExperimentalAnimationApi::class)
 @ExperimentalComposeUiApi
-@ExperimentalMaterialApi
 @Composable
 fun ControllerView(
-    controller: ControllerOrBuilder,
-    executor: OpenControllerLibExecutor,
-    onOpenMenu: (List<Widget>) -> Unit,
-    onError: (Throwable) -> Unit) =
-    if (controller.hasDisplayInterface()) {
-        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            controller.displayInterface.widgetsList.map {
-                Widget(it, executor, Modifier.fillMaxWidth().padding(bottom = 10.dp), onOpenMenu, onError)
+    controller: Controller,
+    onError: (Throwable) -> Unit
+) {
+    var menuItems: List<Widget> by remember { mutableStateOf(listOf()) }
+    var menuOpen by remember { mutableStateOf(false) }
+    Column(Modifier.fillMaxSize()) {
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.weight(0.1f)) {
+            controller.displayInterface?.widgets?.map {
+                Widget(
+                    it,
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 10.dp),
+                    { items -> menuOpen = !menuOpen; menuItems = items },
+                    onError
+                )
             }
         }
-    } else {
-        TODO()
+        AnimatedVisibility(visible = menuOpen) {
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.weight(1f)) {
+                menuItems.map {
+                    Widget(
+                        it,
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp),
+                        { items -> menuItems = items },
+                        onError
+                    )
+                }
+            }
+        }
     }
+}

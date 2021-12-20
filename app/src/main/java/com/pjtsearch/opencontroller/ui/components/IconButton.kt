@@ -2,55 +2,73 @@ package com.pjtsearch.opencontroller.ui.components
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
-import com.pjtsearch.opencontroller.ui.theme.shapes
-import com.pjtsearch.opencontroller_lib_proto.Icon
-import com.pjtsearch.opencontroller_lib_proto.Size
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @Composable
-fun OpenControllerButton(modifier: Modifier, text: String, icon: Icon?, size: Size?, onClick: () -> Unit) {
+fun OpenControllerButton(
+    modifier: Modifier,
+    text: String,
+    icon: String?,
+    size: Int?,
+    onClick: () -> Unit
+) {
     val view = LocalView.current
-    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colors.secondary) {
-        Box(
-            modifier
-                .size(when (size) {
-                    Size.SMALL -> 65.dp
-                    Size.MEDIUM -> 77.dp
-                    Size.LARGE -> 156.dp
-                    null -> 65.dp
-                })
-                .padding(when (size) {
-                    Size.SMALL -> 5.dp
-                    Size.MEDIUM -> 8.dp
-                    Size.LARGE -> 8.dp
-                    null -> 5.dp
-                })
-                .clip(shapes.medium)
-                .background(
-                    MaterialTheme.colors.secondary.copy(alpha = 0.07f),
-                    shapes.medium
-                )
-                .clickable(role = Role.Button) {
+    val scope = rememberCoroutineScope()
+    val interactionSource = remember { MutableInteractionSource() }
+    LaunchedEffect(interactionSource) {
+        scope.launch {
+            interactionSource.interactions.collect { value ->
+                if (value is PressInteraction.Press) {
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                    onClick()
-                }, Alignment.Center
-        ) {
-            icon?.let {
-                OpenControllerIcon(icon, text, size)
-            } ?: Text(text)
+                }
+            }
         }
+    }
+    FilledTonalButton(
+        modifier = modifier
+            .size(
+                when (size) {
+                    0 -> 65.dp
+                    1 -> 77.dp
+                    2 -> 156.dp
+                    else -> 65.dp
+                }
+            )
+            .padding(
+                when (size) {
+                    0 -> 5.dp
+                    1 -> 8.dp
+                    2 -> 8.dp
+                    else -> 5.dp
+                }
+            ),
+        onClick = {
+            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            onClick()
+        },
+        contentPadding = PaddingValues(3.dp),
+        interactionSource = interactionSource
+    ) {
+        icon?.let {
+            OpenControllerIcon(icon, text, size)
+        } ?: Text(text)
     }
 }

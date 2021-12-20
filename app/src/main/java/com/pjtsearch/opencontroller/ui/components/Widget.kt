@@ -1,140 +1,195 @@
 package com.pjtsearch.opencontroller.ui.components
 
 import android.view.HapticFeedbackConstants
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
-import com.github.michaelbull.result.mapError
+import com.pjtsearch.opencontroller.Fn
+import com.pjtsearch.opencontroller.Widget
 import com.pjtsearch.opencontroller.extensions.DirectionVector
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
-import com.pjtsearch.opencontroller.ui.theme.shapes
-import com.pjtsearch.opencontroller_lib_android.OpenControllerLibExecutor
-import com.pjtsearch.opencontroller_lib_proto.Widget
-import com.pjtsearch.opencontroller_lib_proto.WidgetOrBuilder
-import com.pjtsearch.opencontroller_lib_proto.Widget.InnerCase
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-@ExperimentalMaterialApi
 @ExperimentalComposeUiApi
 @Composable
 fun ColumnScope.Widget(
-    widget: WidgetOrBuilder,
-    executor: OpenControllerLibExecutor,
+    widget: Widget,
     modifier: Modifier = Modifier,
     onOpenMenu: (List<Widget>) -> Unit,
     onError: (Throwable) -> Unit
 ) {
+    fun callParam(paramName: String, vararg params: Any?) {
+        GlobalScope.launch {
+            (widget.params[paramName] as Fn)(params.toList())
+        }
+    }
     val view = LocalView.current
-    val sizedModifier = if (widget.expand) {
+    val sizedModifier = if (widget.params["expand"] as Boolean? == true) {
         modifier.weight(1f, false)
     } else modifier
-    when (widget.innerCase) {
-        InnerCase.BUTTON ->
-            OpenControllerButton(sizedModifier, widget.button.text, if (widget.button.hasIcon()) widget.button.icon else null, widget.button.size) {
-                GlobalScope.launch {
-                    executor
-                        .executeLambda(widget.button.onClick, listOf())
-                        .mapError(onError)
+    when (widget.widgetType) {
+        "reactive" -> {
+            val state by (widget.params["observe"] as Flow<*>)
+                .collectAsState(initial = null)
+            state?.let {
+                Column(sizedModifier, Arrangement.Top) {
+                    this@Widget.Widget(
+                        (widget.params["child"] as Fn)(listOf(it)) as Widget,
+                        onError = onError,
+                        onOpenMenu = onOpenMenu
+                    )
                 }
             }
-        InnerCase.ROW -> Row(sizedModifier, Arrangement.SpaceBetween) {
-            widget.row.childrenList.map {
-                this@Widget.Widget(it, executor, onOpenMenu = onOpenMenu, onError = onError)
+        }
+        "button" ->
+            OpenControllerButton(
+                sizedModifier,
+                widget.params["text"] as String,
+                widget.params["icon"] as String?,
+                widget.params["size"] as Int?
+            ) {
+                callParam("onClick")
+            }
+        "row" -> Row(sizedModifier, Arrangement.SpaceBetween) {
+            widget.children.map {
+                this@Widget.Widget(it, onError = onError, onOpenMenu = onOpenMenu)
             }
         }
-        InnerCase.COLUMN -> Column(sizedModifier, Arrangement.Top) {
-            widget.column.childrenList.map {
-                Widget(it, executor, onOpenMenu = onOpenMenu, onError = onError)
+        "column" -> Column(sizedModifier, Arrangement.Top) {
+            widget.children.map {
+                Widget(it, onError = onError, onOpenMenu = onOpenMenu)
             }
         }
-        InnerCase.ARROW_LAYOUT -> Column(sizedModifier, Arrangement.Top) {
+        "arrowlayout" -> Column(sizedModifier, Arrangement.Top) {
             Row(Modifier.align(Alignment.CenterHorizontally)) {
-                this@Widget.Widget(widget.arrowLayout.top, executor, onOpenMenu = onOpenMenu, onError = onError)
+                this@Widget.Widget(
+                    widget.params["top"] as Widget,
+                    onError = onError,
+                    onOpenMenu = onOpenMenu
+                )
             }
             Row {
-                this@Widget.Widget(widget.arrowLayout.left, executor, onOpenMenu = onOpenMenu, onError = onError)
-                this@Widget.Widget(widget.arrowLayout.center, executor, onOpenMenu = onOpenMenu, onError = onError)
-                this@Widget.Widget(widget.arrowLayout.right, executor, onOpenMenu = onOpenMenu, onError = onError)
+                this@Widget.Widget(
+                    widget.params["left"] as Widget,
+                    onError = onError,
+                    onOpenMenu = onOpenMenu
+                )
+                this@Widget.Widget(
+                    widget.params["center"] as Widget,
+                    onError = onError,
+                    onOpenMenu = onOpenMenu
+                )
+                this@Widget.Widget(
+                    widget.params["right"] as Widget,
+                    onError = onError,
+                    onOpenMenu = onOpenMenu
+                )
             }
             Row(Modifier.align(Alignment.CenterHorizontally)) {
-                this@Widget.Widget(widget.arrowLayout.bottom, executor, onOpenMenu = onOpenMenu, onError = onError)
-            }
-        }
-        InnerCase.SWIPE_PAD -> Column(
-            sizedModifier.background(
-                MaterialTheme.colors.secondary.copy(alpha = 0.07f), shapes.large
-            )
-        ) {
-            SwipePad(
-                if (widget.expand)
-                    Modifier.weight(1f, true).fillMaxWidth()
-                else Modifier.defaultMinSize(200.dp, 200.dp)
-            ) {
-                val lambda = when (it) {
-                    is DirectionVector.Down -> widget.swipePad.onSwipeDown
-                    is DirectionVector.Left -> widget.swipePad.onSwipeLeft
-                    is DirectionVector.Right -> widget.swipePad.onSwipeRight
-                    is DirectionVector.Up -> widget.swipePad.onSwipeUp
-                    DirectionVector.Zero -> widget.swipePad.onClick
-                }
-                GlobalScope.launch {
-                    executor
-                        .executeLambda(lambda, listOf())
-                        .mapError(onError)
-                }
-            }
-            if (widget.swipePad.hasOnBottomDecrease() && widget.swipePad.hasOnBottomIncrease()) {
-                Row(Modifier.padding(8.dp)
-                        .then(if (widget.expand) Modifier.fillMaxWidth() else Modifier.defaultMinSize(200.dp, 10.dp)),
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                    IconButton(onClick = {
-                        GlobalScope.launch {
-                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                            executor.executeLambda(widget.swipePad.onBottomDecrease, listOf())
-                                .mapError(onError)
-                        }
-                    }) {
-                        OpenControllerIcon(widget.swipePad.bottomDecreaseIcon, "Decrease")
-                    }
-                    IconButton(onClick = {
-                        GlobalScope.launch {
-                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                            executor.executeLambda(widget.swipePad.onBottomIncrease, listOf())
-                                .mapError(onError)
-                        }
-                    }) {
-                        OpenControllerIcon(widget.swipePad.bottomIncreaseIcon, "Increase")
-                    }
-                }
-            }
-        }
-        InnerCase.SPACE -> Spacer(sizedModifier)
-        InnerCase.MENU_BUTTON ->
-            OpenControllerButton(sizedModifier, widget.menuButton.text,
-            if (widget.menuButton.hasIcon()) widget.menuButton.icon else null, widget.menuButton.size) {
-                onOpenMenu(widget.menuButton.contentList)
-            }
-        InnerCase.TEXT_INPUT -> TextInput(
-            sizedModifier,
-            widget.textInput.text,
-            widget.textInput.icon,
-            widget.textInput.size
-        ) {
-            GlobalScope.launch {
-                executor.executeLambda(
-                    widget.textInput.onInput,
-                    listOf(it)
+                this@Widget.Widget(
+                    widget.params["bottom"] as Widget,
+                    onError = onError,
+                    onOpenMenu = onOpenMenu
                 )
             }
         }
-        InnerCase.INNER_NOT_SET -> Text("Widget type must be set")
+        "swipepad" -> Column(
+            sizedModifier
+                .padding(8.dp)
+                .background(
+                    MaterialTheme.colorScheme.secondaryContainer,
+                    RoundedCornerShape(30.dp)
+                )
+        ) {
+            SwipePad(
+                if (widget.params["expand"] as Boolean? == true)
+                    Modifier
+                        .weight(1f, true)
+                        .fillMaxWidth()
+                else Modifier.defaultMinSize(200.dp, 200.dp)
+            ) {
+                callParam(
+                    when (it) {
+                        is DirectionVector.Down -> "onSwipeDown"
+                        is DirectionVector.Left -> "onSwipeLeft"
+                        is DirectionVector.Right -> "onSwipeRight"
+                        is DirectionVector.Up -> "onSwipeUp"
+                        DirectionVector.Zero -> "onClick"
+                    }
+                )
+            }
+            widget.params["onBottomDecrease"]?.let {
+                widget.params["onBottomIncrease"]?.let {
+                    Row(
+                        Modifier
+                            .padding(8.dp)
+                            .then(
+                                if (widget.params["expand"] as Boolean? == true) Modifier.fillMaxWidth() else Modifier.defaultMinSize(
+                                    200.dp,
+                                    10.dp
+                                )
+                            ),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSecondaryContainer) {
+                            IconButton(onClick = {
+                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                callParam("onBottomDecrease")
+                            }) {
+                                OpenControllerIcon(
+                                    widget.params["bottomDecreaseIcon"] as String,
+                                    "Decrease"
+                                )
+                            }
+                            IconButton(onClick = {
+                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                callParam("onBottomIncrease")
+                            }) {
+                                OpenControllerIcon(
+                                    widget.params["bottomIncreaseIcon"] as String,
+                                    "Increase"
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        "space" -> Spacer(sizedModifier)
+        "menubutton" ->
+            OpenControllerButton(
+                sizedModifier,
+                widget.params["text"] as String,
+                widget.params["icon"] as String?,
+                widget.params["size"] as Int?
+            ) {
+                onOpenMenu(widget.children)
+            }
+//        FIXME: readd
+//        "textinput" -> TextInput(
+//            sizedModifier,
+//            widget.params["text"] as String,
+//            widget.params["icon"] as String,
+//            widget.params["size"] as Int
+//        ) {
+//            callParam("onInput")
+//        }
         null -> Text("Widget type must be set")
     }
 }

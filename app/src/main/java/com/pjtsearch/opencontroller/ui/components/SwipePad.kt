@@ -12,20 +12,22 @@ import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import com.pjtsearch.opencontroller.extensions.DirectionVector
-import com.pjtsearch.opencontroller.extensions.DragMagnitudeTimer
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun SwipePad(modifier: Modifier = Modifier, onAction: (DirectionVector) -> Unit = {}) {
     var startPosition: Offset? by remember { mutableStateOf(null) }
     val view = LocalView.current
-    val nextActionTime: MutableState<Long?> = remember { mutableStateOf(null) }
+    val scope = rememberCoroutineScope()
+    var nextActionTime: Long? by remember { mutableStateOf(null) }
     var hasRun by remember { mutableStateOf(false) }
     var swipeVector: DirectionVector by remember { mutableStateOf(DirectionVector.Zero) }
     fun reset() {
         startPosition = null
         swipeVector = DirectionVector.Zero
-        nextActionTime.value = null
+        nextActionTime = null
         hasRun = false
     }
     fun runAction(vec: DirectionVector) {
@@ -33,39 +35,52 @@ fun SwipePad(modifier: Modifier = Modifier, onAction: (DirectionVector) -> Unit 
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
     }
 
-    DragMagnitudeTimer(swipeVector, nextActionTime) {
-        hasRun = true
-        runAction(swipeVector)
+    DisposableEffect(key1 = swipeVector) {
+        var stopped = false
+        scope.launch {
+            while (swipeVector.magnitude > 0.15 && !stopped) {
+                val time = (300 / swipeVector.magnitude).toLong()
+                if (nextActionTime == null) nextActionTime = System.currentTimeMillis() + 500
+                if (nextActionTime != null && System.currentTimeMillis() > nextActionTime!!) {
+                    hasRun = true
+                    runAction(swipeVector)
+                    nextActionTime = System.currentTimeMillis() + time
+                }
+                delay(time + 20)
+            }
+        }
+        onDispose { stopped = true }
     }
     Box(modifier
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragEnd = {
-                        if (!hasRun) {
-                            runAction(swipeVector)
-                        }
-                        reset()
-                    },
-                    onDragCancel = { reset() },
-                    onDragStart = { reset() }
-                ) { change, _ ->
-                    change.consumePositionChange()
-                    if (startPosition == null) startPosition = change.previousPosition
-                    val vec = (change.position - startPosition!!)
-                    val swipeOffset = Offset(vec.x / 600f, vec.y / -600f)
-                    val dirs = listOf(
-                        DirectionVector.Up(swipeOffset.dot(Offset(0f, 1f))),
-                        DirectionVector.Down(swipeOffset.dot(Offset(0f, -1f))),
-                        DirectionVector.Left(swipeOffset.dot(Offset(-1f, 0f))),
-                        DirectionVector.Right(swipeOffset.dot(Offset(1f, 0f)))
-                    )
-                    swipeVector = dirs.maxByOrNull { d -> d.magnitude }!!
-                }
+        .pointerInput(Unit) {
+            detectDragGestures(
+                onDragEnd = {
+                    if (!hasRun) {
+                        runAction(swipeVector)
+                    }
+                    reset()
+                },
+                onDragCancel = { reset() },
+                onDragStart = { reset() }
+            ) { change, _ ->
+                change.consumePositionChange()
+                if (startPosition == null) startPosition = change.previousPosition
+                val vec = (change.position - startPosition!!)
+                val swipeOffset = Offset(vec.x / 600f, vec.y / -600f)
+                val dirs = listOf(
+                    DirectionVector.Up(swipeOffset.dot(Offset(0f, 1f))),
+                    DirectionVector.Down(swipeOffset.dot(Offset(0f, -1f))),
+                    DirectionVector.Left(swipeOffset.dot(Offset(-1f, 0f))),
+                    DirectionVector.Right(swipeOffset.dot(Offset(1f, 0f)))
+                )
+                swipeVector = dirs.maxByOrNull { d -> d.magnitude }!!
+
             }
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) { runAction(DirectionVector.Zero) }
+        }
+        .clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null
+        ) { runAction(DirectionVector.Zero) }
     )
 }
 

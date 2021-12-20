@@ -1,3 +1,8 @@
+/**
+ * OpenController Proto
+ *
+ * A Protocol Buffer schema representing an OpenController house.
+*/
 syntax = "proto2";
 
 option java_package = "com.pjtsearch.opencontroller_lib_proto";
@@ -6,274 +11,80 @@ option go_package = "pjtsearch.com/opencontroller_lib_proto";
 
 package model;
 
-message House {
-  required string display_name = 1;
-  required string id = 2;
-  repeated Room rooms = 3;
-  repeated Device devices = 4;
+/** The root message representing a house. **/
+message HouseExpr {
+    required Expr display_name = 1; // The name to be displayed by clients
+    required Expr id = 2; // A unique identifier
+    map<string, Expr> rooms = 3; // The Rooms inside the House
+    map<string, Expr> devices = 4;  // The Devices inside the House
 }
 
-message Room {
-  required string display_name = 1;
-  required string id = 2;
-  repeated Controller controllers = 3;
-  optional Icon icon = 4 [default = ROOM];
+/** A message representing a room. */
+message RoomExpr {
+    required Expr display_name = 1; // The name to be displayed by clients
+    map<string, Expr> controllers = 2; // The Controllers inside the Room
+    optional Expr icon = 3; // The icon of the Room to be displayed by clients
 }
 
-message Controller {
-  required string display_name = 1;
-  required string id = 2;
-  optional string brand_color = 3;
-  optional DisplayInterface display_interface = 4;
+/** A message representing a controller */
+message ControllerExpr {
+    required Expr display_name = 1; // The name to be displayed by clients
+    optional Expr brand_color = 2; // A brand color to be displayed by clients
+    optional Expr display_interface = 3; // The interface for display clients for the Controller
 }
 
-message DisplayInterface {
-  repeated Widget widgets = 1;
+/** A Controller interface for clients with displays */
+message DisplayInterfaceExpr {
+    /**
+        * The Widgets that make up the controller.
+        * 
+    * Implementation Notes: The layout of the widgets in the array is flexible for the client.
+        */
+    repeated Expr widgets = 1;
 }
 
-message Device {
-  required string id = 1;
-  repeated Lambda lambdas = 2;
+/** A message representing a controllable device */
+message DeviceExpr {
+    map<string, Expr> lambdas = 1; // The actions the Device is capable of
 }
 
-message Widget {
-  optional bool expand = 1;
-  oneof inner {
-    Button button = 2;
-    Row row = 3;
-    Column column = 4;
-    ArrowLayout arrow_layout = 5;
-    Space space = 6;
-    TextInput text_input = 7;
-    SwipePad swipe_pad = 8;
-    MenuButton menu_button = 9;
-  }
+/** A message representing any controller widget that can be displayed by clients */
+message WidgetExpr {
+    optional bool expand = 1; // Whether to expand the widget to its maximum possible size on the client
+    required string widget_type = 2;
+    map<string, Expr> params = 3;
+    repeated Expr children = 4;
 }
 
-message Button {
-  required Lambda on_click = 1;
-  optional Icon icon = 2;
-  required string text = 3;
-  optional Size size = 4 [default = SMALL];
+message RefExpr {
+    required string ref = 1;
 }
 
-message Row {
-  repeated Widget children = 1;
+message LambdaExpr {
+    repeated string args = 1;
+    required Expr return = 2;
 }
 
-message Column {
-  repeated Widget children = 1;
+message CallExpr {
+    required Expr calling = 1;
+    repeated Expr args = 2;
 }
 
-message ArrowLayout {
-  required Widget top = 1;
-  required Widget bottom = 2;
-  required Widget left = 3;
-  required Widget right = 4;
-  required Widget center = 5;
-}
-
-message SwipePad {
-  required Lambda on_swipe_up = 1;
-  required Lambda on_swipe_down = 2;
-  required Lambda on_swipe_left = 3;
-  required Lambda on_swipe_right = 4;
-  required Lambda on_click = 5;
-  optional Lambda on_bottom_increase = 6;
-  optional Lambda on_bottom_decrease = 7;
-  optional Lambda on_bottom_click = 8;
-  optional Icon bottom_increase_icon = 9;
-  optional Icon bottom_decrease_icon = 10;
-}
-
-message TextInput {
-  required Lambda on_input = 1;
-  required string text = 3;
-  optional Icon icon = 2;
-  optional Size size = 4 [default = SMALL];
-}
-
-message TextInputAction {
-  oneof inner {
-    string char = 1;
-    bool backspace = 2;
-    bool cursor_left = 3;
-    bool cursor_right = 4;
-  }
-}
-
-message MenuButton {
-  repeated Widget content = 1;
-  required string text = 2;
-  optional Icon icon = 3;
-  optional Size size = 4 [default = SMALL];
-}
-
-message Space {}
-
-enum Size {
-  SMALL = 0;
-  MEDIUM = 1;
-  LARGE = 2;
-}
-
-message Lambda {
-  optional string id = 1;
-  repeated string args = 2;
-  oneof inner {
-    HttpFunc http = 3;
-    TCPFunc tcp = 4;
-    MacroFunc macro = 5;
-    DelayFunc delay = 6;
-    RefFunc ref = 7;
-    ConcatenateFunc concatenate = 8;
-    PushStackFunc push_stack = 9;
-    string string = 10;
-    PipeArgsFunc pipe_args = 11;
-    PrependStackFunc prepend_stack = 12;
-    SwitchFunc switch = 13;
-    IsEqualFunc is_equal = 14;
-    GetPropFunc get_prop = 15;
-    int32 int32 = 16;
-    int64 int64 = 17;
-    float float = 18;
-    GetIndexFunc get_index = 19;
-  }
-}
-
-message HttpFunc {
-  optional string url = 1;
-  optional HttpMethod method = 3;
-}
-
-enum HttpMethod {
-    GET = 0;
-    HEAD = 1;
-    POST = 2;
-    PUT = 3;
-    PATCH = 4;
-    DELETE = 5;
-}
-
-message TCPFunc {
-  optional string address = 1;
-  optional string command = 2;
-}
-
-message MacroFunc {
-  repeated Lambda lambdas = 1;
-}
-
-message PipeArgsFunc {
-  repeated Lambda lambdas = 1;
-}
-
-message DelayFunc {
-  optional int32 time = 1;
-}
-
-message RefFunc {
-  optional string device = 1;
-  optional string lambda = 2;
-}
-
-message PushStackFunc {
-  optional Lambda lambda = 1;
-}
-
-message PrependStackFunc {
-  optional Lambda lambda = 1;
-}
-
-message ConcatenateFunc {
-  repeated string strings = 1;
-}
-
-message Conditional {
-  required Lambda if = 1;
-  required Lambda then = 2;
-}
-
-message SwitchFunc {
-  repeated Conditional conditions = 1;
-  optional Lambda else = 2;
-}
-
-message IsEqualFunc {
-  oneof from {
-    string from_string = 1;
-    int64 from_int64 = 2;
-    int32 from_int32 = 3;
-    float from_float = 4;
-    bool from_bool = 5;
-  }
-  oneof to {
-    string to_string = 6;
-    int64 to_int64 = 7;
-    int32 to_int32 = 8;
-    float to_float = 9;
-    bool to_bool = 10;
-  }
-}
-
-message GetPropFunc {
-  optional string prop = 1;
-}
-
-message GetIndexFunc {
-  optional int32 index = 1;
-}
-
-enum Icon {
-  STAR = 0;
-  ARROW_UP = 1;
-  ARROW_DOWN = 2;
-  ARROW_LEFT = 3;
-  ARROW_RIGHT = 4;
-  SELECT = 5;
-  VOLUME_UP = 6;
-  VOLUME_DOWN = 7;
-  VOLUME_MUTE = 8;
-  BACK = 9;
-  ON = 10;
-  OFF = 11;
-  FORWARD = 12;
-  REVERSE = 13;
-  INFO = 14;
-  HOME = 15;
-  CHANNEL_UP = 16;
-  CHANNEL_DOWN = 17;
-  CHANNEL = 18;
-  REMOVE = 19;
-  STOP = 20;
-  SKIP_FORWARD = 21;
-  SKIP_REVERSE = 22;
-  RECORD = 23;
-  PAUSE = 24;
-  PLAY = 25;
-  GUIDE = 26;
-  DVR = 27;
-  MENU = 28;
-  OPTIONS = 29;
-  EXIT = 30;
-  ASTERISK = 31;
-  POUND = 32;
-  CLOSED_CAPTIONS = 33;
-  GARAGE = 34;
-  LAUNDRY = 35;
-  KITCHEN = 36;
-  NOOK = 37;
-  FAMILY_ROOM = 38;
-  LIVING_ROOM = 39;
-  MEDIA_ROOM = 40;
-  DINING_ROOM = 41;
-  ENTRY = 42;
-  MASTER_BEDROOM = 43;
-  EXERCISE_ROOM = 44;
-  PLAY_ROOM = 45;
-  BEDROOM = 46;
-  ROOM = 47;
-  MENU_ALT = 48;
-  PLUS = 49;
-  MINUS = 50;
+message Expr {
+    oneof inner {
+        RefExpr ref = 1;
+        LambdaExpr lambda = 2;
+        CallExpr call = 3;
+        string string = 4;
+        int64 int64 = 5;
+        int32 int32 = 6;
+        float float = 7;
+        bool bool = 8;
+        HouseExpr house = 9;
+        RoomExpr room = 10;
+        ControllerExpr controller = 11;
+        DisplayInterfaceExpr display_interface = 12;
+        DeviceExpr device = 13;
+        WidgetExpr widget = 14;
+    }
 }
