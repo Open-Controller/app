@@ -1,7 +1,7 @@
 /**
  * OpenController Proto
  *
- * A Protocol Buffer schema representing an OpenController house.
+ * A Protocol Buffer schema representing an OpenController module.
 */
 syntax = "proto2";
 
@@ -16,7 +16,6 @@ message HouseExpr {
     required Expr display_name = 1; // The name to be displayed by clients
     required Expr id = 2; // A unique identifier
     map<string, Expr> rooms = 3; // The Rooms inside the House
-    map<string, Expr> devices = 4;  // The Devices inside the House
 }
 
 /** A message representing a room. */
@@ -50,27 +49,45 @@ message DeviceExpr {
 
 /** A message representing any controller widget that can be displayed by clients */
 message WidgetExpr {
-    optional bool expand = 1; // Whether to expand the widget to its maximum possible size on the client
-    required string widget_type = 2;
-    map<string, Expr> params = 3;
-    repeated Expr children = 4;
+    required string widget_type = 2; // The type of widget
+    map<string, Expr> params = 3; // The parameters to the widget
+    repeated Expr children = 4; // The children of the widget
 }
 
+/** A message representing a reference to the cope */
 message RefExpr {
-    required string ref = 1;
+    required string ref = 1; // The name of the desired reference in the scope
 }
 
+/** A message representing a lambda expression */
 message LambdaExpr {
-    repeated string args = 1;
-    required Expr return = 2;
+    repeated string args = 1; // The args to the lambda
+    required Expr return = 2; // The return of the lambda
 }
 
+/** A message representing a function call */
 message CallExpr {
-    required Expr calling = 1;
-    repeated Expr args = 2;
+    required Expr calling = 1; // The expression to call
+    repeated Expr args = 2; // The arguments to pass
 }
 
+/** A message representing an else-if */
+message Elif {
+    required Expr condition = 1; // The condition to call if
+    required Expr then = 2; // The expression to call
+}
+
+/** A message representing an if expression */
+message IfExpr {
+    required Expr condition = 1; // The condition to call if
+    required Expr then = 2; // The expression to call
+    repeated Elif elif = 3; // The else-if conditions
+    required Expr else = 4; // The else condition
+}
+
+/** A message representing an expression */
 message Expr {
+    /** The type of expression */
     oneof inner {
         RefExpr ref = 1;
         LambdaExpr lambda = 2;
@@ -86,5 +103,12 @@ message Expr {
         DisplayInterfaceExpr display_interface = 12;
         DeviceExpr device = 13;
         WidgetExpr widget = 14;
+        IfExpr if = 15;
     }
+}
+
+/** A message representing an OpenController module */
+message Module {
+    map<string, Module> imports = 1; // The imports of the module
+    required Expr body = 2; // The body of the module
 }
