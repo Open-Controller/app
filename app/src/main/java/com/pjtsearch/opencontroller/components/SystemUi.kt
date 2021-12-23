@@ -2,6 +2,7 @@ package com.pjtsearch.opencontroller.components
 
 import android.os.Build
 import android.view.Window
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
@@ -19,11 +20,7 @@ fun SystemUi(window: Window, content: @Composable () -> Unit) =
             }
 
             val systemUiController = rememberSystemUiController()
-//            FIXME: Detect
-            val bg = MaterialTheme.colorScheme.background
-            val useDarkIcons = remember(bg) {
-                bg.luminance() > 0.3
-            }
+            val useDarkIcons = !isSystemInDarkTheme()
 
             SideEffect {
                 systemUiController.setSystemBarsColor(
