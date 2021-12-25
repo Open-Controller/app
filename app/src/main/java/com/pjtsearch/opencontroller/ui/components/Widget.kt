@@ -34,7 +34,7 @@ fun ColumnScope.Widget(
     onOpenMenu: (List<Widget>) -> Unit,
     onError: (Throwable) -> Unit
 ) {
-    fun callParam(paramName: String, vararg params: Any?) {
+    fun callParam(paramName: String, vararg params: Any) {
         GlobalScope.launch {
             (widget.params[paramName] as Fn)(params.toList())
         }

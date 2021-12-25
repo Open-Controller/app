@@ -13,7 +13,26 @@ import java.io.Serializable
 import java.net.Socket
 import java.util.*
 import kotlin.collections.fold
+import kotlin.reflect.KClass
 
+
+abstract class Panic(msg: String) : Throwable(msg)
+
+class TypePanic(expected: KClass<*>?, actual: KClass<*>?) : Panic("Type panic: Expected $expected, was $actual") {
+    constructor() : this(null, null) {}
+}
+
+inline fun <reified T> Any.tryCast(): Result<T, TypePanic> =
+    if (this is T) {
+        Ok(this as T)
+    } else {
+        Err(TypePanic(T::class, this::class))
+    }
+
+fun <T, E : Exception> com.github.kittinunf.result.Result<T, E>.toResult(): Result<T, E> =
+    this.component1()?.let {
+        Ok(it)
+    } ?: Err(this.component2()!!)
 
 data class House(
     val id: String,
@@ -43,536 +62,554 @@ data class Device(
 
 data class Widget(
     val widgetType: String,
-    val params: Map<String, Any?>,
+    val params: Map<String, Any>,
     val children: List<Widget>
 )
 
-typealias Fn = (List<Any?>) -> Any?
+typealias Fn = (List<Any>) -> Result<Any, Panic>
 
 class OpenControllerLibExecutor(
     private var sockets: Map<String, Socket> = hashMapOf()
 ) : Serializable {
     private val builtins: Map<String, Fn> = mapOf(
-        "=" to { args: List<Any?> ->
+        "=" to { args: List<Any> ->
             val first = args[0]
             val second = args[1]
             when (first) {
-                is String -> first == second as String
-                is Number -> first == second as Number
-                is List<*> -> first == second as List<*>
-                is Map<*, *> -> first == second as Map<*, *>
-                else -> TODO()
+                is String -> second.tryCast<String>().map {
+                    first == second
+                }
+                is Number -> second.tryCast<Number>().map {
+                    first == second
+                }
+                is List<*> -> second.tryCast<List<*>>().map {
+                    first == second
+                }
+                is Map<*, *> -> second.tryCast<Map<*, *>>().map {
+                    first == second
+                }
+                else -> Err(TypePanic())
             }
         },
-        "<=" to { args: List<Any?> ->
-            val first = args[0]
-            val second = args[1]
-            when (first) {
-                is Int -> {
-                    when (second) {
-                        is Int -> first <= second
-                        is Float -> first <= second
-                        is Long -> first <= second
-                        is Double -> first <= second
-                        else -> TODO()
-                    }
-                }
-                is Float -> {
-                    when (second) {
-                        is Int -> first <= second
-                        is Float -> first <= second
-                        is Long -> first <= second
-                        is Double -> first <= second
-                        else -> TODO()
-                    }
-                }
-                is Long -> {
-                    when (second) {
-                        is Int -> first <= second
-                        is Float -> first <= second
-                        is Long -> first <= second
-                        is Double -> first <= second
-                        else -> TODO()
-                    }
-                }
-                is Double -> {
-                    when (second) {
-                        is Int -> first <= second
-                        is Float -> first <= second
-                        is Long -> first <= second
-                        is Double -> first <= second
-                        else -> TODO()
-                    }
-                }
-                else -> {
-                    TODO()
-                }
-            }
-        },
-        "<" to { args: List<Any?> ->
+        "<=" to { args: List<Any> ->
             val first = args[0]
             val second = args[1]
             when (first) {
                 is Int -> {
                     when (second) {
-                        is Int -> first < second
-                        is Float -> first < second
-                        is Long -> first < second
-                        is Double -> first < second
-                        else -> TODO()
+                        is Int -> Ok(first <= second)
+                        is Float -> Ok(first <= second)
+                        is Long -> Ok(first <= second)
+                        is Double -> Ok(first <= second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Float -> {
                     when (second) {
-                        is Int -> first < second
-                        is Float -> first < second
-                        is Long -> first < second
-                        is Double -> first < second
-                        else -> TODO()
+                        is Int -> Ok(first <= second)
+                        is Float -> Ok(first <= second)
+                        is Long -> Ok(first <= second)
+                        is Double -> Ok(first <= second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Long -> {
                     when (second) {
-                        is Int -> first < second
-                        is Float -> first < second
-                        is Long -> first < second
-                        is Double -> first < second
-                        else -> TODO()
+                        is Int -> Ok(first <= second)
+                        is Float -> Ok(first <= second)
+                        is Long -> Ok(first <= second)
+                        is Double -> Ok(first <= second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Double -> {
                     when (second) {
-                        is Int -> first < second
-                        is Float -> first < second
-                        is Long -> first < second
-                        is Double -> first < second
-                        else -> TODO()
+                        is Int -> Ok(first <= second)
+                        is Float -> Ok(first <= second)
+                        is Long -> Ok(first <= second)
+                        is Double -> Ok(first <= second)
+                        else -> Err(TypePanic())
                     }
                 }
                 else -> {
-                    TODO()
+                    Err(TypePanic())
                 }
             }
         },
-        ">" to { args: List<Any?> ->
+        "<" to { args: List<Any> ->
             val first = args[0]
             val second = args[1]
             when (first) {
                 is Int -> {
                     when (second) {
-                        is Int -> first > second
-                        is Float -> first > second
-                        is Long -> first > second
-                        is Double -> first > second
-                        else -> TODO()
+                        is Int -> Ok(first < second)
+                        is Float -> Ok(first < second)
+                        is Long -> Ok(first < second)
+                        is Double -> Ok(first < second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Float -> {
                     when (second) {
-                        is Int -> first > second
-                        is Float -> first > second
-                        is Long -> first > second
-                        is Double -> first > second
-                        else -> TODO()
+                        is Int -> Ok(first < second)
+                        is Float -> Ok(first < second)
+                        is Long -> Ok(first < second)
+                        is Double -> Ok(first < second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Long -> {
                     when (second) {
-                        is Int -> first > second
-                        is Float -> first > second
-                        is Long -> first > second
-                        is Double -> first > second
-                        else -> TODO()
+                        is Int -> Ok(first < second)
+                        is Float -> Ok(first < second)
+                        is Long -> Ok(first < second)
+                        is Double -> Ok(first < second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Double -> {
                     when (second) {
-                        is Int -> first > second
-                        is Float -> first > second
-                        is Long -> first > second
-                        is Double -> first > second
-                        else -> TODO()
+                        is Int -> Ok(first < second)
+                        is Float -> Ok(first < second)
+                        is Long -> Ok(first < second)
+                        is Double -> Ok(first < second)
+                        else -> Err(TypePanic())
                     }
                 }
                 else -> {
-                    TODO()
+                    Err(TypePanic())
                 }
             }
         },
-        ">=" to { args: List<Any?> ->
+        ">" to { args: List<Any> ->
             val first = args[0]
             val second = args[1]
             when (first) {
                 is Int -> {
                     when (second) {
-                        is Int -> first >= second
-                        is Float -> first >= second
-                        is Long -> first >= second
-                        is Double -> first >= second
-                        else -> TODO()
+                        is Int -> Ok(first > second)
+                        is Float -> Ok(first > second)
+                        is Long -> Ok(first > second)
+                        is Double -> Ok(first > second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Float -> {
                     when (second) {
-                        is Int -> first >= second
-                        is Float -> first >= second
-                        is Long -> first >= second
-                        is Double -> first >= second
-                        else -> TODO()
+                        is Int -> Ok(first > second)
+                        is Float -> Ok(first > second)
+                        is Long -> Ok(first > second)
+                        is Double -> Ok(first > second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Long -> {
                     when (second) {
-                        is Int -> first >= second
-                        is Float -> first >= second
-                        is Long -> first >= second
-                        is Double -> first >= second
-                        else -> TODO()
+                        is Int -> Ok(first > second)
+                        is Float -> Ok(first > second)
+                        is Long -> Ok(first > second)
+                        is Double -> Ok(first > second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Double -> {
                     when (second) {
-                        is Int -> first >= second
-                        is Float -> first >= second
-                        is Long -> first >= second
-                        is Double -> first >= second
-                        else -> TODO()
+                        is Int -> Ok(first > second)
+                        is Float -> Ok(first > second)
+                        is Long -> Ok(first > second)
+                        is Double -> Ok(first > second)
+                        else -> Err(TypePanic())
                     }
                 }
                 else -> {
-                    TODO()
+                    Err(TypePanic())
                 }
             }
         },
-        "&&" to { args: List<Any?> ->
-            args[0] as Boolean && args[1] as Boolean
+        ">=" to { args: List<Any> ->
+            val first = args[0]
+            val second = args[1]
+            when (first) {
+                is Int -> {
+                    when (second) {
+                        is Int -> Ok(first >= second)
+                        is Float -> Ok(first >= second)
+                        is Long -> Ok(first >= second)
+                        is Double -> Ok(first >= second)
+                        else -> Err(TypePanic())
+                    }
+                }
+                is Float -> {
+                    when (second) {
+                        is Int -> Ok(first >= second)
+                        is Float -> Ok(first >= second)
+                        is Long -> Ok(first >= second)
+                        is Double -> Ok(first >= second)
+                        else -> Err(TypePanic())
+                    }
+                }
+                is Long -> {
+                    when (second) {
+                        is Int -> Ok(first >= second)
+                        is Float -> Ok(first >= second)
+                        is Long -> Ok(first >= second)
+                        is Double -> Ok(first >= second)
+                        else -> Err(TypePanic())
+                    }
+                }
+                is Double -> {
+                    when (second) {
+                        is Int -> Ok(first >= second)
+                        is Float -> Ok(first >= second)
+                        is Long -> Ok(first >= second)
+                        is Double -> Ok(first >= second)
+                        else -> Err(TypePanic())
+                    }
+                }
+                else -> {
+                    Err(TypePanic())
+                }
+            }
         },
-        "||" to { args: List<Any?> ->
-            args[0] as Boolean || args[1] as Boolean
+        "&&" to { args: List<Any> ->
+            Ok(args[0] as Boolean && args[1] as Boolean)
         },
-        "+" to { args: List<Any?> ->
+        "||" to { args: List<Any> ->
+            Ok(args[0] as Boolean || args[1] as Boolean)
+        },
+        "+" to { args: List<Any> ->
             val first = args[0]
             val second = args[1]
             when (first) {
                 is String -> {
                     when (second) {
                         is String, is Number -> {
-                            first + second
+                            Ok(first + second)
                         }
                         else -> {
-                            TODO()
+                            Err(TypePanic())
                         }
                     }
                 }
                 is Int -> {
                     when (second) {
-                        is Int -> first + second
-                        is Float -> first + second
-                        is Long -> first + second
-                        is Double -> first + second
-                        is String -> first.toString() + second
-                        else -> TODO()
+                        is Int -> Ok(first + second)
+                        is Float -> Ok(first + second)
+                        is Long -> Ok(first + second)
+                        is Double -> Ok(first + second)
+                        is String -> Ok(first.toString() + second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Float -> {
                     when (second) {
-                        is Int -> first + second
-                        is Float -> first + second
-                        is Long -> first + second
-                        is Double -> first + second
-                        is String -> first.toString() + second
-                        else -> TODO()
+                        is Int -> Ok(first + second)
+                        is Float -> Ok(first + second)
+                        is Long -> Ok(first + second)
+                        is Double -> Ok(first + second)
+                        is String -> Ok(first.toString() + second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Long -> {
                     when (second) {
-                        is Int -> first + second
-                        is Float -> first + second
-                        is Long -> first + second
-                        is Double -> first + second
-                        is String -> first.toString() + second
-                        else -> TODO()
+                        is Int -> Ok(first + second)
+                        is Float -> Ok(first + second)
+                        is Long -> Ok(first + second)
+                        is Double -> Ok(first + second)
+                        is String -> Ok(first.toString() + second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Double -> {
                     when (second) {
-                        is Int -> first + second
-                        is Float -> first + second
-                        is Long -> first + second
-                        is Double -> first + second
-                        is String -> first.toString() + second
-                        else -> TODO()
+                        is Int -> Ok(first + second)
+                        is Float -> Ok(first + second)
+                        is Long -> Ok(first + second)
+                        is Double -> Ok(first + second)
+                        is String -> Ok(first.toString() + second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is List<*> -> {
-                    first + second
+                    Ok(first + second)
                 }
                 is Map<*, *> -> {
                     when (second) {
-                        is Map<*, *> -> first + second
-                        is Pair<*, *> -> first + second
-                        else -> TODO()
+                        is Map<*, *> -> Ok(first + second)
+                        is Pair<*, *> -> Ok(first + second)
+                        else -> Err(TypePanic())
                     }
                 }
                 else -> {
-                    TODO()
+                    Err(TypePanic())
                 }
             }
         },
-        "-" to { args: List<Any?> ->
+        "-" to { args: List<Any> ->
             val first = args[0]
             val second = args[1]
             when (first) {
                 is Int -> {
                     when (second) {
-                        is Int -> first - second
-                        is Float -> first - second
-                        is Long -> first - second
-                        is Double -> first - second
-                        else -> TODO()
+                        is Int -> Ok(first - second)
+                        is Float -> Ok(first - second)
+                        is Long -> Ok(first - second)
+                        is Double -> Ok(first - second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Float -> {
                     when (second) {
-                        is Int -> first - second
-                        is Float -> first - second
-                        is Long -> first - second
-                        is Double -> first - second
-                        else -> TODO()
+                        is Int -> Ok(first - second)
+                        is Float -> Ok(first - second)
+                        is Long -> Ok(first - second)
+                        is Double -> Ok(first - second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Long -> {
                     when (second) {
-                        is Int -> first - second
-                        is Float -> first - second
-                        is Long -> first - second
-                        is Double -> first - second
-                        else -> TODO()
+                        is Int -> Ok(first - second)
+                        is Float -> Ok(first - second)
+                        is Long -> Ok(first - second)
+                        is Double -> Ok(first - second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Double -> {
                     when (second) {
-                        is Int -> first - second
-                        is Float -> first - second
-                        is Long -> first - second
-                        is Double -> first - second
-                        else -> TODO()
+                        is Int -> Ok(first - second)
+                        is Float -> Ok(first - second)
+                        is Long -> Ok(first - second)
+                        is Double -> Ok(first - second)
+                        else -> Err(TypePanic())
                     }
                 }
                 else -> {
-                    TODO()
+                    Err(TypePanic())
                 }
             }
         },
-        "*" to { args: List<Any?> ->
+        "*" to { args: List<Any> ->
             val first = args[0]
             val second = args[1]
             when (first) {
                 is Int -> {
                     when (second) {
-                        is Int -> first * second
-                        is Float -> first * second
-                        is Long -> first * second
-                        is Double -> first * second
-                        else -> TODO()
+                        is Int -> Ok(first * second)
+                        is Float -> Ok(first * second)
+                        is Long -> Ok(first * second)
+                        is Double -> Ok(first * second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Float -> {
                     when (second) {
-                        is Int -> first * second
-                        is Float -> first * second
-                        is Long -> first * second
-                        is Double -> first * second
-                        else -> TODO()
+                        is Int -> Ok(first * second)
+                        is Float -> Ok(first * second)
+                        is Long -> Ok(first * second)
+                        is Double -> Ok(first * second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Long -> {
                     when (second) {
-                        is Int -> first * second
-                        is Float -> first * second
-                        is Long -> first * second
-                        is Double -> first * second
-                        else -> TODO()
+                        is Int -> Ok(first * second)
+                        is Float -> Ok(first * second)
+                        is Long -> Ok(first * second)
+                        is Double -> Ok(first * second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Double -> {
                     when (second) {
-                        is Int -> first * second
-                        is Float -> first * second
-                        is Long -> first * second
-                        is Double -> first * second
-                        else -> TODO()
+                        is Int -> Ok(first * second)
+                        is Float -> Ok(first * second)
+                        is Long -> Ok(first * second)
+                        is Double -> Ok(first * second)
+                        else -> Err(TypePanic())
                     }
                 }
                 else -> {
-                    TODO()
+                    Err(TypePanic())
                 }
             }
         },
-        "/" to { args: List<Any?> ->
+        "/" to { args: List<Any> ->
             val first = args[0]
             val second = args[1]
             when (first) {
                 is Int -> {
                     when (second) {
-                        is Int -> first / second
-                        is Float -> first / second
-                        is Long -> first / second
-                        is Double -> first / second
-                        else -> TODO()
+                        is Int -> Ok(first / second)
+                        is Float -> Ok(first / second)
+                        is Long -> Ok(first / second)
+                        is Double -> Ok(first / second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Float -> {
                     when (second) {
-                        is Int -> first / second
-                        is Float -> first / second
-                        is Long -> first / second
-                        is Double -> first / second
-                        else -> TODO()
+                        is Int -> Ok(first / second)
+                        is Float -> Ok(first / second)
+                        is Long -> Ok(first / second)
+                        is Double -> Ok(first / second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Long -> {
                     when (second) {
-                        is Int -> first / second
-                        is Float -> first / second
-                        is Long -> first / second
-                        is Double -> first / second
-                        else -> TODO()
+                        is Int -> Ok(first / second)
+                        is Float -> Ok(first / second)
+                        is Long -> Ok(first / second)
+                        is Double -> Ok(first / second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Double -> {
                     when (second) {
-                        is Int -> first / second
-                        is Float -> first / second
-                        is Long -> first / second
-                        is Double -> first / second
-                        else -> TODO()
+                        is Int -> Ok(first / second)
+                        is Float -> Ok(first / second)
+                        is Long -> Ok(first / second)
+                        is Double -> Ok(first / second)
+                        else -> Err(TypePanic())
                     }
                 }
                 else -> {
-                    TODO()
+                    Err(TypePanic())
                 }
             }
         },
-        "%" to { args: List<Any?> ->
+        "%" to { args: List<Any> ->
             val first = args[0]
             val second = args[1]
             when (first) {
                 is Int -> {
                     when (second) {
-                        is Int -> first % second
-                        is Float -> first % second
-                        is Long -> first % second
-                        is Double -> first % second
-                        else -> TODO()
+                        is Int -> Ok(first % second)
+                        is Float -> Ok(first % second)
+                        is Long -> Ok(first % second)
+                        is Double -> Ok(first % second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Float -> {
                     when (second) {
-                        is Int -> first % second
-                        is Float -> first % second
-                        is Long -> first % second
-                        is Double -> first % second
-                        else -> TODO()
+                        is Int -> Ok(first % second)
+                        is Float -> Ok(first % second)
+                        is Long -> Ok(first % second)
+                        is Double -> Ok(first % second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Long -> {
                     when (second) {
-                        is Int -> first % second
-                        is Float -> first % second
-                        is Long -> first % second
-                        is Double -> first % second
-                        else -> TODO()
+                        is Int -> Ok(first % second)
+                        is Float -> Ok(first % second)
+                        is Long -> Ok(first % second)
+                        is Double -> Ok(first % second)
+                        else -> Err(TypePanic())
                     }
                 }
                 is Double -> {
                     when (second) {
-                        is Int -> first % second
-                        is Float -> first % second
-                        is Long -> first % second
-                        is Double -> first % second
-                        else -> TODO()
+                        is Int -> Ok(first % second)
+                        is Float -> Ok(first % second)
+                        is Long -> Ok(first % second)
+                        is Double -> Ok(first % second)
+                        else -> Err(TypePanic())
                     }
                 }
                 else -> {
-                    TODO()
+                    Err(TypePanic())
                 }
             }
         },
-        "getLambda" to { args: List<Any?> ->
+        "getLambda" to { args: List<Any> ->
             val device = args[0] as Device
             val lambda = args[1] as String
-            device.lambdas.get(lambda)
+            Ok(device.lambdas[lambda]!!)
         },
-        "pipe" to { args: List<Any?> ->
+        "pipe" to { args: List<Any> -> binding {
             val value = args[0]
             args.drop(1).fold(value) { lastResult, curr ->
-                (curr as Fn)(listOf(lastResult))
+                curr.tryCast<Fn>().bind()(listOf(lastResult))
             }
+        } },
+        "listOf" to { args: List<Any> ->
+            Ok(args)
         },
-        "listOf" to { args: List<Any?> ->
-            args
-        },
-        "mapOf" to { args: List<Any?> ->
-            val pairs = args as List<Pair<Any?, Any?>>
+        "mapOf" to { args: List<Any> -> binding {
+            val pairs = args.tryCast<List<Pair<Any, Any>>>().bind()
             mapOf(*pairs.toTypedArray())
-        },
-        "pair" to { args: List<Any?> ->
+        } },
+        "pair" to { args: List<Any> ->
             val key = args[0]
             val value = args[1]
-            key to value
+            Ok(key to value)
         },
-        "index" to { args: List<Any?> ->
+        "index" to { args: List<Any> ->
             val input = args[0]
             val path = args.drop(1)
-            fun getIndex(input: Any?, path: List<Any?>): Any? {
+            fun getIndex(input: Any?, path: List<Any>): Any? {
                 return if (path.isEmpty()) {
                     input
                 } else {
                     when (input) {
+//                        TODO: Panic
                         is List<*> -> getIndex(input[path[0] as Int], path.drop(1))
                         is Map<*, *> -> getIndex(input[path[0]], path.drop(1))
                         else -> TODO()
                     }
                 }
             }
-            getIndex(input, path)
+            Ok(Optional.ofNullable(getIndex(input, path)))
         },
-        "map" to { args: List<Any?> ->
-            val transformer = args[0] as Fn
-            { innerArgs: List<Any?> ->
+        "map" to { args: List<Any> -> binding {
+            val transformer = args[0].tryCast<Fn>().bind();
+            { innerArgs: List<Any> -> runCatching {
                 when (val input = innerArgs[0]) {
                     is Flow<*> -> input.map {
-                        transformer(listOf(it))
+
+//                        TODO: fix bind
+                        it?.let { transformer(listOf(it)).bind() } ?: throw TypePanic()
                     }
                     is List<*> -> input.map {
-                        transformer(listOf(it))
+                        it?.let { transformer(listOf(it)).bind() } ?: throw TypePanic()
                     }
-                    else -> TODO()
+                    is Result<*, *> -> input.map {
+                        it?.let { transformer(listOf(it)).bind() } ?: throw TypePanic()
+                    }
+                    is Optional<*> -> input.map {
+                        it?.let { transformer(listOf(it)).bind() } ?: throw TypePanic()
+                    }
+                    else -> throw TypePanic()
                 }
-            }
-        },
-        "delay" to { args: List<Any?> ->
+            } }
+        } },
+        "delay" to { args: List<Any> ->
             val amount = args[0] as Int
             Thread.sleep(amount.toLong())
+            Ok(Unit)
         }
     )
 
     private val stdModule = Device(
         mapOf(
-            "httpRequest" to { args: List<Any?> ->
+            "httpRequest" to { args: List<Any> ->
                 val url = args[0] as String
                 when (args[1] as String) {
-                    "GET" -> url.httpGet().response().third.get().decodeToString()
-                    "HEAD" -> url.httpHead().response().third.get().decodeToString()
-                    "POST" -> url.httpPost().response().third.get().decodeToString()
-                    "PUT" -> url.httpPut().response().third.get().decodeToString()
-                    "PATCH" -> url.httpPatch().response().third.get().decodeToString()
-                    "DELETE" -> url.httpDelete().response().third.get().decodeToString()
-                    else -> TODO()
+                    "GET" -> Ok(url.httpGet().responseString().third.toResult())
+                    "HEAD" -> Ok(url.httpHead().responseString().third.toResult())
+                    "POST" -> Ok(url.httpPost().responseString().third.toResult())
+                    "PUT" -> Ok(url.httpPut().responseString().third.toResult())
+                    "PATCH" -> Ok(url.httpPatch().responseString().third.toResult())
+                    "DELETE" -> Ok(url.httpDelete().responseString().third.toResult())
+                    else -> Err(TypePanic())
                 }
             },
-            "tcpRequest" to { args: List<Any?> ->
+            "tcpRequest" to { args: List<Any> ->
                 val (host, port) = (args[0] as String).split(":")
                 var client:Socket? = null
                 try {
@@ -588,233 +625,203 @@ class OpenControllerLibExecutor(
                 Thread.sleep(300)
                 client?.close()
                 sockets = sockets - "$host:$port"
+                Ok(Unit)
             },
-            "observeTime" to { args: List<Any?> ->
+            "observeTime" to { args: List<Any> ->
                 val interval = args[0] as Number
-                flow {
+                Ok(flow {
                     while (true) {
                         emit(Date().time)
                         delay(interval.toLong())
                     }
-                }
+                })
             },
         )
     )
 
     fun interpretExpr(
         expr: ExprOrBuilder,
-        moduleScope: Map<String, Any?>,
-        localScope: Map<String, Any?>,
-    ): Result<Any?, Throwable> =
-        binding {
-            when (expr.innerCase) {
-                Expr.InnerCase.REF -> expr.ref.let {
-                    runCatching {
-                        localScope[it.ref] ?: builtins[it.ref] ?: moduleScope[it.ref]
-                    }.bind()
+        moduleScope: Map<String, Any>,
+        localScope: Map<String, Any>,
+    ): Result<Any, Panic> =
+        when (expr.innerCase) {
+            Expr.InnerCase.REF -> expr.ref.let {
+                (localScope[it.ref] ?: builtins[it.ref] ?: moduleScope[it.ref])?.let { r ->
+                    Ok(r)
+                } ?: Err(TypePanic())
+            }
+            Expr.InnerCase.LAMBDA -> expr.lambda.let {
+                Ok<Fn> { args: List<Any> ->
+                    interpretExpr(
+                        it.`return`,
+                        moduleScope,
+                        localScope + mapOf(*it.argsList.mapIndexed { i, arg ->
+                            arg to args[i]
+                        }.toTypedArray()),
+                    )
                 }
-                Expr.InnerCase.LAMBDA -> expr.lambda.let {
-                    { args: List<Any?> ->
+            }
+            Expr.InnerCase.CALL -> expr.call.let { binding {
+                val fn = interpretExpr(
+                    it.calling,
+                    moduleScope,
+                    localScope,
+                ).bind()
+                fn.tryCast<Fn>().bind()(
+                    it.argsList.map { arg ->
                         interpretExpr(
-                            it.`return`,
+                            arg,
                             moduleScope,
-                            localScope + mapOf(*it.argsList.mapIndexed { i, arg ->
-                                arg to args[i]
-                            }.toTypedArray()),
-                        ).unwrap()
+                            localScope,
+                        ).bind()
+                    },
+                ).bind()
+            } }
+            Expr.InnerCase.STRING -> Ok(expr.string)
+            Expr.InnerCase.INT64 -> Ok(expr.int64)
+            Expr.InnerCase.INT32 -> Ok(expr.int32)
+            Expr.InnerCase.FLOAT -> Ok(expr.float)
+            Expr.InnerCase.BOOL -> Ok(expr.bool)
+            Expr.InnerCase.HOUSE -> expr.house.let { binding {
+                House(
+//                      Evaluate with old house scope
+                    interpretExpr(
+                        it.id,
+                        moduleScope,
+                        localScope,
+                    ).bind().tryCast<String>().bind(),
+                    interpretExpr(
+                        it.displayName,
+                        moduleScope,
+                        localScope,
+                    ).bind().tryCast<String>().bind(),
+                    it.roomsMap.mapValues { (_, roomExpr) ->
+                        interpretExpr(
+                            roomExpr,
+                            moduleScope,
+                            localScope,
+                        ).bind().tryCast<Room>().bind()
+                    },
+                )
+            } }
+            Expr.InnerCase.ROOM -> expr.room.let { binding {
+                Room(
+                    interpretExpr(
+                        it.displayName,
+                        moduleScope,
+                        localScope,
+                    ).bind().tryCast<String>().bind(),
+                    interpretExpr(
+                        it.icon,
+                        moduleScope,
+                        localScope,
+                    ).bind().tryCast<String>().bind(),
+                    it.controllersMap.mapValues { (_, controllerExpr) ->
+                        interpretExpr(
+                            controllerExpr,
+                            moduleScope,
+                            localScope,
+                        ).bind().tryCast<Controller>().bind()
                     }
-                }
-                Expr.InnerCase.CALL -> expr.call.let {
-                    val fn = interpretExpr(
-                        it.calling,
+                )
+            } }
+            Expr.InnerCase.CONTROLLER -> expr.controller.let { binding {
+                Controller(
+                    interpretExpr(
+                        it.displayName,
+                        moduleScope,
+                        localScope,
+                    ).bind().tryCast<String>().bind(),
+                    interpretExpr(
+                        it.brandColor,
+                        moduleScope,
+                        localScope,
+                    ).bind().tryCast<String>().bind(),
+                    interpretExpr(
+                        it.displayInterface,
+                        moduleScope,
+                        localScope,
+                    ).bind().tryCast<DisplayInterface>().bind()
+                )
+            } }
+            Expr.InnerCase.DISPLAY_INTERFACE -> expr.displayInterface.let { binding {
+                DisplayInterface(it.widgetsList.map { widget ->
+                    interpretExpr(
+                        widget,
+                        moduleScope,
+                        localScope,
+                    ).bind().tryCast<Widget>().bind()
+                })
+            } }
+            Expr.InnerCase.DEVICE -> expr.device.let { binding {
+                Device(it.lambdasMap.mapValues { (_, lambdaExpr) ->
+                    interpretExpr(
+                        lambdaExpr,
+                        moduleScope,
+                        localScope,
+                    ).bind().tryCast<Fn>().bind()
+                })
+            } }
+            Expr.InnerCase.WIDGET -> expr.widget.let { binding {
+                Widget(
+                    it.widgetType,
+                    it.paramsMap.mapValues { (_, paramExpr) ->
+                        interpretExpr(
+                            paramExpr,
+                            moduleScope,
+                            localScope,
+                        ).bind()
+                    },
+                    it.childrenList.map { childExpr ->
+                        interpretExpr(
+                            childExpr,
+                            moduleScope,
+                            localScope,
+                        ).bind().tryCast<Widget>().bind()
+                    }
+                )
+            } }
+            Expr.InnerCase.IF -> expr.`if`.let { binding {
+                if (interpretExpr(
+                        it.condition,
+                        moduleScope,
+                        localScope,
+                    ).bind().tryCast<Boolean>().bind()) {
+                    interpretExpr(
+                        it.then,
                         moduleScope,
                         localScope,
                     ).bind()
-                    runCatching { fn as Fn }.mapError { Error("Expected function, was $fn") }
-                        .bind()(
-                        it.argsList.map { arg ->
-                            interpretExpr(
-                                arg,
-                                moduleScope,
-                                localScope,
-                            ).bind()
-                        },
-                    )
-                }
-                Expr.InnerCase.STRING -> expr.string
-                Expr.InnerCase.INT64 -> expr.int64
-                Expr.InnerCase.INT32 -> expr.int32
-                Expr.InnerCase.FLOAT -> expr.float
-                Expr.InnerCase.BOOL -> expr.bool
-                Expr.InnerCase.HOUSE -> expr.house.let {
-                    House(
-//                      Evaluate with old house scope
-                        runCatching {
-                            interpretExpr(
-                                it.id,
-                                moduleScope,
-                                localScope,
-                            ).bind() as String
-                        }.mapError { Error("Expected id") }.bind(),
-                        runCatching {
-                            interpretExpr(
-                                it.displayName,
-                                moduleScope,
-                                localScope,
-                            ).bind() as String
-                        }.mapError { Error("Expected display name") }.bind(),
-                        it.roomsMap.mapValues { (_, roomExpr) ->
-                            runCatching {
-                                interpretExpr(
-                                    roomExpr,
-                                    moduleScope,
-                                    localScope,
-                                ).bind() as Room
-                            }.mapError { Error("Expected room") }.bind()
-                        },
-                    )
-                }
-                Expr.InnerCase.ROOM -> expr.room.let {
-                    Room(
-                        runCatching {
-                            interpretExpr(
-                                it.displayName,
-                                moduleScope,
-                                localScope,
-                            ).bind() as String
-                        }.mapError { Error("Expected display name") }.bind(),
-                        runCatching {
-                            interpretExpr(
-                                it.icon,
-                                moduleScope,
-                                localScope,
-                            ).bind() as String
-                        }.mapError { Error("Expected icon") }.bind(),
-                        it.controllersMap.mapValues { (_, controllerExpr) ->
-                            runCatching {
-                                interpretExpr(
-                                    controllerExpr,
-                                    moduleScope,
-                                    localScope,
-                                ).bind() as Controller
-                            }.mapError { Error("Expected controller") }.bind()
-                        }
-                    )
-                }
-                Expr.InnerCase.CONTROLLER -> expr.controller.let {
-                    Controller(
-                        runCatching {
-                            interpretExpr(
-                                it.displayName,
-                                moduleScope,
-                                localScope,
-                            ).bind() as String
-                        }.mapError { Error("Expected display name") }.bind(),
-                        runCatching {
-                            interpretExpr(
-                                it.brandColor,
-                                moduleScope,
-                                localScope,
-                            ).bind() as String
-                        }.mapError { Error("Expected brand color") }.bind(),
-                        runCatching {
-                            interpretExpr(
-                                it.displayInterface,
-                                moduleScope,
-                                localScope,
-                            ).bind() as DisplayInterface
-                        }.mapError { Error("Expected display interface") }.bind()
-                    )
-                }
-                Expr.InnerCase.DISPLAY_INTERFACE -> expr.displayInterface.let {
-                    DisplayInterface(it.widgetsList.map { widget ->
-                        runCatching {
-                            interpretExpr(
-                                widget,
-                                moduleScope,
-                                localScope,
-                            ).bind() as Widget
-                        }.mapError { Error("Expected widget") }.bind()
-                    })
-                }
-                Expr.InnerCase.DEVICE -> expr.device.let {
-                    Device(it.lambdasMap.mapValues { (_, lambdaExpr) ->
-                        runCatching {
-                            interpretExpr(
-                                lambdaExpr,
-                                moduleScope,
-                                localScope,
-                            ).bind() as Fn
-                        }.mapError { Error("Expected function") }.bind()
-                    })
-                }
-                Expr.InnerCase.WIDGET -> expr.widget.let {
-                    Widget(
-                        it.widgetType,
-                        it.paramsMap.mapValues { (_, paramExpr) ->
-                            interpretExpr(
-                                paramExpr,
-                                moduleScope,
-                                localScope,
-                            ).bind()
-                        },
-                        it.childrenList.map { childExpr ->
-                            runCatching {
-                                interpretExpr(
-                                    childExpr,
-                                    moduleScope,
-                                    localScope,
-                                ).bind() as Widget
-                            }.mapError { Error("Expected widget") }.bind()
-                        }
-                    )
-                }
-                Expr.InnerCase.IF -> expr.`if`.let {
-                    if (runCatching {
-                            interpretExpr(
-                                it.condition,
-                                moduleScope,
-                                localScope,
-                            ).bind() as Boolean
-                        }.mapError { Error("Expected condition") }.bind()) {
+                } else {
+                    val elif = it.elifList.find { elif ->
                         interpretExpr(
-                            it.then,
+                            elif.condition,
+                            moduleScope,
+                            localScope,
+                        ).bind().tryCast<Boolean>().bind()
+                    }
+                    if (elif != null) {
+                        interpretExpr(
+                            elif.then,
                             moduleScope,
                             localScope,
                         ).bind()
                     } else {
-                        val elif = it.elifList.find { elif ->
-                            runCatching {
-                                interpretExpr(
-                                    elif.condition,
-                                    moduleScope,
-                                    localScope,
-                                ).bind() as Boolean
-                            }.mapError { Error("Expected condition") }.bind()
-                        }
-                        if (elif != null) {
-                            interpretExpr(
-                                elif.then,
-                                moduleScope,
-                                localScope,
-                            ).bind()
-                        } else {
-                            interpretExpr(
-                                it.`else`,
-                                moduleScope,
-                                localScope,
-                            ).bind()
-                        }
+                        interpretExpr(
+                            it.`else`,
+                            moduleScope,
+                            localScope,
+                        ).bind()
                     }
                 }
-                Expr.InnerCase.INNER_NOT_SET -> TODO()
-                null -> TODO()
-            }
+            } }
+            Expr.InnerCase.INNER_NOT_SET -> TODO()
+            null -> TODO()
         }
 
     fun interpretModule(
         module: ModuleOrBuilder,
-    ): Result<Any?, Throwable> = binding {
+    ): Result<Any, Panic> = binding {
         interpretExpr(
             module.body,
             mapOf("std" to stdModule) +

@@ -1,9 +1,11 @@
 package com.pjtsearch.opencontroller
 
+import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import com.pjtsearch.opencontroller_lib_proto.*
 import org.junit.Assert
 import org.junit.Test
+import java.util.*
 
 class OpenControllerLibExecutorTest {
 //    TODO: Use modules
@@ -93,7 +95,7 @@ class OpenControllerLibExecutorTest {
             )
         ).build()
         val res = executor.interpretExpr(lambda, mapOf(), mapOf()).unwrap() as Fn
-        Assert.assertEquals("123", res(listOf("123")))
+        Assert.assertEquals(Ok("123"), res(listOf("123")))
     }
 
     @Test
@@ -123,7 +125,7 @@ class OpenControllerLibExecutorTest {
                 )
             ).build())
         val res = executor.interpretModule(module).unwrap() as Fn
-        Assert.assertEquals("added 123", res(listOf()))
+        Assert.assertEquals(Ok("added 123"), res(listOf()))
     }
 
     @Test
@@ -146,14 +148,15 @@ class OpenControllerLibExecutorTest {
             )
         )).build()
         val res = executor.interpretModule(lambda).unwrap() as Fn
-        Assert.assertEquals("""
+//        Second Ok for http result
+        Assert.assertEquals(Ok(Ok("""
             {
               "userId": 1,
               "id": 1,
               "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
               "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
             }
-        """.trimIndent(), res(listOf()))
+        """.trimIndent())), res(listOf()))
     }
 
     @Test
@@ -186,14 +189,15 @@ class OpenControllerLibExecutorTest {
                 )
         )).build()
         val res = executor.interpretModule(lambda).unwrap() as Fn
-        Assert.assertEquals("""
+//        Second Ok for http result
+        Assert.assertEquals(Ok(Ok("""
             {
               "userId": 1,
               "id": 1,
               "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
               "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
             }
-        """.trimIndent(), res(listOf("GET", "1")))
+        """.trimIndent())), res(listOf("GET", "1")))
     }
 
 
@@ -248,8 +252,8 @@ class OpenControllerLibExecutorTest {
                 )
         )).build()
         val res = executor.interpretModule(lambda).unwrap() as Fn
-        Assert.assertEquals("a", res(listOf(mapOf("1" to "a", "2" to "b"), "1")))
-        Assert.assertEquals("2", res(listOf(listOf("1", "2", "3"), 1)))
+        Assert.assertEquals(Ok(Optional.of("a")), res(listOf(mapOf("1" to "a", "2" to "b"), "1")))
+        Assert.assertEquals(Ok(Optional.of("2")), res(listOf(listOf("1", "2", "3"), 1)))
     }
 
     @Test
@@ -273,8 +277,32 @@ class OpenControllerLibExecutorTest {
         )).build()
         val res = executor.interpretModule(lambda).unwrap() as Fn
         Assert.assertEquals(
-            "b",
+            Ok(Optional.of("b")),
             res(listOf(mapOf("1" to listOf("1", mapOf("a" to "b"), "3"), "2" to "b"), "1", 1, "a"))
         )
+    }
+
+
+    @Test
+    fun mapResult() {
+        val executor = OpenControllerLibExecutor()
+        val lambda = Module.newBuilder().setBody(Expr.newBuilder().setLambda(
+            LambdaExpr.newBuilder()
+                .addArgs("of")
+                .setReturn(
+                    Expr.newBuilder().setCall(CallExpr.newBuilder()
+                        .setCalling(Expr.newBuilder().setCall(CallExpr.newBuilder()
+                            .setCalling(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("map")))
+                            .addArgs(Expr.newBuilder().setLambda(
+                                LambdaExpr.newBuilder().setReturn(Expr.newBuilder().setString("mapped"))
+                            ))
+                        ))
+                        .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("of")))
+                    )
+                )
+        )).build()
+        val res = executor.interpretModule(lambda).unwrap() as Fn
+//        Two Oks because should return the mapped result
+        Assert.assertEquals(Ok(Ok("mapped")), res(listOf(Ok("asdf"))))
     }
 }
