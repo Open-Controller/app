@@ -18,7 +18,8 @@ import kotlin.reflect.KClass
 
 abstract class Panic(msg: String) : Throwable(msg)
 
-class TypePanic(expected: KClass<*>?, actual: KClass<*>?) : Panic("Type panic: Expected $expected, was $actual") {
+data class TypePanic(val expected: KClass<*>?, val actual: KClass<*>?) :
+        Panic("Type panic${if (expected != null) " : Expected $expected, was $actual" else ""}") {
     constructor() : this(null, null) {}
 }
 
@@ -284,6 +285,13 @@ class OpenControllerLibExecutor(
                 }
                 is Optional<*> -> Ok(if (first.isPresent) first.get() else second)
                 is Result<*, *> -> Ok(first.getOr(second)!!)
+                else -> Err(TypePanic())
+            }
+        },
+        "unwrap" to { args: List<Any> ->
+            when (val item = args[0]) {
+                is Optional<*> -> if (item.isPresent) Ok(item.get()) else Err(TypePanic())
+                is Result<*, *> -> item.mapError { TypePanic() }
                 else -> Err(TypePanic())
             }
         },

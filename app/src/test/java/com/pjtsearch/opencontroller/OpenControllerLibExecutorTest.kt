@@ -1,5 +1,6 @@
 package com.pjtsearch.opencontroller
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import com.pjtsearch.opencontroller_lib_proto.*
@@ -323,5 +324,23 @@ class OpenControllerLibExecutorTest {
         val res = executor.interpretModule(lambda).unwrap() as Fn
         Assert.assertEquals(Ok("replaced"), res(listOf(Optional.empty<Nothing>())))
         Assert.assertEquals(Ok("test"), res(listOf(Optional.ofNullable("test"))))
+    }
+
+    @Test
+    fun unwrapResult() {
+        val executor = OpenControllerLibExecutor()
+        val lambda = Module.newBuilder().setBody(Expr.newBuilder().setLambda(
+            LambdaExpr.newBuilder()
+                .addArgs("of")
+                .setReturn(
+                    Expr.newBuilder().setCall(CallExpr.newBuilder()
+                        .setCalling(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("unwrap")))
+                        .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("of")))
+                    )
+                )
+        )).build()
+        val res = executor.interpretModule(lambda).unwrap() as Fn
+        Assert.assertEquals(Ok("test"), res(listOf(Ok("test"))))
+        Assert.assertEquals(Err(TypePanic()), res(listOf(Err("test"))))
     }
 }
