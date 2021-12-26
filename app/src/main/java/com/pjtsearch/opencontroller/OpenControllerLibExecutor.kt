@@ -275,7 +275,17 @@ class OpenControllerLibExecutor(
             Ok(args[0] as Boolean && args[1] as Boolean)
         },
         "||" to { args: List<Any> ->
-            Ok(args[0] as Boolean || args[1] as Boolean)
+            val first = args[0]
+            val second = args[1]
+            when (first) {
+                is Boolean -> when (second) {
+                    is Boolean -> Ok(first || second)
+                    else -> Err(TypePanic())
+                }
+                is Optional<*> -> Ok(if (first.isPresent) first.get() else second)
+                is Result<*, *> -> Ok(first.getOr(second)!!)
+                else -> Err(TypePanic())
+            }
         },
         "+" to { args: List<Any> ->
             val first = args[0]

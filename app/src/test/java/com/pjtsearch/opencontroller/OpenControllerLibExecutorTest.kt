@@ -305,4 +305,23 @@ class OpenControllerLibExecutorTest {
 //        Two Oks because should return the mapped result
         Assert.assertEquals(Ok(Ok("mapped")), res(listOf(Ok("asdf"))))
     }
+
+    @Test
+    fun orOptional() {
+        val executor = OpenControllerLibExecutor()
+        val lambda = Module.newBuilder().setBody(Expr.newBuilder().setLambda(
+            LambdaExpr.newBuilder()
+                .addArgs("of")
+                .setReturn(
+                    Expr.newBuilder().setCall(CallExpr.newBuilder()
+                        .setCalling(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("||")))
+                        .addArgs(Expr.newBuilder().setRef(RefExpr.newBuilder().setRef("of")))
+                        .addArgs(Expr.newBuilder().setString("replaced"))
+                    )
+                )
+        )).build()
+        val res = executor.interpretModule(lambda).unwrap() as Fn
+        Assert.assertEquals(Ok("replaced"), res(listOf(Optional.empty<Nothing>())))
+        Assert.assertEquals(Ok("test"), res(listOf(Optional.ofNullable("test"))))
+    }
 }
