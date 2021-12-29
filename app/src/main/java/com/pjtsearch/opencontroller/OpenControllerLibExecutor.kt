@@ -15,20 +15,45 @@ import java.util.*
 import kotlin.collections.fold
 import kotlin.reflect.KClass
 
+sealed interface Panic {
+    val msg: String
+    val stack: List<StackCtx>
+    fun withCtx(ctx: StackCtx): Panic
 
-abstract class Panic(msg: String) : Throwable(msg)
+    data class Type(val expected: KClass<*>?, val actual: KClass<*>?, override val stack: List<StackCtx>) : Panic {
+        constructor(stack: List<StackCtx>) : this(null, null, stack)
 
-data class TypePanic(val expected: KClass<*>?, val actual: KClass<*>?) :
-        Panic("Type panic${if (expected != null) " : Expected $expected, was $actual" else ""}") {
-    constructor() : this(null, null) {}
+        override val msg: String
+            get() = "Type Panic${if (expected != null) " : Expected $expected, was $actual" else ""}"
+
+        override fun withCtx(ctx: StackCtx): Panic =
+            Type(expected, actual, stack + ctx)
+    }
 }
 
-inline fun <reified T> Any.tryCast(): Result<T, TypePanic> =
-    if (this is T) {
-        Ok(this as T)
-    } else {
-        Err(TypePanic(T::class, this::class))
+sealed interface StackCtx {
+    data class Fn(
+        val lambdaName: String,
+        val args: List<Any>
+    ) : StackCtx {
+        inline fun <reified T> tryCast(item: Any): Result<T, Panic.Type> =
+            if (item is T) {
+                Ok(item as T)
+            } else {
+                Err(Panic.Type(T::class, item::class, listOf(this)))
+            }
+
+        inline fun <reified T> Result<T, Panic>.ctx(): Result<T, Panic> =
+            this.mapError { e -> e.withCtx(this@Fn) }
+
+        fun typePanic(): Panic.Type =
+            Panic.Type(listOf(this))
+
     }
+}
+    
+fun <T> fnCtx(lambdaName: String, args: List<Any>, cb: StackCtx.Fn.() -> T) =
+    StackCtx.Fn(lambdaName, args).run(cb)
 
 fun <T, E : Exception> com.github.kittinunf.result.Result<T, E>.toResult(): Result<T, E> =
     this.component1()?.let {
@@ -69,30 +94,55 @@ data class Widget(
 
 typealias Fn = (List<Any>) -> Result<Any, Panic>
 
+fun asString(item: Any): Result<String, Panic> = fnCtx("asString", listOf(item)) {
+    when (item) {
+        is String -> Ok("\"$item\"")
+        is Int, is Long, is Float, is Boolean -> Ok("$item")
+        is Map<*, *> -> binding { "{${item.entries.map { (k, v) -> "${asString(k!!).bind()}: ${asString(v!!).bind()}, " }}" }
+        is List<*> -> binding { "[${item.map { "${asString(it!!).bind()}, " }}]" }
+        is Result<*, *> -> binding { item.mapBoth({"Ok(${asString(it!!).bind()})"}, {"Err(${asString(it!!).bind()})"}) }
+        is Optional<*> -> binding { if (item.isPresent) "Some(${asString(item.get()).bind()})" else "None" }
+        is Flow<*> -> Ok("Observable")
+        is Function<*> -> Ok("Fn")
+        is Panic -> binding { "Panic: ${item.msg}\nStack:\n${item.stack.joinToString("\n") { asString(it).bind() }}" }
+        is StackCtx -> when (item) {
+            is StackCtx.Fn -> binding {"@${item.lambdaName}, args: ${item.args.joinToString(", ") { asString(it).bind() }}" }
+        }
+        is House -> binding { "House { id: ${asString(item.id)} displayName: ${asString(item.displayName)} rooms: ${asString(item.rooms)} }" }
+        is Room -> binding { "Room { icon: ${asString(item.icon)} displayName: ${asString(item.displayName)} controllers: ${asString(item.controllers)} }" }
+        is Controller -> binding { "Controller { brandColor: ${asString(Optional.ofNullable(item.brandColor))} displayName: ${asString(item.displayName)} displayInterface: ${asString(Optional.ofNullable(item.displayInterface))} }" }
+        is DisplayInterface -> binding { "DisplayInterface { widgets: ${asString(item.widgets)} }" }
+        is Device -> binding { "Device { lambdas: ${asString(item.lambdas)} }" }
+        is Widget -> binding { "Widget { widgetType: ${asString(item.widgetType)} params: ${asString(item.params)} children: ${asString(item.children)} }" }
+
+        else -> Err(typePanic())
+    }
+}
+
 class OpenControllerLibExecutor(
     private var sockets: Map<String, Socket> = hashMapOf()
 ) : Serializable {
     private val builtins: Map<String, Fn> = mapOf(
-        "=" to { args: List<Any> ->
+        "=" to { args: List<Any> -> fnCtx("=", args) {
             val first = args[0]
             val second = args[1]
             when (first) {
-                is String -> second.tryCast<String>().map {
+                is String -> tryCast<String>(second).map {
                     first == second
                 }
-                is Number -> second.tryCast<Number>().map {
+                is Number -> tryCast<Number>(second).map {
                     first == second
                 }
-                is List<*> -> second.tryCast<List<*>>().map {
+                is List<*> -> tryCast<List<*>>(second).map {
                     first == second
                 }
-                is Map<*, *> -> second.tryCast<Map<*, *>>().map {
+                is Map<*, *> -> tryCast<Map<*, *>>(second).map {
                     first == second
                 }
-                else -> Err(TypePanic())
+                else -> Err(typePanic())
             }
-        },
-        "<=" to { args: List<Any> ->
+        }},
+        "<=" to { args: List<Any> -> fnCtx("<=", args) {
             val first = args[0]
             val second = args[1]
             when (first) {
@@ -102,7 +152,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first <= second)
                         is Long -> Ok(first <= second)
                         is Double -> Ok(first <= second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Float -> {
@@ -111,7 +161,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first <= second)
                         is Long -> Ok(first <= second)
                         is Double -> Ok(first <= second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Long -> {
@@ -120,7 +170,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first <= second)
                         is Long -> Ok(first <= second)
                         is Double -> Ok(first <= second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Double -> {
@@ -129,15 +179,15 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first <= second)
                         is Long -> Ok(first <= second)
                         is Double -> Ok(first <= second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 else -> {
-                    Err(TypePanic())
+                    Err(typePanic())
                 }
             }
-        },
-        "<" to { args: List<Any> ->
+        }},
+        "<" to { args: List<Any> -> fnCtx("<", args) {
             val first = args[0]
             val second = args[1]
             when (first) {
@@ -147,7 +197,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first < second)
                         is Long -> Ok(first < second)
                         is Double -> Ok(first < second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Float -> {
@@ -156,7 +206,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first < second)
                         is Long -> Ok(first < second)
                         is Double -> Ok(first < second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Long -> {
@@ -165,7 +215,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first < second)
                         is Long -> Ok(first < second)
                         is Double -> Ok(first < second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Double -> {
@@ -174,15 +224,15 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first < second)
                         is Long -> Ok(first < second)
                         is Double -> Ok(first < second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 else -> {
-                    Err(TypePanic())
+                    Err(typePanic())
                 }
             }
-        },
-        ">" to { args: List<Any> ->
+        }},
+        ">" to { args: List<Any> -> fnCtx(">", args) {
             val first = args[0]
             val second = args[1]
             when (first) {
@@ -192,7 +242,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first > second)
                         is Long -> Ok(first > second)
                         is Double -> Ok(first > second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Float -> {
@@ -201,7 +251,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first > second)
                         is Long -> Ok(first > second)
                         is Double -> Ok(first > second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Long -> {
@@ -210,7 +260,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first > second)
                         is Long -> Ok(first > second)
                         is Double -> Ok(first > second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Double -> {
@@ -219,15 +269,15 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first > second)
                         is Long -> Ok(first > second)
                         is Double -> Ok(first > second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 else -> {
-                    Err(TypePanic())
+                    Err(typePanic())
                 }
             }
-        },
-        ">=" to { args: List<Any> ->
+        }},
+        ">=" to { args: List<Any> -> fnCtx(">=", args) {
             val first = args[0]
             val second = args[1]
             when (first) {
@@ -237,7 +287,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first >= second)
                         is Long -> Ok(first >= second)
                         is Double -> Ok(first >= second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Float -> {
@@ -246,7 +296,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first >= second)
                         is Long -> Ok(first >= second)
                         is Double -> Ok(first >= second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Long -> {
@@ -255,7 +305,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first >= second)
                         is Long -> Ok(first >= second)
                         is Double -> Ok(first >= second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Double -> {
@@ -264,38 +314,38 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first >= second)
                         is Long -> Ok(first >= second)
                         is Double -> Ok(first >= second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 else -> {
-                    Err(TypePanic())
+                    Err(typePanic())
                 }
             }
-        },
-        "&&" to { args: List<Any> ->
+        }},
+        "&&" to { args: List<Any> -> fnCtx("&&", args) {
             Ok(args[0] as Boolean && args[1] as Boolean)
-        },
-        "||" to { args: List<Any> ->
+        }},
+        "||" to { args: List<Any> -> fnCtx("||", args) {
             val first = args[0]
             val second = args[1]
             when (first) {
                 is Boolean -> when (second) {
                     is Boolean -> Ok(first || second)
-                    else -> Err(TypePanic())
+                    else -> Err(typePanic())
                 }
                 is Optional<*> -> Ok(if (first.isPresent) first.get() else second)
                 is Result<*, *> -> Ok(first.getOr(second)!!)
-                else -> Err(TypePanic())
+                else -> Err(typePanic())
             }
-        },
-        "unwrap" to { args: List<Any> ->
+        }},
+        "unwrap" to { args: List<Any> -> fnCtx("unwrap", args) {
             when (val item = args[0]) {
-                is Optional<*> -> if (item.isPresent) Ok(item.get()) else Err(TypePanic())
-                is Result<*, *> -> item.mapError { TypePanic() }
-                else -> Err(TypePanic())
+                is Optional<*> -> if (item.isPresent) Ok(item.get()) else Err(typePanic())
+                is Result<*, *> -> item.mapError { typePanic() }
+                else -> Err(typePanic())
             }
-        },
-        "+" to { args: List<Any> ->
+        }},
+        "+" to { args: List<Any> -> fnCtx("+", args) {
             val first = args[0]
             val second = args[1]
             when (first) {
@@ -305,7 +355,7 @@ class OpenControllerLibExecutor(
                             Ok(first + second)
                         }
                         else -> {
-                            Err(TypePanic())
+                            Err(typePanic())
                         }
                     }
                 }
@@ -316,7 +366,7 @@ class OpenControllerLibExecutor(
                         is Long -> Ok(first + second)
                         is Double -> Ok(first + second)
                         is String -> Ok(first.toString() + second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Float -> {
@@ -326,7 +376,7 @@ class OpenControllerLibExecutor(
                         is Long -> Ok(first + second)
                         is Double -> Ok(first + second)
                         is String -> Ok(first.toString() + second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Long -> {
@@ -336,7 +386,7 @@ class OpenControllerLibExecutor(
                         is Long -> Ok(first + second)
                         is Double -> Ok(first + second)
                         is String -> Ok(first.toString() + second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Double -> {
@@ -346,7 +396,7 @@ class OpenControllerLibExecutor(
                         is Long -> Ok(first + second)
                         is Double -> Ok(first + second)
                         is String -> Ok(first.toString() + second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is List<*> -> {
@@ -356,15 +406,15 @@ class OpenControllerLibExecutor(
                     when (second) {
                         is Map<*, *> -> Ok(first + second)
                         is Pair<*, *> -> Ok(first + second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 else -> {
-                    Err(TypePanic())
+                    Err(typePanic())
                 }
             }
-        },
-        "-" to { args: List<Any> ->
+        }},
+        "-" to { args: List<Any> -> fnCtx("-", args) {
             val first = args[0]
             val second = args[1]
             when (first) {
@@ -374,7 +424,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first - second)
                         is Long -> Ok(first - second)
                         is Double -> Ok(first - second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Float -> {
@@ -383,7 +433,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first - second)
                         is Long -> Ok(first - second)
                         is Double -> Ok(first - second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Long -> {
@@ -392,7 +442,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first - second)
                         is Long -> Ok(first - second)
                         is Double -> Ok(first - second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Double -> {
@@ -401,15 +451,15 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first - second)
                         is Long -> Ok(first - second)
                         is Double -> Ok(first - second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 else -> {
-                    Err(TypePanic())
+                    Err(typePanic())
                 }
             }
-        },
-        "*" to { args: List<Any> ->
+        }},
+        "*" to { args: List<Any> -> fnCtx("*", args) {
             val first = args[0]
             val second = args[1]
             when (first) {
@@ -419,7 +469,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first * second)
                         is Long -> Ok(first * second)
                         is Double -> Ok(first * second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Float -> {
@@ -428,7 +478,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first * second)
                         is Long -> Ok(first * second)
                         is Double -> Ok(first * second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Long -> {
@@ -437,7 +487,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first * second)
                         is Long -> Ok(first * second)
                         is Double -> Ok(first * second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Double -> {
@@ -446,15 +496,15 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first * second)
                         is Long -> Ok(first * second)
                         is Double -> Ok(first * second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 else -> {
-                    Err(TypePanic())
+                    Err(typePanic())
                 }
             }
-        },
-        "/" to { args: List<Any> ->
+        }},
+        "/" to { args: List<Any> -> fnCtx("/", args) {
             val first = args[0]
             val second = args[1]
             when (first) {
@@ -464,7 +514,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first / second)
                         is Long -> Ok(first / second)
                         is Double -> Ok(first / second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Float -> {
@@ -473,7 +523,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first / second)
                         is Long -> Ok(first / second)
                         is Double -> Ok(first / second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Long -> {
@@ -482,7 +532,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first / second)
                         is Long -> Ok(first / second)
                         is Double -> Ok(first / second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Double -> {
@@ -491,15 +541,15 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first / second)
                         is Long -> Ok(first / second)
                         is Double -> Ok(first / second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 else -> {
-                    Err(TypePanic())
+                    Err(typePanic())
                 }
             }
-        },
-        "%" to { args: List<Any> ->
+        }},
+        "%" to { args: List<Any> -> fnCtx("%", args) {
             val first = args[0]
             val second = args[1]
             when (first) {
@@ -509,7 +559,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first % second)
                         is Long -> Ok(first % second)
                         is Double -> Ok(first % second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Float -> {
@@ -518,7 +568,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first % second)
                         is Long -> Ok(first % second)
                         is Double -> Ok(first % second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Long -> {
@@ -527,7 +577,7 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first % second)
                         is Long -> Ok(first % second)
                         is Double -> Ok(first % second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 is Double -> {
@@ -536,38 +586,38 @@ class OpenControllerLibExecutor(
                         is Float -> Ok(first % second)
                         is Long -> Ok(first % second)
                         is Double -> Ok(first % second)
-                        else -> Err(TypePanic())
+                        else -> Err(typePanic())
                     }
                 }
                 else -> {
-                    Err(TypePanic())
+                    Err(typePanic())
                 }
             }
-        },
-        "getLambda" to { args: List<Any> ->
+        }},
+        "getLambda" to { args: List<Any> -> fnCtx("getLambda", args) {
             val device = args[0] as Device
             val lambda = args[1] as String
             Ok(device.lambdas[lambda]!!)
-        },
-        "pipe" to { args: List<Any> -> binding {
+        }},
+        "pipe" to { args: List<Any> -> fnCtx("pipe", args) { binding {
             val value = args[0]
             args.drop(1).fold(value) { lastResult, curr ->
-                curr.tryCast<Fn>().bind()(listOf(lastResult))
+                tryCast<Fn>(curr).bind()(listOf(lastResult))
             }
-        } },
-        "listOf" to { args: List<Any> ->
+        } }},
+        "listOf" to { args: List<Any> -> fnCtx("listOf", args) {
             Ok(args)
-        },
-        "mapOf" to { args: List<Any> -> binding {
-            val pairs = args.tryCast<List<Pair<Any, Any>>>().bind()
+        }},
+        "mapOf" to { args: List<Any> -> fnCtx("mapOf", args) { binding {
+            val pairs = tryCast<List<Pair<Any, Any>>>(args).bind()
             mapOf(*pairs.toTypedArray())
-        } },
-        "pair" to { args: List<Any> ->
+        } }},
+        "pair" to { args: List<Any> -> fnCtx("pair", args) {
             val key = args[0]
             val value = args[1]
             Ok(key to value)
-        },
-        "index" to { args: List<Any> ->
+        }},
+        "index" to { args: List<Any> -> fnCtx("index", args) {
             val input = args[0]
             val path = args.drop(1)
             fun getIndex(input: Any?, path: List<Any>): Any? {
@@ -583,39 +633,39 @@ class OpenControllerLibExecutor(
                 }
             }
             Ok(Optional.ofNullable(getIndex(input, path)))
-        },
-        "map" to { args: List<Any> -> binding {
-            val transformer = args[0].tryCast<Fn>().bind();
-            { innerArgs: List<Any> -> runCatching {
+        }},
+        "map" to { args: List<Any> -> fnCtx("map", args) { binding {
+            val transformer = tryCast<Fn>(args[0]).bind();
+            { innerArgs: List<Any> ->
                 when (val input = innerArgs[0]) {
-                    is Flow<*> -> input.map {
-
+                    is Flow<*> -> binding { input.map {
 //                        TODO: fix bind
-                        it?.let { transformer(listOf(it)).bind() } ?: throw TypePanic()
-                    }
-                    is List<*> -> input.map {
-                        it?.let { transformer(listOf(it)).bind() } ?: throw TypePanic()
-                    }
-                    is Result<*, *> -> input.map {
-                        it?.let { transformer(listOf(it)).bind() } ?: throw TypePanic()
-                    }
-                    is Optional<*> -> input.map {
-                        it?.let { transformer(listOf(it)).bind() } ?: throw TypePanic()
-                    }
-                    else -> throw TypePanic()
+                        it?.let { transformer(listOf(it)).bind() } ?: Err(typePanic()).bind()
+                    }}
+                    is List<*> -> binding { input.map {
+                        it?.let { transformer(listOf(it)).bind() } ?: Err(typePanic()).bind()
+                    }}
+                    is Result<*, *> -> binding<Result<*, *>, Panic> { input.map {
+                        it?.let { transformer(listOf(it)).bind() } ?: Err(typePanic()).bind()
+                    }}
+                    is Optional<*> -> binding<Optional<*>, Panic> { input.map {
+                        it?.let { transformer(listOf(it)).bind() } ?: Err(typePanic()).bind()
+                    }}
+                    else -> Err(typePanic())
                 }
-            } }
-        } },
-        "delay" to { args: List<Any> ->
+            }
+        } }},
+        "delay" to { args: List<Any> -> fnCtx("delay", args) {
             val amount = args[0] as Int
             Thread.sleep(amount.toLong())
             Ok(Unit)
-        }
+        }},
+        "asString" to { args: List<Any> -> asString(args[0]) }
     )
 
     private val stdModule = Device(
         mapOf(
-            "httpRequest" to { args: List<Any> ->
+            "httpRequest" to { args: List<Any> -> fnCtx("httpRequest", args) {
                 val url = args[0] as String
                 when (args[1] as String) {
                     "GET" -> Ok(url.httpGet().responseString().third.toResult())
@@ -624,10 +674,10 @@ class OpenControllerLibExecutor(
                     "PUT" -> Ok(url.httpPut().responseString().third.toResult())
                     "PATCH" -> Ok(url.httpPatch().responseString().third.toResult())
                     "DELETE" -> Ok(url.httpDelete().responseString().third.toResult())
-                    else -> Err(TypePanic())
+                    else -> Err(typePanic())
                 }
-            },
-            "tcpRequest" to { args: List<Any> ->
+            }},
+            "tcpRequest" to { args: List<Any> -> fnCtx("tcpRequest", args) {
                 val (host, port) = (args[0] as String).split(":")
                 var client:Socket? = null
                 try {
@@ -644,8 +694,8 @@ class OpenControllerLibExecutor(
                 client?.close()
                 sockets = sockets - "$host:$port"
                 Ok(Unit)
-            },
-            "observeTime" to { args: List<Any> ->
+            }},
+            "observeTime" to { args: List<Any> -> fnCtx("observeTime", args) {
                 val interval = args[0] as Number
                 Ok(flow {
                     while (true) {
@@ -653,7 +703,7 @@ class OpenControllerLibExecutor(
                         delay(interval.toLong())
                     }
                 })
-            },
+            }},
         )
     )
 
@@ -663,124 +713,124 @@ class OpenControllerLibExecutor(
         localScope: Map<String, Any>,
     ): Result<Any, Panic> =
         when (expr.innerCase) {
-            Expr.InnerCase.REF -> expr.ref.let {
+            Expr.InnerCase.REF -> expr.ref.let { fnCtx("REF", listOf(it.ref)) {
                 (localScope[it.ref] ?: builtins[it.ref] ?: moduleScope[it.ref])?.let { r ->
                     Ok(r)
-                } ?: Err(TypePanic())
-            }
+                } ?: Err(typePanic())
+            }}
             Expr.InnerCase.LAMBDA -> expr.lambda.let {
-                Ok<Fn> { args: List<Any> ->
+                Ok<Fn> { args: List<Any> -> fnCtx("LAMBDA", args) {
                     interpretExpr(
                         it.`return`,
                         moduleScope,
                         localScope + mapOf(*it.argsList.mapIndexed { i, arg ->
                             arg to args[i]
                         }.toTypedArray()),
-                    )
-                }
+                    ).ctx()
+                }}
             }
-            Expr.InnerCase.CALL -> expr.call.let { binding {
+            Expr.InnerCase.CALL -> expr.call.let { fnCtx("CALL", listOf()) { binding {
                 val fn = interpretExpr(
                     it.calling,
                     moduleScope,
                     localScope,
-                ).bind()
-                fn.tryCast<Fn>().bind()(
+                ).ctx().bind()
+                tryCast<Fn>(fn).bind()(
                     it.argsList.map { arg ->
                         interpretExpr(
                             arg,
                             moduleScope,
                             localScope,
-                        ).bind()
+                        ).ctx().bind()
                     },
-                ).bind()
-            } }
+                ).ctx().bind()
+            }} }
             Expr.InnerCase.STRING -> Ok(expr.string)
             Expr.InnerCase.INT64 -> Ok(expr.int64)
             Expr.InnerCase.INT32 -> Ok(expr.int32)
             Expr.InnerCase.FLOAT -> Ok(expr.float)
             Expr.InnerCase.BOOL -> Ok(expr.bool)
-            Expr.InnerCase.HOUSE -> expr.house.let { binding {
+            Expr.InnerCase.HOUSE -> expr.house.let { fnCtx("HOUSE", listOf()) { binding {
                 House(
 //                      Evaluate with old house scope
-                    interpretExpr(
+                    tryCast<String>(interpretExpr(
                         it.id,
                         moduleScope,
                         localScope,
-                    ).bind().tryCast<String>().bind(),
-                    interpretExpr(
+                    ).ctx().bind()).bind(),
+                    tryCast<String>(interpretExpr(
                         it.displayName,
                         moduleScope,
                         localScope,
-                    ).bind().tryCast<String>().bind(),
+                    ).ctx().bind()).bind(),
                     it.roomsMap.mapValues { (_, roomExpr) ->
-                        interpretExpr(
+                        tryCast<Room>(interpretExpr(
                             roomExpr,
                             moduleScope,
                             localScope,
-                        ).bind().tryCast<Room>().bind()
+                        ).ctx().bind()).bind()
                     },
                 )
-            } }
-            Expr.InnerCase.ROOM -> expr.room.let { binding {
+            }} }
+            Expr.InnerCase.ROOM -> expr.room.let { fnCtx("ROOM", listOf()) { binding {
                 Room(
-                    interpretExpr(
+                    tryCast<String>(interpretExpr(
                         it.displayName,
                         moduleScope,
                         localScope,
-                    ).bind().tryCast<String>().bind(),
-                    interpretExpr(
+                    ).ctx().bind()).bind(),
+                    tryCast<String>(interpretExpr(
                         it.icon,
                         moduleScope,
                         localScope,
-                    ).bind().tryCast<String>().bind(),
+                    ).ctx().bind()).bind(),
                     it.controllersMap.mapValues { (_, controllerExpr) ->
-                        interpretExpr(
+                        tryCast<Controller>(interpretExpr(
                             controllerExpr,
                             moduleScope,
                             localScope,
-                        ).bind().tryCast<Controller>().bind()
+                        ).ctx().bind()).bind()
                     }
                 )
-            } }
-            Expr.InnerCase.CONTROLLER -> expr.controller.let { binding {
+            }} }
+            Expr.InnerCase.CONTROLLER -> expr.controller.let { fnCtx("CONTROLLER", listOf()) { binding {
                 Controller(
-                    interpretExpr(
+                    tryCast<String>(interpretExpr(
                         it.displayName,
                         moduleScope,
                         localScope,
-                    ).bind().tryCast<String>().bind(),
-                    interpretExpr(
+                    ).bind()).bind(),
+                    tryCast<String>(interpretExpr(
                         it.brandColor,
                         moduleScope,
                         localScope,
-                    ).bind().tryCast<String>().bind(),
-                    interpretExpr(
+                    ).ctx().bind()).bind(),
+                    tryCast<DisplayInterface>(interpretExpr(
                         it.displayInterface,
                         moduleScope,
                         localScope,
-                    ).bind().tryCast<DisplayInterface>().bind()
+                    ).ctx().bind()).bind()
                 )
-            } }
-            Expr.InnerCase.DISPLAY_INTERFACE -> expr.displayInterface.let { binding {
+            }} }
+            Expr.InnerCase.DISPLAY_INTERFACE -> expr.displayInterface.let { fnCtx("DISPLAY_INTERFACE", listOf()) { binding {
                 DisplayInterface(it.widgetsList.map { widget ->
-                    interpretExpr(
+                    tryCast<Widget>(interpretExpr(
                         widget,
                         moduleScope,
                         localScope,
-                    ).bind().tryCast<Widget>().bind()
+                    ).ctx().bind()).bind()
                 })
-            } }
-            Expr.InnerCase.DEVICE -> expr.device.let { binding {
+            }} }
+            Expr.InnerCase.DEVICE -> expr.device.let { fnCtx("DEVICE", listOf()) { binding {
                 Device(it.lambdasMap.mapValues { (_, lambdaExpr) ->
-                    interpretExpr(
+                    tryCast<Fn>(interpretExpr(
                         lambdaExpr,
                         moduleScope,
                         localScope,
-                    ).bind().tryCast<Fn>().bind()
+                    ).ctx().bind()).bind()
                 })
-            } }
-            Expr.InnerCase.WIDGET -> expr.widget.let { binding {
+            }} }
+            Expr.InnerCase.WIDGET -> expr.widget.let { fnCtx("DEVICE", listOf()) { binding {
                 Widget(
                     it.widgetType,
                     it.paramsMap.mapValues { (_, paramExpr) ->
@@ -788,51 +838,51 @@ class OpenControllerLibExecutor(
                             paramExpr,
                             moduleScope,
                             localScope,
-                        ).bind()
+                        ).ctx().bind()
                     },
                     it.childrenList.map { childExpr ->
-                        interpretExpr(
+                        tryCast<Widget>(interpretExpr(
                             childExpr,
                             moduleScope,
                             localScope,
-                        ).bind().tryCast<Widget>().bind()
+                        ).ctx().bind()).bind()
                     }
                 )
-            } }
-            Expr.InnerCase.IF -> expr.`if`.let { binding {
-                if (interpretExpr(
+            }} }
+            Expr.InnerCase.IF -> expr.`if`.let { fnCtx("IF", listOf()) { binding {
+                if (tryCast<Boolean>(interpretExpr(
                         it.condition,
                         moduleScope,
                         localScope,
-                    ).bind().tryCast<Boolean>().bind()) {
+                    ).ctx().bind()).bind()) {
                     interpretExpr(
                         it.then,
                         moduleScope,
                         localScope,
-                    ).bind()
+                    ).ctx().bind()
                 } else {
                     val elif = it.elifList.find { elif ->
-                        interpretExpr(
+                        tryCast<Boolean>(interpretExpr(
                             elif.condition,
                             moduleScope,
                             localScope,
-                        ).bind().tryCast<Boolean>().bind()
+                        ).ctx().bind()).bind()
                     }
                     if (elif != null) {
                         interpretExpr(
                             elif.then,
                             moduleScope,
                             localScope,
-                        ).bind()
+                        ).ctx().bind()
                     } else {
                         interpretExpr(
                             it.`else`,
                             moduleScope,
                             localScope,
-                        ).bind()
+                        ).ctx().bind()
                     }
                 }
-            } }
+            }} }
             Expr.InnerCase.INNER_NOT_SET -> TODO()
             null -> TODO()
         }
