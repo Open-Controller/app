@@ -10,13 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
-import com.google.accompanist.insets.statusBarsPadding
-import com.google.accompanist.insets.systemBarsPadding
-import com.pjtsearch.opencontroller.Controller
-import com.pjtsearch.opencontroller.Device
+import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.components.CenterBar
 import com.pjtsearch.opencontroller.components.SmallIconButton
 import com.pjtsearch.opencontroller.ui.components.ControllerView

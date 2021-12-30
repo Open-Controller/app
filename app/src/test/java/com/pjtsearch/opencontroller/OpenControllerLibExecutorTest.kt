@@ -1,6 +1,10 @@
 package com.pjtsearch.opencontroller
 
 import com.github.michaelbull.result.*
+import com.pjtsearch.opencontroller.executor.Fn
+import com.pjtsearch.opencontroller.executor.OpenControllerLibExecutor
+import com.pjtsearch.opencontroller.executor.Panic
+import com.pjtsearch.opencontroller.executor.StackCtx
 import com.pjtsearch.opencontroller_lib_proto.*
 import org.junit.Assert
 import org.junit.Test
@@ -340,7 +344,8 @@ class OpenControllerLibExecutorTest {
         val res = executor.interpretModule(lambda).unwrap() as Fn
         Assert.assertEquals(Ok("test"), res(listOf(Ok("test"))))
         Assert.assertEquals(
-            Err(Panic.Type(null, null, listOf(
+            Err(
+                Panic.Type(null, null, listOf(
                 StackCtx.Fn("unwrap", listOf(Err("test"))),
                 StackCtx.Fn("CALL", listOf()),
                 StackCtx.Fn("LAMBDA", listOf(Err("test")))

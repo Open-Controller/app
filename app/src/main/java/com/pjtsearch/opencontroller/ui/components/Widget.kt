@@ -15,11 +15,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
-import com.pjtsearch.opencontroller.Fn
-import com.pjtsearch.opencontroller.Widget
+import com.pjtsearch.opencontroller.executor.Fn
+import com.pjtsearch.opencontroller.executor.Widget
 import com.pjtsearch.opencontroller.extensions.DirectionVector
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import kotlinx.coroutines.GlobalScope

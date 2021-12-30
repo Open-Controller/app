@@ -11,9 +11,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.pjtsearch.opencontroller.Controller
-import com.pjtsearch.opencontroller.Device
-import com.pjtsearch.opencontroller.Widget
+import com.pjtsearch.opencontroller.executor.Controller
+import com.pjtsearch.opencontroller.executor.Widget
 
 @OptIn(ExperimentalAnimationApi::class)
 @ExperimentalComposeUiApi

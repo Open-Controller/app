@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
-import com.pjtsearch.opencontroller.Controller
-import com.pjtsearch.opencontroller.House
+import com.pjtsearch.opencontroller.executor.Controller
+import com.pjtsearch.opencontroller.executor.House
 import com.pjtsearch.opencontroller.extensions.resolveHouseRef
 import com.pjtsearch.opencontroller.settings.HouseRef
 import kotlinx.coroutines.GlobalScope
