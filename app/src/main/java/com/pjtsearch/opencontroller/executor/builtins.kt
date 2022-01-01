@@ -57,7 +57,7 @@ fun asString(item: Any): Result<String, Panic> = fnCtx("asString", listOf(item))
                             it
                         ).bind()
                     }
-                })"
+                }) ${item.position.line}:${item.position.column}"
             }
         }
         is House -> binding {

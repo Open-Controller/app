@@ -344,8 +344,8 @@ class OpenControllerLibExecutorTest {
             Err(
                 Panic.Type(null, null, listOf(
                 StackCtx.Fn("unwrap", listOf(Err("test"))),
-                StackCtx.Syntax("CALL", listOf()),
-                StackCtx.Syntax("LAMBDA", listOf(Err("test")))
+                StackCtx.Syntax("CALL", listOf(), CodePosition(0, 0)),
+                StackCtx.Syntax("LAMBDA", listOf(Err("test")), CodePosition(0, 0))
             ))),
             res(listOf(Err("test")))
         )
