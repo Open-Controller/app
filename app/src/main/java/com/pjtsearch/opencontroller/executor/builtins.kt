@@ -42,13 +42,22 @@ fun asString(item: Any): Result<String, Panic> = fnCtx("asString", listOf(item))
         }
         is StackCtx -> when (item) {
             is StackCtx.Fn -> binding {
-                "@${item.lambdaName}, args: ${
+                "at ${item.lambdaName}(${
                     item.args.joinToString(", ") {
                         asString(
                             it
                         ).bind()
                     }
-                }"
+                })"
+            }
+            is StackCtx.Syntax -> binding {
+                "in ${item.name}(${
+                    item.params.joinToString(", ") {
+                        asString(
+                            it
+                        ).bind()
+                    }
+                })"
             }
         }
         is House -> binding {

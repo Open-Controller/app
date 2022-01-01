@@ -1,10 +1,7 @@
 package com.pjtsearch.opencontroller
 
 import com.github.michaelbull.result.*
-import com.pjtsearch.opencontroller.executor.Fn
-import com.pjtsearch.opencontroller.executor.OpenControllerLibExecutor
-import com.pjtsearch.opencontroller.executor.Panic
-import com.pjtsearch.opencontroller.executor.StackCtx
+import com.pjtsearch.opencontroller.executor.*
 import com.pjtsearch.opencontroller_lib_proto.*
 import org.junit.Assert
 import org.junit.Test
@@ -347,10 +344,11 @@ class OpenControllerLibExecutorTest {
             Err(
                 Panic.Type(null, null, listOf(
                 StackCtx.Fn("unwrap", listOf(Err("test"))),
-                StackCtx.Fn("CALL", listOf()),
-                StackCtx.Fn("LAMBDA", listOf(Err("test")))
+                StackCtx.Syntax("CALL", listOf()),
+                StackCtx.Syntax("LAMBDA", listOf(Err("test")))
             ))),
             res(listOf(Err("test")))
         )
+        println(asString(res(listOf(Err("test"))).unwrapError()).unwrap())
     }
 }

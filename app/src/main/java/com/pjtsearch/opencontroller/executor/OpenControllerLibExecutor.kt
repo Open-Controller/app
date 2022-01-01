@@ -29,29 +29,36 @@ sealed interface Panic {
     }
 }
 
-sealed interface StackCtx {
+sealed class StackCtx {
+    inline fun <reified T> tryCast(item: Any): Result<T, Panic.Type> =
+        if (item is T) {
+            Ok(item as T)
+        } else {
+            Err(Panic.Type(T::class, item::class, listOf(this)))
+        }
+
+    inline fun <reified T> Result<T, Panic>.ctx(): Result<T, Panic> =
+        this.mapError { e -> e.withCtx(this@StackCtx) }
+
+    fun typePanic(): Panic.Type =
+        Panic.Type(listOf(this))
+
     data class Fn(
         val lambdaName: String,
         val args: List<Any>
-    ) : StackCtx {
-        inline fun <reified T> tryCast(item: Any): Result<T, Panic.Type> =
-            if (item is T) {
-                Ok(item as T)
-            } else {
-                Err(Panic.Type(T::class, item::class, listOf(this)))
-            }
+    ) : StackCtx()
 
-        inline fun <reified T> Result<T, Panic>.ctx(): Result<T, Panic> =
-            this.mapError { e -> e.withCtx(this@Fn) }
-
-        fun typePanic(): Panic.Type =
-            Panic.Type(listOf(this))
-
-    }
+    data class Syntax(
+        val name: String,
+        val params: List<Any>
+    ) : StackCtx()
 }
 
 fun <T> fnCtx(lambdaName: String, args: List<Any>, cb: StackCtx.Fn.() -> T) =
     StackCtx.Fn(lambdaName, args).run(cb)
+
+fun <T> syntaxCtx(name: String, params: List<Any>, cb: StackCtx.Syntax.() -> T) =
+    StackCtx.Syntax(name, params).run(cb)
 
 fun <T, E : Exception> com.github.kittinunf.result.Result<T, E>.toResult(): Result<T, E> =
     this.component1()?.let {
@@ -108,7 +115,7 @@ class OpenControllerLibExecutor(
     ): Result<Any, Panic> =
         when (expr.innerCase) {
             Expr.InnerCase.REF -> expr.ref.let {
-                fnCtx("REF", listOf(it.ref)) {
+                syntaxCtx("REF", listOf(it.ref)) {
                     (localScope[it.ref] ?: builtins[it.ref] ?: moduleScope[it.ref])?.let { r ->
                         Ok(r)
                     } ?: Err(typePanic())
@@ -116,7 +123,7 @@ class OpenControllerLibExecutor(
             }
             Expr.InnerCase.LAMBDA -> expr.lambda.let {
                 Ok<Fn> { args: List<Any> ->
-                    fnCtx("LAMBDA", args) {
+                    syntaxCtx("LAMBDA", args) {
                         interpretExpr(
                             it.`return`,
                             moduleScope,
@@ -128,7 +135,7 @@ class OpenControllerLibExecutor(
                 }
             }
             Expr.InnerCase.CALL -> expr.call.let {
-                fnCtx("CALL", listOf()) {
+                syntaxCtx("CALL", listOf()) {
                     binding {
                         val fn = interpretExpr(
                             it.calling,
@@ -153,7 +160,7 @@ class OpenControllerLibExecutor(
             Expr.InnerCase.FLOAT -> Ok(expr.float)
             Expr.InnerCase.BOOL -> Ok(expr.bool)
             Expr.InnerCase.HOUSE -> expr.house.let {
-                fnCtx("HOUSE", listOf()) {
+                syntaxCtx("HOUSE", listOf()) {
                     binding {
                         House(
 //                      Evaluate with old house scope
@@ -185,7 +192,7 @@ class OpenControllerLibExecutor(
                 }
             }
             Expr.InnerCase.ROOM -> expr.room.let {
-                fnCtx("ROOM", listOf()) {
+                syntaxCtx("ROOM", listOf()) {
                     binding {
                         Room(
                             tryCast<String>(
@@ -216,7 +223,7 @@ class OpenControllerLibExecutor(
                 }
             }
             Expr.InnerCase.CONTROLLER -> expr.controller.let {
-                fnCtx("CONTROLLER", listOf()) {
+                syntaxCtx("CONTROLLER", listOf()) {
                     binding {
                         Controller(
                             tryCast<String>(
@@ -245,7 +252,7 @@ class OpenControllerLibExecutor(
                 }
             }
             Expr.InnerCase.DISPLAY_INTERFACE -> expr.displayInterface.let {
-                fnCtx("DISPLAY_INTERFACE", listOf()) {
+                syntaxCtx("DISPLAY_INTERFACE", listOf()) {
                     binding {
                         DisplayInterface(it.widgetsList.map { widget ->
                             tryCast<Widget>(
@@ -260,7 +267,7 @@ class OpenControllerLibExecutor(
                 }
             }
             Expr.InnerCase.DEVICE -> expr.device.let {
-                fnCtx("DEVICE", listOf()) {
+                syntaxCtx("DEVICE", listOf()) {
                     binding {
                         Device(it.lambdasMap.mapValues { (_, lambdaExpr) ->
                             tryCast<Fn>(
@@ -275,7 +282,7 @@ class OpenControllerLibExecutor(
                 }
             }
             Expr.InnerCase.WIDGET -> expr.widget.let {
-                fnCtx("DEVICE", listOf()) {
+                syntaxCtx("DEVICE", listOf()) {
                     binding {
                         Widget(
                             it.widgetType,
@@ -300,7 +307,7 @@ class OpenControllerLibExecutor(
                 }
             }
             Expr.InnerCase.IF -> expr.`if`.let {
-                fnCtx("IF", listOf()) {
+                syntaxCtx("IF", listOf()) {
                     binding {
                         if (tryCast<Boolean>(
                                 interpretExpr(
