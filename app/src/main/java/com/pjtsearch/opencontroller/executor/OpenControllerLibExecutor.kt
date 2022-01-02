@@ -13,6 +13,7 @@ sealed interface Panic {
     val msg: String
     val stack: List<StackCtx>
     fun withCtx(ctx: StackCtx): Panic
+    fun asThrowable(): Throwable
 
     data class Type(
         val expected: KClass<*>?,
@@ -27,6 +28,9 @@ sealed interface Panic {
 
         override fun withCtx(ctx: StackCtx): Panic =
             Type(expected, actual, stack + ctx)
+
+        override fun asThrowable(): Throwable =
+            Error(asString(this).unwrap())
     }
 }
 

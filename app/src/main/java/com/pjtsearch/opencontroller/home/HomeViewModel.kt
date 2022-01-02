@@ -7,6 +7,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.executor.House
+import com.pjtsearch.opencontroller.executor.Panic
 import com.pjtsearch.opencontroller.extensions.resolveHouseRef
 import com.pjtsearch.opencontroller.settings.HouseRef
 import kotlinx.coroutines.GlobalScope
@@ -94,7 +95,7 @@ private data class HomeViewModelState(
  */
 class HomeViewModel(
     private val houseRef: HouseRef,
-    private val onError: (Throwable) -> Unit
+    private val onPanic: (Panic) -> Unit
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(HomeViewModelState(isLoading = true))
@@ -125,7 +126,7 @@ class HomeViewModel(
                 when (result) {
                     is Ok -> it.copy(house = result.value, isLoading = false)
                     is Err -> {
-                        onError(result.error)
+                        onPanic(result.error)
                         it
                     }
                 }
@@ -167,11 +168,11 @@ class HomeViewModel(
     companion object {
         fun provideFactory(
             houseRef: HouseRef,
-            onError: (Throwable) -> Unit
+            onPanic: (Panic) -> Unit
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return HomeViewModel(houseRef, onError) as T
+                return HomeViewModel(houseRef, onPanic) as T
             }
         }
     }

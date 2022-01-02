@@ -42,7 +42,7 @@ fun NavigationGraph(
                     HouseRef.parseFrom(
                         it.arguments?.getString("house")!!.encodeToByteArray()
                     ),
-                    onError
+                    {onError(it.asThrowable())}
                 )
             )
             HomeRoute(
