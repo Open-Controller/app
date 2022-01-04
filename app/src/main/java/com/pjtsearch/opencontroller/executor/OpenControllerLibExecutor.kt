@@ -34,7 +34,7 @@ sealed interface Panic {
     }
 }
 
-data class CodePosition(val line: Int, val column: Int)
+data class CodePosition(val line: Int, val column: Int, val file: String)
 
 sealed class StackCtx {
     inline fun <reified T> tryCast(item: Any): Result<T, Panic.Type> =
@@ -66,7 +66,7 @@ fun <T> fnCtx(lambdaName: String, args: List<Any>, cb: StackCtx.Fn.() -> T) =
     StackCtx.Fn(lambdaName, args).run(cb)
 
 fun <T> syntaxCtx(name: String, params: List<Any>, position: Position, cb: StackCtx.Syntax.() -> T) =
-    StackCtx.Syntax(name, params, CodePosition(position.line, position.column)).run(cb)
+    StackCtx.Syntax(name, params, CodePosition(position.line, position.column, position.file)).run(cb)
 
 fun <T, E : Exception> com.github.kittinunf.result.Result<T, E>.toResult(): Result<T, E> =
     this.component1()?.let {
