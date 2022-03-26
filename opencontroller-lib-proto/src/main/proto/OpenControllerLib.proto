@@ -85,25 +85,34 @@ message IfExpr {
     required Expr else = 4; // The else condition
 }
 
+/** A message representing the position of an expression in source code */
+message Position {
+    required string file = 1; // The file path
+    required int32 line = 2; // The line number
+    required int32 column = 3; // The column number
+}
+
 /** A message representing an expression */
 message Expr {
+    /** The position of the expression in the source code */
+    optional Position position = 1;
     /** The type of expression */
     oneof inner {
-        RefExpr ref = 1;
-        LambdaExpr lambda = 2;
-        CallExpr call = 3;
-        string string = 4;
-        int64 int64 = 5;
-        int32 int32 = 6;
-        float float = 7;
-        bool bool = 8;
-        HouseExpr house = 9;
-        RoomExpr room = 10;
-        ControllerExpr controller = 11;
-        DisplayInterfaceExpr display_interface = 12;
-        DeviceExpr device = 13;
-        WidgetExpr widget = 14;
-        IfExpr if = 15;
+        RefExpr ref = 2;
+        LambdaExpr lambda = 3;
+        CallExpr call = 4;
+        string string = 5;
+        int64 int64 = 6;
+        int32 int32 = 7;
+        float float = 8;
+        bool bool = 9;
+        HouseExpr house = 10;
+        RoomExpr room = 11;
+        ControllerExpr controller = 12;
+        DisplayInterfaceExpr display_interface = 13;
+        DeviceExpr device = 14;
+        WidgetExpr widget = 15;
+        IfExpr if = 16;
     }
 }
 

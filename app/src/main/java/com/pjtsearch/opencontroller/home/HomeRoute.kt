@@ -54,13 +54,13 @@ fun HomeRoute(
                 1
             }
             slideInVertically(
+                intSpec,
                 { height -> dir * height / 10 },
-                intSpec
-            ) + fadeIn(0f, floatSpec) with
+            ) + fadeIn(floatSpec, 0f) with
                     slideOutVertically(
+                        intSpec,
                         { height -> -dir * height / 10 },
-                        intSpec
-                    ) + fadeOut(0f, floatSpec)
+                    ) + fadeOut(floatSpec, 0f)
         },
     ) {
         when (it) {
