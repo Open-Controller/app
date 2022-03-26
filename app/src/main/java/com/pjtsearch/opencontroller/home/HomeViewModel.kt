@@ -3,6 +3,7 @@ package com.pjtsearch.opencontroller.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.github.kittinunf.fuel.core.FuelError
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.pjtsearch.opencontroller.executor.Controller
@@ -95,7 +96,8 @@ private data class HomeViewModelState(
  */
 class HomeViewModel(
     private val houseRef: HouseRef,
-    private val onPanic: (Panic) -> Unit
+    private val onPanic: (Panic) -> Unit,
+    private val onGetHouseError: (Throwable) -> Unit
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(HomeViewModelState(isLoading = true))
@@ -121,12 +123,18 @@ class HomeViewModel(
         viewModelState.update { it.copy(isLoading = true) }
 
         GlobalScope.launch {
-            val result = resolveHouseRef(houseRef)
+            val fetchResult = resolveHouseRef(houseRef)
             viewModelState.update {
-                when (result) {
-                    is Ok -> it.copy(house = result.value, isLoading = false)
+                when (fetchResult) {
+                    is Ok -> when (val evalResult = fetchResult.value) {
+                        is Ok -> it.copy(house = evalResult.value, isLoading = false)
+                        is Err -> {
+                            onPanic(evalResult.error)
+                            it
+                        }
+                    }
                     is Err -> {
-                        onPanic(result.error)
+                        onGetHouseError(fetchResult.error)
                         it
                     }
                 }
@@ -168,11 +176,12 @@ class HomeViewModel(
     companion object {
         fun provideFactory(
             houseRef: HouseRef,
-            onPanic: (Panic) -> Unit
+            onPanic: (Panic) -> Unit,
+            onGetHouseError: (Throwable) -> Unit
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return HomeViewModel(houseRef, onPanic) as T
+                return HomeViewModel(houseRef, onPanic, onGetHouseError) as T
             }
         }
     }

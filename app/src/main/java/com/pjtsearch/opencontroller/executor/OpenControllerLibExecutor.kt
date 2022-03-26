@@ -68,11 +68,6 @@ fun <T> fnCtx(lambdaName: String, args: List<Any>, cb: StackCtx.Fn.() -> T) =
 fun <T> syntaxCtx(name: String, params: List<Any>, position: Position, cb: StackCtx.Syntax.() -> T) =
     StackCtx.Syntax(name, params, CodePosition(position.line, position.column, position.file)).run(cb)
 
-fun <T, E : Exception> com.github.kittinunf.result.Result<T, E>.toResult(): Result<T, E> =
-    this.component1()?.let {
-        Ok(it)
-    } ?: Err(this.component2()!!)
-
 data class House(
     val id: String,
     val displayName: String,

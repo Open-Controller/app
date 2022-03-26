@@ -3,6 +3,7 @@ package com.pjtsearch.opencontroller.executor
 import com.github.kittinunf.fuel.*
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
+import com.pjtsearch.opencontroller.extensions.toResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import java.net.Socket
