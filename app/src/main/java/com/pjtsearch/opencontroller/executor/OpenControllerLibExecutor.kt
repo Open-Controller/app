@@ -285,7 +285,7 @@ class OpenControllerLibExecutor(
                 }
             }
             Expr.InnerCase.WIDGET -> expr.widget.let {
-                syntaxCtx("DEVICE", listOf(), expr.position) {
+                syntaxCtx("WIDGET", listOf(), expr.position) {
                     binding {
                         Widget(
                             it.widgetType,
