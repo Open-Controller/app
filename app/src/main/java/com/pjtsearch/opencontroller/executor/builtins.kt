@@ -639,10 +639,9 @@ val builtins: Map<String, Fn> = mapOf(
                     input
                 } else {
                     when (input) {
-//                        TODO: Panic
                         is List<*> -> getIndex(input[path[0] as Int], path.drop(1))
                         is Map<*, *> -> getIndex(input[path[0]], path.drop(1))
-                        else -> TODO()
+                        else -> Err(typePanic())
                     }
                 }
             }
