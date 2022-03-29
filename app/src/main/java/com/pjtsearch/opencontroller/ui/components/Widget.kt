@@ -57,7 +57,7 @@ fun ColumnScope.Widget(
             }
         }
         "button" ->
-            OpenControllerButton(
+            ControllerButton(
                 sizedModifier,
                 widget.params["text"] as String,
                 widget.params["icon"] as String?,
@@ -172,7 +172,7 @@ fun ColumnScope.Widget(
         }
         "space" -> Spacer(sizedModifier)
         "menubutton" ->
-            OpenControllerButton(
+            ControllerButton(
                 sizedModifier,
                 widget.params["text"] as String,
                 widget.params["icon"] as String?,
