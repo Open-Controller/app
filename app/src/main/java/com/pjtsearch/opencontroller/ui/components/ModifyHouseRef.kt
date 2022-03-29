@@ -2,6 +2,7 @@ package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Link
@@ -23,7 +24,11 @@ sealed interface ChoosingIconState {
 
 @Composable
 fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
-    var houseRefBuilder by remember(houseRef) { mutableStateOf(HouseRef.newBuilder(houseRef).build()) }
+    var houseRefBuilder by remember(houseRef) {
+        mutableStateOf(
+            HouseRef.newBuilder(houseRef).build()
+        )
+    }
     var choosingIconState by remember { mutableStateOf<ChoosingIconState>(ChoosingIconState.Closed) }
 
     LaunchedEffect(houseRefBuilder) {
@@ -63,23 +68,29 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
             )
         ) {
             if (houseRefBuilder.icon != "") {
-                OpenControllerIcon(icon = houseRefBuilder.icon, text = houseRefBuilder.icon, size = 2)
+                OpenControllerIcon(
+                    icon = houseRefBuilder.icon,
+                    text = houseRefBuilder.icon,
+                    size = 2
+                )
             } else {
                 Text("Chose Icon")
             }
         }
-        TextField(
+        OutlinedTextField(
             value = houseRefBuilder.displayName,
             leadingIcon = { Icon(Icons.Outlined.TextFields, "Name") },
             label = { Text("Name") },
+            shape = RoundedCornerShape(15.dp),
             onValueChange = {
                 houseRefBuilder =
                     houseRefBuilder.toBuilder().setDisplayName(it).build()
             })
-        TextField(
+        OutlinedTextField(
             value = houseRefBuilder.networkHouseRef.url,
             label = { Text("URL") },
             leadingIcon = { Icon(Icons.Outlined.Link, "URL") },
+            shape = RoundedCornerShape(15.dp),
             onValueChange = {
                 houseRefBuilder = houseRefBuilder.toBuilder().setNetworkHouseRef(
                     houseRefBuilder.networkHouseRef.toBuilder().setUrl(it)
