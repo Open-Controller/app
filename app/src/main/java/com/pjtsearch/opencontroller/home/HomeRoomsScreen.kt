@@ -6,6 +6,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -109,6 +110,7 @@ fun ControllerButton(
             modifier = Modifier
                 .width(120.dp)
                 .height(100.dp),
+            shape = RoundedCornerShape(15.dp),
             onClick = { onSelectController(Pair(roomId, controllerId)) },
 //            FIXME: Figure out colors
             colors = ButtonDefaults.buttonColors(
