@@ -29,7 +29,7 @@ fun ControllerButton(
     val view = LocalView.current
     val scope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
-    println(listOf(text, icon))
+
     LaunchedEffect(interactionSource) {
         scope.launch {
             interactionSource.interactions.collect { value ->
