@@ -2,6 +2,7 @@ package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.TextFields
@@ -9,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.settings.HouseRef
@@ -82,6 +84,8 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
                 houseRefBuilder = houseRefBuilder.toBuilder().setNetworkHouseRef(
                     houseRefBuilder.networkHouseRef.toBuilder().setUrl(it)
                 ).build()
-            })
+            },
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri)
+        )
     }
 }
