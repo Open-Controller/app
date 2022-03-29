@@ -5,9 +5,8 @@ import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
@@ -24,7 +23,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.insets.*
 import com.pjtsearch.opencontroller.components.ExpandingBar
 import com.pjtsearch.opencontroller.components.ListItem
 import com.pjtsearch.opencontroller.components.SmallIconButton
@@ -122,12 +120,11 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                     }
                 },
                 scrollBehavior = scrollBehavior,
-                contentPadding = rememberInsetsPaddingValues(
-                    insets = LocalWindowInsets.current.statusBars,
-                    applyStart = true,
-                    applyTop = true,
-                    applyEnd = true,
-                )
+                contentPadding = WindowInsets.statusBars.exclude(
+                    WindowInsets.statusBars.only(
+                        WindowInsetsSides.Bottom
+                    )
+                ).asPaddingValues()
             )
         },
         floatingActionButton = {
@@ -146,13 +143,13 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
         content = { innerPadding ->
             BoxWithConstraints {
                 LazyVerticalGrid(
-                    cells = GridCells.Fixed(maxOf((maxWidth / 150.dp).toInt(), 1)),
+                    columns = GridCells.Fixed(maxOf((maxWidth / 150.dp).toInt(), 1)),
+                    modifier = Modifier
+                        .padding(horizontal = 15.dp)
+                        .fillMaxHeight(),
                     contentPadding = innerPadding,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .padding(horizontal = 15.dp)
-                        .fillMaxHeight()
                 ) {
                     settings.value.houseRefsList.forEachIndexed { i, it ->
                         item {
@@ -190,7 +187,11 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                                     verticalArrangement = Arrangement.spacedBy(10.dp),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    OpenControllerIcon(icon = it.icon, text = "No Room Icon", size = 2)
+                                    OpenControllerIcon(
+                                        icon = it.icon,
+                                        text = "No Room Icon",
+                                        size = 2
+                                    )
                                     Text(it.displayName)
                                 }
                             }

@@ -18,10 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.fade
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import com.pjtsearch.opencontroller.components.ControlledExpandableListItem
@@ -58,12 +55,11 @@ fun HomeRoomsScreen(
                     }
                 },
                 scrollBehavior = scrollBehavior,
-                contentPadding = rememberInsetsPaddingValues(
-                    insets = LocalWindowInsets.current.statusBars,
-                    applyStart = true,
-                    applyTop = true,
-                    applyEnd = true,
-                )
+                contentPadding = WindowInsets.statusBars.exclude(
+                    WindowInsets.statusBars.only(
+                        WindowInsetsSides.Bottom
+                    )
+                ).asPaddingValues()
             )
         },
         content = { innerPadding ->
