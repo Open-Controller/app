@@ -49,13 +49,13 @@ fun NavigationGraph(
             HomeRoute(
                 homeViewModel = homeViewModel,
                 isExpandedScreen = isExpandedScreen,
-                onExit = { navigationActions.navigateToHouses() },
+                onExit = { navigationActions.navigateToHouses(false) },
                 onError = onError
             )
         }
         composable(Destinations.HOUSES_ROUTE) {
             HousesRoute(
-                onHouseSelected = { navigationActions.navigateToHome(it) }
+                onHouseSelected = { navigationActions.navigateToHome(it, true) }
             )
         }
     }

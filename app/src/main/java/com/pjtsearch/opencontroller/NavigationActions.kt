@@ -11,13 +11,13 @@ object Destinations {
 }
 
 class NavigationActions(navController: NavHostController) {
-    val navigateToHome: (HouseRef) -> Unit = {
-        navController.navigate(Destinations.HOME_ROUTE + "/" + URLEncoder.encode(it.toByteArray().decodeToString(), "utf-8")) {
+    val navigateToHome: (home: HouseRef, saveOldState: Boolean) -> Unit = { home, saveOldState ->
+        navController.navigate(Destinations.HOME_ROUTE + "/" + URLEncoder.encode(home.toByteArray().decodeToString(), "utf-8")) {
             // Pop up to the start destination of the graph to
             // avoid building up a large stack of destinations
             // on the back stack as users select items
             popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+                saveState = saveOldState
             }
             // Avoid multiple copies of the same destination when
             // reselecting the same item
@@ -26,10 +26,10 @@ class NavigationActions(navController: NavHostController) {
             restoreState = true
         }
     }
-    val navigateToHouses: () -> Unit = {
+    val navigateToHouses: (saveOldState: Boolean) -> Unit = { saveOldState ->
         navController.navigate(Destinations.HOUSES_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+                saveState = saveOldState
             }
             launchSingleTop = true
             restoreState = true
