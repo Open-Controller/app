@@ -33,6 +33,7 @@ fun OpenControllerButton(
     val view = LocalView.current
     val scope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
+    println(listOf(text, icon))
     LaunchedEffect(interactionSource) {
         scope.launch {
             interactionSource.interactions.collect { value ->
@@ -67,8 +68,8 @@ fun OpenControllerButton(
         contentPadding = PaddingValues(3.dp),
         interactionSource = interactionSource
     ) {
-        icon?.let {
+        if (icon != null) {
             OpenControllerIcon(icon, text, size)
-        } ?: Text(text)
+        } else { Text(text) }
     }
 }
