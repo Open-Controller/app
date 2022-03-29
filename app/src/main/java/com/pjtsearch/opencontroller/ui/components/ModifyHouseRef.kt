@@ -3,6 +3,13 @@ package com.pjtsearch.opencontroller.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.TextFields
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.settings.HouseRef
@@ -17,21 +24,26 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-//        FIXME: Figure out inputs
-        BasicTextField(
+        TextField(
             value = houseRefBuilder.icon,
+            leadingIcon = { Icon(Icons.Outlined.Image, "Icon") },
+            label = { Text("Icon") },
             onValueChange = {
                 houseRefBuilder =
                     houseRefBuilder.toBuilder().setIcon(it).build()
             })
-        BasicTextField(
+        TextField(
             value = houseRefBuilder.displayName,
+            leadingIcon = { Icon(Icons.Outlined.TextFields, "Name") },
+            label = { Text("Name") },
             onValueChange = {
                 houseRefBuilder =
                     houseRefBuilder.toBuilder().setDisplayName(it).build()
             })
-        BasicTextField(
+        TextField(
             value = houseRefBuilder.networkHouseRef.url,
+            label = { Text("URL") },
+            leadingIcon = { Icon(Icons.Outlined.Link, "URL") },
             onValueChange = {
                 houseRefBuilder = houseRefBuilder.toBuilder().setNetworkHouseRef(
                     houseRefBuilder.networkHouseRef.toBuilder().setUrl(it)
