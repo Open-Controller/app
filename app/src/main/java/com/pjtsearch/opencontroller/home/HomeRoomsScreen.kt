@@ -130,10 +130,9 @@ fun ControllerButton(
                 .height(100.dp),
             shape = RoundedCornerShape(15.dp),
             onClick = { onSelectController(Pair(roomId, controllerId)) },
-//            FIXME: Figure out colors
             colors = ButtonDefaults.buttonColors(
                 containerColor = color,
-                contentColor = if (color.luminance() < 0.3) androidx.compose.ui.graphics.Color.White else androidx.compose.ui.graphics.Color.Black
+                contentColor = contentColorFor(backgroundColor = color)
             )
         ) {
             Text(controller.displayName)
