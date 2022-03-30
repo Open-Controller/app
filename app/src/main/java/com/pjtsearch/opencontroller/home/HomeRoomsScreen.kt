@@ -22,7 +22,7 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import com.pjtsearch.opencontroller.components.ControlledExpandableListItem
-import com.pjtsearch.opencontroller.components.ExpandingBar
+import com.pjtsearch.opencontroller.components.LargeTopAppBarWithPadding
 import com.pjtsearch.opencontroller.components.SmallIconButton
 import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.executor.House
@@ -44,7 +44,7 @@ fun HomeRoomsScreen(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            ExpandingBar(
+            LargeTopAppBarWithPadding(
                 title = { house?.displayName?.let { Text(it) } },
                 navigationIcon = {
                     SmallIconButton(onClick = onExit) {

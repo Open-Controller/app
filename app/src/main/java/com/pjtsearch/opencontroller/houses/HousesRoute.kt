@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
@@ -23,7 +21,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
-import com.pjtsearch.opencontroller.components.ExpandingBar
+import com.pjtsearch.opencontroller.components.LargeTopAppBarWithPadding
 import com.pjtsearch.opencontroller.components.ListItem
 import com.pjtsearch.opencontroller.components.SmallIconButton
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
@@ -81,7 +79,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
         topBar = {
-            ExpandingBar(
+            LargeTopAppBarWithPadding(
                 title = { Text("Houses") },
                 actions = {
                     when (selected.size) {
