@@ -9,6 +9,7 @@ import com.github.michaelbull.result.Ok
 import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.executor.House
 import com.pjtsearch.opencontroller.executor.Panic
+import com.pjtsearch.opencontroller.executor.Widget
 import com.pjtsearch.opencontroller.extensions.resolveHouseRef
 import com.pjtsearch.opencontroller.settings.HouseRef
 import kotlinx.coroutines.GlobalScope
@@ -18,6 +19,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+sealed interface ControllerMenuState {
+    val items: List<Widget>
+    data class Open(override val items: List<Widget>) : ControllerMenuState
+    data class Closed(override val items: List<Widget>) : ControllerMenuState
+}
 
 /**
  * UI state for the Home route.
@@ -48,6 +55,7 @@ sealed interface HomeUiState {
     data class HasController(
         val selectedController: Controller,
         val isControllerOpen: Boolean,
+        val controllerMenuState: ControllerMenuState,
         override val isLoading: Boolean,
         override val house: House,
     ) : HomeUiState
@@ -61,6 +69,8 @@ private data class HomeViewModelState(
     val selectedController: Pair<String, String>? = null, // TODO back selectedController in a SavedStateHandle
     val isControllerOpen: Boolean = false,
     val isLoading: Boolean = false,
+    val isControllerMenuOpen: Boolean = false,
+    val controllerMenuItems: List<Widget> = listOf()
 ) {
 
     /**
@@ -87,6 +97,11 @@ private data class HomeViewModelState(
                 selectedController = house.rooms[selectedController.first]!!.controllers[selectedController.second]!!,
                 isControllerOpen = isControllerOpen,
                 isLoading = isLoading,
+                controllerMenuState = if (isControllerMenuOpen) {
+                    ControllerMenuState.Open(controllerMenuItems)
+                } else {
+                    ControllerMenuState.Closed(controllerMenuItems)
+                }
             )
         }
 }
@@ -147,6 +162,15 @@ class HomeViewModel(
         interactedWithController(controller)
     }
 
+    fun interactedWithControllerMenu(open: Boolean, items: List<Widget>) {
+        viewModelState.update {
+            it.copy(
+                isControllerMenuOpen = open,
+                controllerMenuItems = items
+            )
+        }
+    }
+
     /**
      * Notify that the user interacted with the article details
      */
@@ -154,7 +178,8 @@ class HomeViewModel(
         viewModelState.update {
             it.copy(
                 selectedController = controller,
-                isControllerOpen = true
+                isControllerOpen = true,
+                isControllerMenuOpen = false
             )
         }
     }

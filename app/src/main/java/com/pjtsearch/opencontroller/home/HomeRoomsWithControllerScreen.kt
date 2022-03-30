@@ -10,6 +10,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -18,6 +21,7 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import com.pjtsearch.opencontroller.components.ControlledExpandableListItem
+import com.pjtsearch.opencontroller.executor.Widget
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.ui.components.ControllerView
 
@@ -30,10 +34,11 @@ import com.pjtsearch.opencontroller.ui.components.ControllerView
 fun HomeRoomsWithControllerScreen(
     uiState: HomeUiState,
     onSelectController: (Pair<String, String>) -> Unit,
+    onInteractWithControllerMenu: (open: Boolean, items: List<Widget>) -> Unit,
     onExit: () -> Unit,
     onError: (Throwable) -> Unit
 ) {
-//    TODO: add appbar
+//    TODO: add appbar, move rooms column to shared component
     Row(
         Modifier.padding(
             top = WindowInsets.statusBars.only(WindowInsetsSides.Top).asPaddingValues()
@@ -86,7 +91,9 @@ fun HomeRoomsWithControllerScreen(
         ) {
             if (uiState is HomeUiState.HasController) {
                 ControllerView(
-                    uiState.selectedController, onError = onError
+                    uiState.selectedController, onError = onError,
+                    menuState = uiState.controllerMenuState,
+                    onInteractMenu = onInteractWithControllerMenu
                 )
             } else {
                 Text(

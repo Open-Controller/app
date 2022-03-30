@@ -10,6 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
+import com.pjtsearch.opencontroller.executor.Widget
 
 @Composable
 fun HomeRoute(
@@ -24,6 +25,12 @@ fun HomeRoute(
     HomeRoute(
         uiState = uiState,
         isExpandedScreen = isExpandedScreen,
+        onInteractWithControllerMenu = { open, items ->
+            homeViewModel.interactedWithControllerMenu(
+                open,
+                items
+            )
+        },
         onSelectController = { homeViewModel.selectController(it) },
         onInteractWithRooms = { homeViewModel.interactedWithRooms() },
         onExit = onExit,
@@ -38,6 +45,7 @@ fun HomeRoute(
     isExpandedScreen: Boolean,
     onSelectController: (Pair<String, String>) -> Unit,
     onInteractWithRooms: () -> Unit,
+    onInteractWithControllerMenu: (open: Boolean, items: List<Widget>) -> Unit,
     onExit: () -> Unit,
     onError: (Throwable) -> Unit,
 ) {
@@ -68,6 +76,7 @@ fun HomeRoute(
                 HomeRoomsWithControllerScreen(
                     uiState = uiState,
                     onSelectController = onSelectController,
+                    onInteractWithControllerMenu = onInteractWithControllerMenu,
                     onExit = onExit,
                     onError = onError,
                 )
@@ -86,6 +95,8 @@ fun HomeRoute(
 
                 HomeControllerScreen(
                     controller = uiState.selectedController,
+                    controllerMenuState = uiState.controllerMenuState,
+                    onInteractWithControllerMenu = onInteractWithControllerMenu,
                     onBack = onInteractWithRooms,
                     onError = onError
                 )

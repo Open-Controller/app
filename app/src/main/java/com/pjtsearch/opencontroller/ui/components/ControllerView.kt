@@ -1,28 +1,23 @@
 package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.executor.Widget
+import com.pjtsearch.opencontroller.home.ControllerMenuState
 
 @ExperimentalComposeUiApi
 @Composable
 fun ControllerView(
     controller: Controller,
-    onError: (Throwable) -> Unit
+    onError: (Throwable) -> Unit,
+    menuState: ControllerMenuState,
+    onInteractMenu: (open: Boolean, items: List<Widget>) -> Unit
 ) {
-    var menuItems: List<Widget> by rememberSaveable { mutableStateOf(listOf()) }
-    var menuOpen by rememberSaveable { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()) {
         Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.weight(0.1f)) {
             controller.displayInterface?.widgets?.map {
@@ -31,20 +26,23 @@ fun ControllerView(
                     Modifier
                         .fillMaxWidth()
                         .padding(bottom = 10.dp),
-                    { items -> menuOpen = !menuOpen; menuItems = items },
+                    { items -> onInteractMenu(menuState is ControllerMenuState.Closed, items) },
                     onError
                 )
             }
         }
-        AnimatedVisibility(visible = menuOpen) {
-            Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.weight(1f)) {
-                menuItems.map {
+        AnimatedVisibility(visible = menuState is ControllerMenuState.Open) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(5.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                menuState.items.map {
                     Widget(
                         it,
                         Modifier
                             .fillMaxWidth()
                             .padding(bottom = 10.dp),
-                        { items -> menuItems = items },
+                        { items -> onInteractMenu(true, items) },
                         onError
                     )
                 }
