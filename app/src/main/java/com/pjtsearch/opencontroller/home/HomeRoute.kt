@@ -64,7 +64,14 @@ fun HomeRoute(
         },
     ) {
         when (it) {
-            HomeScreenType.RoomsWithController -> TODO()
+            HomeScreenType.RoomsWithController -> {
+                HomeRoomsWithControllerScreen(
+                    uiState = uiState,
+                    onSelectController = onSelectController,
+                    onExit = onExit,
+                    onError = onError,
+                )
+            }
             HomeScreenType.Rooms -> {
                 HomeRoomsScreen(
                     house = uiState.house,
@@ -79,7 +86,6 @@ fun HomeRoute(
 
                 HomeControllerScreen(
                     controller = uiState.selectedController,
-                    isExpandedScreen = isExpandedScreen,
                     onBack = onInteractWithRooms,
                     onError = onError
                 )

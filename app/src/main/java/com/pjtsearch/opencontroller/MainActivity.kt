@@ -24,7 +24,9 @@ import androidx.datastore.dataStore
 import androidx.navigation.compose.rememberNavController
 import com.pjtsearch.opencontroller.components.SystemUi
 import com.pjtsearch.opencontroller.extensions.SettingsSerializer
+import com.pjtsearch.opencontroller.extensions.WindowSize
 import com.pjtsearch.opencontroller.extensions.copy
+import com.pjtsearch.opencontroller.extensions.rememberWindowSizeClass
 import com.pjtsearch.opencontroller.settings.Settings
 import kotlinx.coroutines.launch
 
@@ -40,13 +42,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val windowSizeClass = rememberWindowSizeClass()
             CompositionLocalProvider(
                 LocalOverScrollConfiguration provides OverScrollConfiguration(
                     forceShowAlways = true
                 )
             ) {
                 SystemUi(this.window) {
-                    MainActivityView()
+                    MainActivityView(windowSizeClass)
                 }
             }
         }
@@ -61,12 +64,12 @@ sealed interface ErrorDialogState {
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
 @Composable
-fun MainActivityView() {
+fun MainActivityView(windowSize: WindowSize) {
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
     val navController = rememberNavController()
 
-    val isExpandedScreen = false
+    val isExpandedScreen = windowSize == WindowSize.Expanded
 
     var errorDialogState: ErrorDialogState by remember { mutableStateOf(ErrorDialogState.Closed) }
 

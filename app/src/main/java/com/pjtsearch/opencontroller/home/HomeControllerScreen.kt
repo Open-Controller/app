@@ -19,7 +19,6 @@ import com.pjtsearch.opencontroller.ui.components.ControllerView
 @Composable
 fun HomeControllerScreen(
     controller: Controller,
-    isExpandedScreen: Boolean,
     onBack: () -> Unit,
     onError: (Throwable) -> Unit
 ) = Scaffold(
