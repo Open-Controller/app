@@ -15,6 +15,7 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -63,9 +64,9 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
     val settings =
         ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
     val scope = rememberCoroutineScope()
-    var selected: List<Int> by remember { mutableStateOf(listOf()) }
-    var adding: HouseRef? by remember { mutableStateOf(null) }
-    var editing: Pair<Int, HouseRef>? by remember { mutableStateOf(null) }
+    var selected: List<Int> by rememberSaveable { mutableStateOf(listOf()) }
+    var adding: HouseRef? by rememberSaveable { mutableStateOf(null) }
+    var editing: Pair<Int, HouseRef>? by rememberSaveable { mutableStateOf(null) }
 
     val view = LocalView.current
     val decayAnimationSpec = rememberSplineBasedDecay<Float>()
