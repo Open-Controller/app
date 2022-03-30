@@ -8,21 +8,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.executor.Widget
 
-@OptIn(ExperimentalAnimationApi::class)
 @ExperimentalComposeUiApi
 @Composable
 fun ControllerView(
     controller: Controller,
     onError: (Throwable) -> Unit
 ) {
-    var menuItems: List<Widget> by remember { mutableStateOf(listOf()) }
-    var menuOpen by remember { mutableStateOf(false) }
+    var menuItems: List<Widget> by rememberSaveable { mutableStateOf(listOf()) }
+    var menuOpen by rememberSaveable { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()) {
         Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.weight(0.1f)) {
             controller.displayInterface?.widgets?.map {

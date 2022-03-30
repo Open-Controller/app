@@ -72,33 +72,33 @@ data class House(
     val id: String,
     val displayName: String,
     val rooms: Map<String, Room>,
-)
+) : Serializable
 
 data class Room(
     val displayName: String,
     val icon: String,
     val controllers: Map<String, Controller>
-)
+) : Serializable
 
 data class Controller(
     val displayName: String,
     val brandColor: String?,
     val displayInterface: DisplayInterface?
-)
+) : Serializable
 
 data class DisplayInterface(
     val widgets: List<Widget>
-)
+) : Serializable
 
 data class Device(
     val lambdas: Map<String, Fn>
-)
+) : Serializable
 
 data class Widget(
     val widgetType: String,
     val params: Map<String, Any>,
     val children: List<Widget>
-)
+) : Serializable
 
 typealias Fn = (List<Any>) -> Result<Any, Panic>
 
