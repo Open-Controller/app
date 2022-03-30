@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.components.CenterAlignedTopAppBarWithPadding
 import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.ui.components.ControllerView
@@ -41,7 +42,15 @@ fun HomeControllerScreen(
             )
         },
         content = { innerPadding ->
-            Column(Modifier.padding(innerPadding)) {
+            Column(
+                Modifier
+                    .padding(innerPadding)
+                    .padding(
+                        bottom = WindowInsets.navigationBars
+                            .only(WindowInsetsSides.Bottom)
+                            .asPaddingValues()
+                            .calculateBottomPadding()
+                    )) {
                 ControllerView(
                     controller,
                     onError = onError
