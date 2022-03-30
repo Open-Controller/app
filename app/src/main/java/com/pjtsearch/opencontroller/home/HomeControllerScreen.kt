@@ -10,7 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import com.pjtsearch.opencontroller.components.CenterBar
+import com.pjtsearch.opencontroller.components.CenterAlignedTopAppBarWithPadding
 import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.ui.components.ControllerView
 
@@ -23,7 +23,7 @@ fun HomeControllerScreen(
     onError: (Throwable) -> Unit
 ) = Scaffold(
         topBar = {
-            CenterBar(
+            CenterAlignedTopAppBarWithPadding(
                 title = { Text(controller.displayName) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
