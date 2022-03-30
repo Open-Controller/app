@@ -23,7 +23,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.components.LargeTopAppBarWithPadding
 import com.pjtsearch.opencontroller.components.ListItem
-import com.pjtsearch.opencontroller.components.SmallIconButton
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.Settings
@@ -83,13 +82,13 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                 title = { Text("Houses") },
                 actions = {
                     when (selected.size) {
-                        0 -> SmallIconButton(
+                        0 -> IconButton(
                             onClick = { }
                         ) {
                             Icon(Icons.Outlined.MoreVert, "More")
                         }
                         1 -> Row {
-                            SmallIconButton(
+                            IconButton(
                                 onClick = {
                                     editing = Pair(selected[0], settings.value.getHouseRefs(selected[0]))
                                 }
@@ -99,7 +98,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                         }
                     }
                     if (selected.isNotEmpty()) {
-                        SmallIconButton(
+                        IconButton(
                             onClick = {
                                 scope.launch {
                                     ctx.settingsDataStore.updateData { settings ->

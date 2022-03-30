@@ -23,7 +23,6 @@ import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import com.pjtsearch.opencontroller.components.ControlledExpandableListItem
 import com.pjtsearch.opencontroller.components.LargeTopAppBarWithPadding
-import com.pjtsearch.opencontroller.components.SmallIconButton
 import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.executor.House
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
@@ -47,7 +46,7 @@ fun HomeRoomsScreen(
             LargeTopAppBarWithPadding(
                 title = { house?.displayName?.let { Text(it) } },
                 navigationIcon = {
-                    SmallIconButton(onClick = onExit) {
+                    IconButton(onClick = onExit) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Exit house"

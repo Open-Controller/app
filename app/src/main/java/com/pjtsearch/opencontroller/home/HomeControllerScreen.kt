@@ -4,13 +4,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import com.pjtsearch.opencontroller.components.CenterBar
-import com.pjtsearch.opencontroller.components.SmallIconButton
 import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.ui.components.ControllerView
 
@@ -26,7 +26,7 @@ fun HomeControllerScreen(
             CenterBar(
                 title = { Text(controller.displayName) },
                 navigationIcon = {
-                    SmallIconButton(onClick = onBack) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Filled.Close,
                             contentDescription = "Exit house"
