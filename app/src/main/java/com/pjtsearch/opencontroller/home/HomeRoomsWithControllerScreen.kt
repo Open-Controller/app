@@ -45,39 +45,11 @@ fun HomeRoomsWithControllerScreen(
                 .calculateTopPadding()
         )
     ) {
-        LazyColumn(
-            modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            uiState.house?.rooms?.map { (roomId, room) ->
-                item {
-                    ControlledExpandableListItem(Modifier.padding(5.dp),
-                        { Text(room.displayName) },
-                        { OpenControllerIcon(room.icon, room.displayName) }) {
-                        Row(
-                            Modifier.horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            room.controllers.map { (controllerId, controller) ->
-                                ControllerButton(
-                                    controller, controllerId, roomId, onSelectController
-                                )
-                            }
-                        }
-                    }
-                }
-            } ?: items(5) {
-                ControlledExpandableListItem(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)
-                        .placeholder(
-                            visible = true,
-                            color = MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.3f),
-                            shape = CircleShape,
-                            highlight = PlaceholderHighlight.shimmer(MaterialTheme.colorScheme.surfaceVariant),
-                        ), { Text("Loading") }, { Text("Loading") }) {}
-            }
-        }
+        RoomControllerPicker(
+            uiState.house?.rooms,
+            modifier = Modifier.weight(3f),
+            onSelectController = onSelectController
+        )
 
         Column(
             Modifier
@@ -87,7 +59,7 @@ fun HomeRoomsWithControllerScreen(
                         .asPaddingValues()
                         .calculateBottomPadding()
                 )
-                .weight(2f)
+                .weight(5f)
         ) {
             if (uiState is HomeUiState.HasController) {
                 ControllerView(

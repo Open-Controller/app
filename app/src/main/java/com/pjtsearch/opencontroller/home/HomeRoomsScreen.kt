@@ -62,79 +62,12 @@ fun HomeRoomsScreen(
             )
         },
         content = { innerPadding ->
-            LazyColumn(
-                contentPadding = innerPadding,
+            RoomControllerPicker(
+                house?.rooms,
                 modifier = Modifier.fillMaxHeight(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                house?.rooms?.map { (roomId, room) ->
-                    item {
-                        ControlledExpandableListItem(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(5.dp),
-                            { Text(room.displayName) },
-                            { OpenControllerIcon(room.icon, room.displayName) }) {
-                            Row(
-                                Modifier
-                                    .horizontalScroll(rememberScrollState()),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                room.controllers.map { (controllerId, controller) ->
-                                    ControllerButton(
-                                        controller,
-                                        controllerId,
-                                        roomId,
-                                        onSelectController
-                                    )
-                                }
-                            }
-                        }
-                    }
-                } ?: items(5) {
-                    ControlledExpandableListItem(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(5.dp)
-                            .placeholder(
-                                visible = true,
-                                color = MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.3f),
-                                shape = CircleShape,
-                                highlight = PlaceholderHighlight.shimmer(MaterialTheme.colorScheme.surfaceVariant),
-                            ),
-                        { Text("Loading") },
-                        { Text("Loading") }) {}
-                }
-            }
+                contentPadding = innerPadding,
+                onSelectController = onSelectController
+            )
         }
     )
 }
-
-@Composable
-fun ControllerButton(
-    controller: Controller,
-    controllerId: String,
-    roomId: String,
-    onSelectController: (Pair<String, String>) -> Unit
-) =
-    (controller.brandColor?.let {
-        Color(
-            android.graphics.Color.parseColor(
-                controller.brandColor
-            )
-        )
-    } ?: MaterialTheme.colorScheme.secondary).let { color ->
-        Button(
-            modifier = Modifier
-                .width(120.dp)
-                .height(100.dp),
-            shape = RoundedCornerShape(15.dp),
-            onClick = { onSelectController(Pair(roomId, controllerId)) },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = color,
-                contentColor = contentColorFor(backgroundColor = color)
-            )
-        ) {
-            Text(controller.displayName)
-        }
-    }
