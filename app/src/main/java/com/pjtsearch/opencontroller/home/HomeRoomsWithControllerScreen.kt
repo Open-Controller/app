@@ -2,12 +2,12 @@ package com.pjtsearch.opencontroller.home
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.twotone.SettingsRemote
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,7 +46,9 @@ fun HomeRoomsWithControllerScreen(
             Column(Modifier.padding(10.dp)) {
                 IconButton(
                     onClick = { onExit() },
-                    modifier = Modifier.padding(5.dp).background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
                 ) {
                     Icon(Icons.Outlined.ArrowBack, "Exit Home")
                 }
@@ -80,10 +82,27 @@ fun HomeRoomsWithControllerScreen(
                     }
                 )
             } else {
-                Text(
-                    text = "No Controller",
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+                Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(40.dp)
+                    ) {
+                        Icon(
+                            Icons.TwoTone.SettingsRemote,
+                            "Controller Icon",
+                            modifier = Modifier.size(250.dp),
+                            tint = MaterialTheme.colorScheme.onBackground.copy(0.3f),
+                        )
+                        Text(
+                            text = "Choose a Controller",
+                            color = MaterialTheme.colorScheme.onBackground.copy(0.4f),
+                            style = MaterialTheme.typography.displayLarge
+                        )
+                    }
+                }
             }
         }
     }
