@@ -52,7 +52,7 @@ fun HomeControllerScreen(
             Column(
                 Modifier
                     .padding(innerPadding)
-                    .padding(start = 8.dp, end = 8.dp)
+                    .padding(start = 15.dp, end = 15.dp)
                     .padding(
                         bottom = WindowInsets.navigationBars
                             .only(WindowInsetsSides.Bottom)

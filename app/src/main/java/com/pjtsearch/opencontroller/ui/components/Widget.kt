@@ -110,7 +110,7 @@ fun ColumnScope.Widget(
         }
         "swipepad" -> Box(
             sizedModifier
-                .padding(8.dp)
+                .padding(0.dp)
                 .weight(1f, true)
                 .background(
                     MaterialTheme.colorScheme.secondaryContainer,
@@ -139,7 +139,7 @@ fun ColumnScope.Widget(
                     Row(
                         Modifier
                             .align(Alignment.BottomCenter)
-                            .padding(8.dp)
+                            .padding(15.dp)
                             .then(
                                 if (widget.params["expand"] as Boolean? == true) Modifier.fillMaxWidth() else Modifier.defaultMinSize(
                                     200.dp,
