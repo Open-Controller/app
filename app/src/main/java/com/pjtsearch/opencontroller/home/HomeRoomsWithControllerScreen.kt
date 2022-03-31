@@ -1,6 +1,7 @@
 package com.pjtsearch.opencontroller.home
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -68,12 +69,14 @@ fun HomeRoomsWithControllerScreen(
                     true -> {
                         check(uiState is HomeUiState.HasController)
                         AnimatedContent(targetState = uiState.selectedController, transitionSpec = {
-                            fadeIn(animationSpec = tween(250, delayMillis = 90)) +
-                                    slideIn(
-                                        initialOffset = { IntOffset(0, 70) },
-                                        animationSpec = tween(250, delayMillis = 90)
-                                    ) with
-                                    fadeOut(animationSpec = tween(90))
+                            slideInVertically(
+                                tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing),
+                                { height -> 1 * height / 10 },
+                            ) + fadeIn(tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing), 0f) with
+                                    slideOutVertically(
+                                        tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing),
+                                        { height -> -1 * height / 10 },
+                                    ) + fadeOut(tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing), 0f)
                         }) { controller ->
                             Scaffold(
                                 topBar = {
