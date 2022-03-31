@@ -114,7 +114,7 @@ fun ColumnScope.Widget(
                 .weight(1f, true)
                 .background(
                     MaterialTheme.colorScheme.secondaryContainer,
-                    RoundedCornerShape(30.dp)
+                    RoundedCornerShape(40.dp)
                 )
         ) {
             SwipePad(
