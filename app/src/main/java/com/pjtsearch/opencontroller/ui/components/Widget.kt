@@ -108,9 +108,10 @@ fun ColumnScope.Widget(
                 )
             }
         }
-        "swipepad" -> Column(
+        "swipepad" -> Box(
             sizedModifier
                 .padding(8.dp)
+                .weight(1f, true)
                 .background(
                     MaterialTheme.colorScheme.secondaryContainer,
                     RoundedCornerShape(30.dp)
@@ -119,7 +120,7 @@ fun ColumnScope.Widget(
             SwipePad(
                 if (widget.params["expand"] as Boolean? == true)
                     Modifier
-                        .weight(1f, true)
+                        .fillMaxHeight()
                         .fillMaxWidth()
                 else Modifier.defaultMinSize(200.dp, 200.dp)
             ) {
@@ -137,6 +138,7 @@ fun ColumnScope.Widget(
                 widget.params["onBottomIncrease"]?.let {
                     Row(
                         Modifier
+                            .align(Alignment.BottomCenter)
                             .padding(8.dp)
                             .then(
                                 if (widget.params["expand"] as Boolean? == true) Modifier.fillMaxWidth() else Modifier.defaultMinSize(
