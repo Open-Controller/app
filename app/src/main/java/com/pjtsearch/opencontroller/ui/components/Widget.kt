@@ -143,7 +143,7 @@ fun ColumnScope.Widget(
                                 ),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSecondaryContainer) {
+                            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
                                 IconButton(onClick = {
                                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                                     callParam("onBottomDecrease")
