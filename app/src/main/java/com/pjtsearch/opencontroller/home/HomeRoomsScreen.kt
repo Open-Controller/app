@@ -4,7 +4,8 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.OtherHouses
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -33,7 +34,7 @@ fun HomeRoomsScreen(
                 navigationIcon = {
                     IconButton(onClick = onExit) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            imageVector = Icons.Outlined.OtherHouses,
                             contentDescription = "Exit house"
                         )
                     }
