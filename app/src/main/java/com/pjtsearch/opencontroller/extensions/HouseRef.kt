@@ -16,7 +16,7 @@ fun resolveHouseRef(houseRef: HouseRef): Result<Result<House, Panic>, Throwable>
             OpenControllerLibExecutor().interpretModule(
                 runCatching {
                     Module.parseFrom(
-                        houseRef.networkHouseRef.url.httpGet().response().third.toResult().bind()
+                        houseRef.networkHouseRef.url.httpGet().response().third.get()
                     )
                 }.bind()
             ).map { it as House }
