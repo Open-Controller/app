@@ -133,6 +133,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                 onClick = {
                     adding = HouseRef.getDefaultInstance()
                 },
+                containerColor = MaterialTheme.colorScheme.tertiary,
                 text = { Text("Add house") },
                 icon = { Icon(Icons.Outlined.Add, "Add a house") }
             )
