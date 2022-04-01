@@ -55,15 +55,28 @@ fun HomeRoomsWithControllerScreen(
                 ) {
                     Icon(Icons.Outlined.ArrowBack, "Exit Home")
                 }
-                RoomControllerPicker(
-                    uiState.house?.rooms,
-                    modifier = Modifier
-                        .fillMaxHeight(),
-                    onSelectController = onSelectController
-                )
+                when (val state = uiState.houseLoadingState) {
+                    is HouseLoadingState.Error ->
+                        RoomsErrorLoading(
+                            state.error, modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(5.dp)
+                        )
+                    is HouseLoadingState.Loaded -> RoomControllerPicker(
+                        state.house.rooms,
+                        modifier = Modifier
+                            .fillMaxHeight(),
+                        onSelectController = onSelectController
+                    )
+                    is HouseLoadingState.Loading -> RoomsLoading(Modifier
+                        .fillMaxHeight())
+                }
             }
         }
-        Column(Modifier.weight(5f).padding(horizontal = 15.dp)) {
+        Column(
+            Modifier
+                .weight(5f)
+                .padding(horizontal = 15.dp)) {
             Crossfade(targetState = uiState is HomeUiState.HasController) { hasController ->
                 when (hasController) {
                     true -> {

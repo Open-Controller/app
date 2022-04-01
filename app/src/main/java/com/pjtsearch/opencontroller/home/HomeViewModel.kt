@@ -3,7 +3,6 @@ package com.pjtsearch.opencontroller.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.kittinunf.fuel.core.FuelError
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.pjtsearch.opencontroller.executor.Controller
@@ -26,6 +25,23 @@ sealed interface ControllerMenuState {
     data class Closed(override val items: List<Widget>) : ControllerMenuState
 }
 
+sealed interface HouseLoadingState {
+    data class Loading(val house: House?) : HouseLoadingState
+    data class Loaded(val house: House) : HouseLoadingState
+    data class Error(val error: Throwable, val house: House?) : HouseLoadingState
+
+    companion object From {
+        fun fromLoadingAndError(isLoading: Boolean, loadingError: Throwable?, house: House?) =
+            if (isLoading) {
+                if (loadingError != null) Error(loadingError, house)
+                else Loading(house)
+            } else {
+                checkNotNull(house)
+                Loaded(house)
+            }
+    }
+}
+
 /**
  * UI state for the Home route.
  *
@@ -33,8 +49,7 @@ sealed interface ControllerMenuState {
  * precisely represent the state available to render the UI.
  */
 sealed interface HomeUiState {
-    val isLoading: Boolean
-    val house: House?
+    val houseLoadingState: HouseLoadingState
 
     /**
      * There are no posts to render.
@@ -43,8 +58,7 @@ sealed interface HomeUiState {
      * waiting to reload them.
      */
     data class NoController(
-        override val house: House?,
-        override val isLoading: Boolean
+        override val houseLoadingState: HouseLoadingState
     ) : HomeUiState
 
     /**
@@ -56,8 +70,7 @@ sealed interface HomeUiState {
         val selectedController: Controller,
         val isControllerOpen: Boolean,
         val controllerMenuState: ControllerMenuState,
-        override val isLoading: Boolean,
-        override val house: House,
+        override val houseLoadingState: HouseLoadingState,
     ) : HomeUiState
 }
 
@@ -69,6 +82,7 @@ private data class HomeViewModelState(
     val selectedController: Pair<String, String>? = null, // TODO back selectedController in a SavedStateHandle
     val isControllerOpen: Boolean = false,
     val isLoading: Boolean = false,
+    val loadingError: Throwable? = null,
     val isControllerMenuOpen: Boolean = false,
     val controllerMenuItems: List<Widget> = listOf()
 ) {
@@ -80,23 +94,20 @@ private data class HomeViewModelState(
     fun toUiState(): HomeUiState =
         if (house == null) {
             HomeUiState.NoController(
-                house = null,
-                isLoading = isLoading
+                houseLoadingState = HouseLoadingState.fromLoadingAndError(isLoading, loadingError, null)
             )
         } else if (selectedController == null) {
             HomeUiState.NoController(
-                house = house,
-                isLoading = isLoading
+                houseLoadingState = HouseLoadingState.fromLoadingAndError(isLoading, loadingError, house)
             )
         } else {
             HomeUiState.HasController(
-                house = house,
                 // Determine the selected post. This will be the post the user last selected.
                 // If there is none (or that post isn't in the current feed), default to the
                 // highlighted post
                 selectedController = house.rooms[selectedController.first]!!.controllers[selectedController.second]!!,
                 isControllerOpen = isControllerOpen,
-                isLoading = isLoading,
+                houseLoadingState = HouseLoadingState.fromLoadingAndError(isLoading, loadingError, house),
                 controllerMenuState = if (isControllerMenuOpen) {
                     ControllerMenuState.Open(controllerMenuItems)
                 } else {
@@ -111,8 +122,7 @@ private data class HomeViewModelState(
  */
 class HomeViewModel(
     private val houseRef: HouseRef,
-    private val onPanic: (Panic) -> Unit,
-    private val onGetHouseError: (Throwable) -> Unit
+    private val onPanic: (Panic) -> Unit
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(HomeViewModelState(isLoading = true))
@@ -142,15 +152,14 @@ class HomeViewModel(
             viewModelState.update {
                 when (fetchResult) {
                     is Ok -> when (val evalResult = fetchResult.value) {
-                        is Ok -> it.copy(house = evalResult.value, isLoading = false)
+                        is Ok -> it.copy(house = evalResult.value, isLoading = false, loadingError = null)
                         is Err -> {
                             onPanic(evalResult.error)
                             it
                         }
                     }
                     is Err -> {
-                        onGetHouseError(fetchResult.error)
-                        it
+                        it.copy(loadingError = fetchResult.error)
                     }
                 }
             }
@@ -202,11 +211,10 @@ class HomeViewModel(
         fun provideFactory(
             houseRef: HouseRef,
             onPanic: (Panic) -> Unit,
-            onGetHouseError: (Throwable) -> Unit
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel(houseRef, onPanic, onGetHouseError) as T
+                return HomeViewModel(houseRef, onPanic) as T
             }
         }
     }

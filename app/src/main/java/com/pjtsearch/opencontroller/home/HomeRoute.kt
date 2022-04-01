@@ -83,8 +83,7 @@ fun HomeRoute(
             }
             HomeScreenType.Rooms -> {
                 HomeRoomsScreen(
-                    house = uiState.house,
-                    isLoading = uiState.isLoading,
+                    houseLoadingState = uiState.houseLoadingState,
                     onSelectController = onSelectController,
                     onExit = onExit
                 )
