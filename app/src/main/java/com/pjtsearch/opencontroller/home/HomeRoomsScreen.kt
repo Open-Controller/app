@@ -57,15 +57,13 @@ fun HomeRoomsScreen(
                     )
                 is HouseLoadingState.Loaded -> RoomControllerPicker(
                     houseLoadingState.house.rooms,
-                    modifier = Modifier
-                        .padding(horizontal = 15.dp)
-                        .fillMaxHeight(),
+                    modifier = Modifier.fillMaxHeight(),
+                    contentPadding = PaddingValues(horizontal = 15.dp),
                     onSelectController = onSelectController
                 )
                 is HouseLoadingState.Loading -> RoomsLoading(
-                    modifier = Modifier
-                        .padding(horizontal = 15.dp)
-                        .fillMaxHeight(),
+                    modifier = Modifier.fillMaxHeight(),
+                    contentPadding = PaddingValues(horizontal = 15.dp),
                 )
             }
         }
