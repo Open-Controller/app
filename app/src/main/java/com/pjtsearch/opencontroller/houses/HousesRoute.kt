@@ -30,6 +30,7 @@ import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.settingsDataStore
 import com.pjtsearch.opencontroller.ui.components.ModifyHouseRef
 import kotlinx.coroutines.launch
+import java.util.*
 
 //sealed interface EditMode {
 //    operator fun not(): EditMode =
@@ -63,10 +64,11 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
     val ctx = LocalContext.current
     val settings =
         ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
+    println(settings.value.houseRefsMap)
     val scope = rememberCoroutineScope()
-    var selected: List<Int> by rememberSaveable { mutableStateOf(listOf()) }
+    var selected: List<String> by rememberSaveable { mutableStateOf(listOf()) }
     var adding: HouseRef? by rememberSaveable { mutableStateOf(null) }
-    var editing: Pair<Int, HouseRef>? by rememberSaveable { mutableStateOf(null) }
+    var editing: Pair<String, HouseRef>? by rememberSaveable { mutableStateOf(null) }
 
     val view = LocalView.current
     val decayAnimationSpec = rememberSplineBasedDecay<Float>()
@@ -91,7 +93,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                         1 -> Row {
                             IconButton(
                                 onClick = {
-                                    editing = Pair(selected[0], settings.value.getHouseRefs(selected[0]))
+                                    editing = Pair(selected[0], settings.value.houseRefsMap[selected[0]]!!)
                                 }
                             ) {
                                 Icon(Icons.Outlined.Edit, "Edit this house")
@@ -103,9 +105,9 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                             onClick = {
                                 scope.launch {
                                     ctx.settingsDataStore.updateData { settings ->
-                                        settings.toBuilder().clearHouseRefs().addAllHouseRefs(
-                                            settings.houseRefsList.filterIndexed { i, _ ->
-                                                !selected.contains(i)
+                                        settings.toBuilder().clearHouseRefs().putAllHouseRefs(
+                                            settings.houseRefsMap.filter { (id, _) ->
+                                                !selected.contains(id)
                                             }
                                         ).build()
                                     }
@@ -148,32 +150,32 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    settings.value.houseRefsList.forEachIndexed { i, it ->
+                    settings.value.houseRefsMap.forEach { (id, it) ->
                         item {
                             ListItem(
                                 modifier = Modifier
                                     .fillMaxWidth(),
-                                selected = selected.contains(i),
+                                selected = selected.contains(id),
                                 clickAndSemanticsModifier =
                                 Modifier.combinedClickable(
                                     interactionSource = remember { MutableInteractionSource() },
                                     onClick = {
                                         if (selected.isEmpty()) {
                                             onHouseSelected(it)
-                                        } else if (!selected.contains(i)) {
-                                            selected = selected + i
+                                        } else if (!selected.contains(id)) {
+                                            selected = selected + id
                                         } else {
-                                            selected = selected - i
+                                            selected = selected - id
                                         }
                                     },
                                     onLongClick = {
                                         view.performHapticFeedback(
                                             HapticFeedbackConstants.LONG_PRESS
                                         )
-                                        if (!selected.contains(i)) {
-                                            selected = selected + i
+                                        if (!selected.contains(id)) {
+                                            selected = selected + id
                                         } else {
-                                            selected = selected - i
+                                            selected = selected - id
                                         }
                                     },
                                     indication = rememberRipple()
@@ -210,7 +212,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                     scope.launch {
                         ctx.settingsDataStore.updateData { settings ->
                             settings.toBuilder()
-                                .setHouseRefs(editingState.first, editingState.second)
+                                .putHouseRefs(editingState.first, editingState.second)
                                 .build()
                         }
                         editing = null
@@ -242,7 +244,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                     scope.launch {
                         ctx.settingsDataStore.updateData { settings ->
                             settings.toBuilder()
-                                .addHouseRefs(addingState).build()
+                                .putHouseRefs(UUID.randomUUID().toString() ,addingState).build()
                         }
                         adding = null
                     }
