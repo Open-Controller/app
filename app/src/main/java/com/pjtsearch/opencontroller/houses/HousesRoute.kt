@@ -139,13 +139,11 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
         },
         floatingActionButtonPosition = FabPosition.Center,
         content = { innerPadding ->
-            BoxWithConstraints {
+            BoxWithConstraints(Modifier.padding(innerPadding)) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(maxOf((maxWidth / 150.dp).toInt(), 1)),
-                    modifier = Modifier
-                        .padding(horizontal = 15.dp)
-                        .fillMaxHeight(),
-                    contentPadding = innerPadding,
+                    modifier = Modifier.fillMaxHeight(),
+                    contentPadding = PaddingValues(horizontal = 15.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {

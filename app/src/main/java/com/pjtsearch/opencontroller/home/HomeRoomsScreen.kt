@@ -44,7 +44,7 @@ fun HomeRoomsScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBarWithPadding(
-                title = { house?.displayName?.let { Text(it) } },
+                title = { Text("Rooms") },
                 navigationIcon = {
                     IconButton(onClick = onExit) {
                         Icon(
@@ -64,7 +64,7 @@ fun HomeRoomsScreen(
         content = { innerPadding ->
             RoomControllerPicker(
                 house?.rooms,
-                modifier = Modifier.fillMaxHeight(),
+                modifier = Modifier.fillMaxHeight().padding(horizontal = 15.dp),
                 contentPadding = innerPadding,
                 onSelectController = onSelectController
             )

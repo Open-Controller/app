@@ -37,8 +37,7 @@ fun RoomControllerPicker(
             item {
                 ControlledExpandableListItem(
                     Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp),
+                        .fillMaxWidth(),
                     { Text(room.displayName) },
                     { OpenControllerIcon(room.icon, room.displayName) }) {
                     Row(
