@@ -63,7 +63,7 @@ fun HomeRoomsWithControllerScreen(
                 )
             }
         }
-        Column(Modifier.weight(5f)) {
+        Column(Modifier.weight(5f).padding(horizontal = 15.dp)) {
             Crossfade(targetState = uiState is HomeUiState.HasController) { hasController ->
                 when (hasController) {
                     true -> {
