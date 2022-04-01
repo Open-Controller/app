@@ -1,7 +1,6 @@
 package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +22,12 @@ fun ControllerView(
     onInteractMenu: (open: Boolean, items: List<Widget>) -> Unit
 ) {
     Column(Modifier.fillMaxSize()) {
-        Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.weight(0.1f)) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+            modifier = Modifier
+                .weight(0.1f)
+                .padding(bottom = 10.dp)
+        ) {
             controller.displayInterface?.widgets?.map {
                 Widget(
                     it,
@@ -41,7 +45,9 @@ fun ControllerView(
             exit = fadeOut() + shrinkVertically(),
         ) {
             Surface(
-                modifier = Modifier.weight(1f).padding(5.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(5.dp),
                 color = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(25.dp),
                 tonalElevation = 1.dp
