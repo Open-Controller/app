@@ -19,6 +19,7 @@ import com.pjtsearch.opencontroller.components.LargeTopAppBarWithPadding
 fun HomeRoomsScreen(
     houseLoadingState: HouseLoadingState,
     onSelectController: (Pair<String, String>) -> Unit,
+    onReload: () -> Unit,
     onExit: () -> Unit
 ) {
     val decayAnimationSpec = rememberSplineBasedDecay<Float>()
@@ -53,7 +54,8 @@ fun HomeRoomsScreen(
                     RoomsErrorLoading(
                         houseLoadingState.error, modifier = Modifier
                             .fillMaxHeight()
-                            .padding(horizontal = 15.dp)
+                            .padding(horizontal = 15.dp),
+                        onReload = onReload
                     )
                 is HouseLoadingState.Loaded -> RoomControllerPicker(
                     houseLoadingState.house.rooms,

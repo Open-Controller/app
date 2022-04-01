@@ -146,7 +146,7 @@ class HomeViewModel(
      */
     fun refreshHouse() {
         // Ui state is refreshing
-        viewModelState.update { it.copy(isLoading = true) }
+        viewModelState.update { it.copy(isLoading = true, loadingError = null) }
 
         GlobalScope.launch {
             val fetchResult = resolveHouseRef(houseRef)

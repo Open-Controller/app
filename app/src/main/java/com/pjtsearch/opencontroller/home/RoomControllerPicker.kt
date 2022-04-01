@@ -122,6 +122,7 @@ fun RoomsLoading(
 @Composable
 fun RoomsErrorLoading(
     error: Throwable,
+    onReload: () -> Unit,
     modifier: Modifier = Modifier
 ) =
     Column(
@@ -136,6 +137,9 @@ fun RoomsErrorLoading(
                 .align(Alignment.CenterHorizontally),
             MaterialTheme.colorScheme.primary,
         )
+        Button(onClick = { onReload() }) {
+            Text("Reload")
+        }
         Text(
             text = "Error Loading: " + (error.localizedMessage
                 ?: "Unknown error"),

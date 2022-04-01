@@ -31,6 +31,7 @@ fun HomeRoomsWithControllerScreen(
     onSelectController: (Pair<String, String>) -> Unit,
     onInteractWithControllerMenu: (open: Boolean, items: List<Widget>) -> Unit,
     onExit: () -> Unit,
+    onReload: () -> Unit,
     onError: (Throwable) -> Unit
 ) {
     Row(
@@ -60,7 +61,8 @@ fun HomeRoomsWithControllerScreen(
                         RoomsErrorLoading(
                             state.error, modifier = Modifier
                                 .fillMaxHeight()
-                                .padding(5.dp)
+                                .padding(5.dp),
+                            onReload = onReload
                         )
                     is HouseLoadingState.Loaded -> RoomControllerPicker(
                         state.house.rooms,

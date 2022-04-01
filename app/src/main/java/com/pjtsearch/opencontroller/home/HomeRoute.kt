@@ -31,6 +31,7 @@ fun HomeRoute(
                 items
             )
         },
+        onReload = { homeViewModel.refreshHouse() },
         onSelectController = { homeViewModel.selectController(it) },
         onInteractWithRooms = { homeViewModel.interactedWithRooms() },
         onExit = onExit,
@@ -47,6 +48,7 @@ fun HomeRoute(
     onInteractWithRooms: () -> Unit,
     onInteractWithControllerMenu: (open: Boolean, items: List<Widget>) -> Unit,
     onExit: () -> Unit,
+    onReload: () -> Unit,
     onError: (Throwable) -> Unit,
 ) {
     val homeScreenType = getHomeScreenType(isExpandedScreen, uiState)
@@ -78,6 +80,7 @@ fun HomeRoute(
                     onSelectController = onSelectController,
                     onInteractWithControllerMenu = onInteractWithControllerMenu,
                     onExit = onExit,
+                    onReload = onReload,
                     onError = onError,
                 )
             }
@@ -85,6 +88,7 @@ fun HomeRoute(
                 HomeRoomsScreen(
                     houseLoadingState = uiState.houseLoadingState,
                     onSelectController = onSelectController,
+                    onReload = onReload,
                     onExit = onExit
                 )
             }
