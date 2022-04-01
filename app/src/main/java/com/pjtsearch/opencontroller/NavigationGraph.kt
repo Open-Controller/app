@@ -1,9 +1,12 @@
 package com.pjtsearch.opencontroller
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -14,6 +17,7 @@ import com.pjtsearch.opencontroller.home.HomeRoute
 import com.pjtsearch.opencontroller.home.HomeViewModel
 import com.pjtsearch.opencontroller.houses.HousesRoute
 import com.pjtsearch.opencontroller.settings.HouseRef
+import kotlinx.coroutines.flow.take
 
 @Composable
 fun NavigationGraph(
@@ -55,6 +59,21 @@ fun NavigationGraph(
             HousesRoute(
                 onHouseSelected = { navigationActions.navigateToHome(it, true) }
             )
+        }
+        composable(Destinations.LAST_HOME_ROUTE) {
+            val ctx = LocalContext.current
+
+            LaunchedEffect(ctx.settingsDataStore) {
+                ctx.settingsDataStore.data.take(1).collect { settings ->
+                    navController.popBackStack()
+                    settings.houseRefsMap[settings.lastHouse]?.let { houseRef ->
+                        navigationActions.navigateToHome(
+                            houseRef,
+                            false
+                        )
+                    } ?: navigationActions.navigateToHouses(false)
+                }
+            }
         }
     }
 }

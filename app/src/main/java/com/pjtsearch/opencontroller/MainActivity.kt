@@ -28,7 +28,9 @@ import com.pjtsearch.opencontroller.extensions.WindowSize
 import com.pjtsearch.opencontroller.extensions.copy
 import com.pjtsearch.opencontroller.extensions.rememberWindowSizeClass
 import com.pjtsearch.opencontroller.settings.Settings
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import java.net.URLEncoder
 
 val Context.settingsDataStore: DataStore<Settings> by dataStore(
     fileName = "Settings.proto",
@@ -68,6 +70,7 @@ fun MainActivityView(windowSize: WindowSize) {
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
     val navController = rememberNavController()
+    var initialStartDestination: String? by remember { mutableStateOf(null) }
 
     val isExpandedScreen = windowSize == WindowSize.Expanded
 
@@ -80,14 +83,27 @@ fun MainActivityView(windowSize: WindowSize) {
         }
     }
 
-    NavigationGraph(
-        isExpandedScreen = isExpandedScreen,
-        navController = navController,
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
-            .fillMaxSize(),
-        onError = { onError(it) }
-    )
+    LaunchedEffect(ctx.settingsDataStore) {
+        ctx.settingsDataStore.data.take(1).collect { setttings ->
+            initialStartDestination = if (setttings.hasLastHouse()) {
+                Destinations.LAST_HOME_ROUTE
+            } else {
+                Destinations.HOUSES_ROUTE
+            }
+        }
+    }
+
+    initialStartDestination?.let { startDestination ->
+        NavigationGraph(
+            isExpandedScreen = isExpandedScreen,
+            navController = navController,
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .fillMaxSize(),
+            onError = { onError(it) },
+            startDestination = startDestination
+        )
+    }
 
     val state = errorDialogState
     if (state is ErrorDialogState.Opened) {

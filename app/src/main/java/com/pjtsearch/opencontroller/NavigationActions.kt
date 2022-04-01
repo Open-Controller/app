@@ -8,6 +8,7 @@ import java.net.URLEncoder
 object Destinations {
     const val HOME_ROUTE = "home"
     const val HOUSES_ROUTE = "houses"
+    const val LAST_HOME_ROUTE = "lastHome"
 }
 
 class NavigationActions(navController: NavHostController) {

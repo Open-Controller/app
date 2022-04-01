@@ -64,7 +64,6 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
     val ctx = LocalContext.current
     val settings =
         ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
-    println(settings.value.houseRefsMap)
     val scope = rememberCoroutineScope()
     var selected: List<String> by rememberSaveable { mutableStateOf(listOf()) }
     var adding: HouseRef? by rememberSaveable { mutableStateOf(null) }
@@ -74,6 +73,23 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
     val decayAnimationSpec = rememberSplineBasedDecay<Float>()
     val scrollBehavior = remember(decayAnimationSpec) {
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(decayAnimationSpec)
+    }
+
+    val beforeHouseSelected = { id: String, houseRef: HouseRef ->
+        scope.launch {
+            ctx.settingsDataStore.updateData { oldSettings ->
+                oldSettings.toBuilder().clone().setLastHouse(id).build()
+            }
+        }
+        onHouseSelected(houseRef)
+    }
+
+    LaunchedEffect(ctx.settingsDataStore) {
+        scope.launch {
+            ctx.settingsDataStore.updateData { oldSettings ->
+                oldSettings.toBuilder().clone().clearLastHouse().build()
+            }
+        }
     }
 
     Scaffold(
@@ -161,7 +177,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                                     interactionSource = remember { MutableInteractionSource() },
                                     onClick = {
                                         if (selected.isEmpty()) {
-                                            onHouseSelected(it)
+                                            beforeHouseSelected(id, it)
                                         } else if (!selected.contains(id)) {
                                             selected = selected + id
                                         } else {
