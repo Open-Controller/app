@@ -4,10 +4,7 @@ import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -108,64 +105,63 @@ fun ColumnScope.Widget(
                 )
             }
         }
-        "swipepad" -> Box(
-            sizedModifier
-                .padding(0.dp)
-                .weight(1f, true)
-                .background(
-                    MaterialTheme.colorScheme.secondaryContainer,
-                    RoundedCornerShape(40.dp)
-                )
+        "swipepad" -> Surface(
+            modifier = sizedModifier.weight(1f, true),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 4.dp,
+            shape = RoundedCornerShape(40.dp)
         ) {
-            SwipePad(
-                if (widget.params["expand"] as Boolean? == true)
-                    Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth()
-                else Modifier.defaultMinSize(200.dp, 200.dp)
-            ) {
-                callParam(
-                    when (it) {
-                        is DirectionVector.Down -> "onSwipeDown"
-                        is DirectionVector.Left -> "onSwipeLeft"
-                        is DirectionVector.Right -> "onSwipeRight"
-                        is DirectionVector.Up -> "onSwipeUp"
-                        DirectionVector.Zero -> "onClick"
-                    }
-                )
-            }
-            widget.params["onBottomDecrease"]?.let {
-                widget.params["onBottomIncrease"]?.let {
-                    Row(
+            Box {
+                SwipePad(
+                    if (widget.params["expand"] as Boolean? == true)
                         Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(15.dp)
-                            .then(
-                                if (widget.params["expand"] as Boolean? == true) Modifier.fillMaxWidth() else Modifier.defaultMinSize(
-                                    200.dp,
-                                    10.dp
-                                )
-                            ),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSecondaryContainer) {
-                            IconButton(onClick = {
-                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                                callParam("onBottomDecrease")
-                            }) {
-                                OpenControllerIcon(
-                                    widget.params["bottomDecreaseIcon"] as String,
-                                    "Decrease"
-                                )
-                            }
-                            IconButton(onClick = {
-                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                                callParam("onBottomIncrease")
-                            }) {
-                                OpenControllerIcon(
-                                    widget.params["bottomIncreaseIcon"] as String,
-                                    "Increase"
-                                )
+                            .fillMaxHeight()
+                            .fillMaxWidth()
+                    else Modifier.defaultMinSize(200.dp, 200.dp)
+                ) {
+                    callParam(
+                        when (it) {
+                            is DirectionVector.Down -> "onSwipeDown"
+                            is DirectionVector.Left -> "onSwipeLeft"
+                            is DirectionVector.Right -> "onSwipeRight"
+                            is DirectionVector.Up -> "onSwipeUp"
+                            DirectionVector.Zero -> "onClick"
+                        }
+                    )
+                }
+                widget.params["onBottomDecrease"]?.let {
+                    widget.params["onBottomIncrease"]?.let {
+                        Row(
+                            Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(15.dp)
+                                .then(
+                                    if (widget.params["expand"] as Boolean? == true) Modifier.fillMaxWidth() else Modifier.defaultMinSize(
+                                        200.dp,
+                                        10.dp
+                                    )
+                                ),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSecondaryContainer) {
+                                IconButton(onClick = {
+                                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                    callParam("onBottomDecrease")
+                                }) {
+                                    OpenControllerIcon(
+                                        widget.params["bottomDecreaseIcon"] as String,
+                                        "Decrease"
+                                    )
+                                }
+                                IconButton(onClick = {
+                                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                    callParam("onBottomIncrease")
+                                }) {
+                                    OpenControllerIcon(
+                                        widget.params["bottomIncreaseIcon"] as String,
+                                        "Increase"
+                                    )
+                                }
                             }
                         }
                     }
