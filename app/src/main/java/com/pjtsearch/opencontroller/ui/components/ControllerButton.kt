@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -49,8 +51,8 @@ fun ControllerButton(
             .size(
                 when (size) {
                     0 -> 65.dp
-                    1 -> 77.dp
-                    2 -> 156.dp
+                    1 -> 87.dp
+                    2 -> 176.dp
                     else -> 65.dp
                 }
             )
@@ -70,7 +72,7 @@ fun ControllerButton(
                 view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                 onClick()
             },
-        tonalElevation = 4.dp,
+        tonalElevation = 5.dp,
         shape = CircleShape,
     ) {
         Box(Modifier.padding(3.dp), contentAlignment = Alignment.Center) {

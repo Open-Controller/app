@@ -70,8 +70,8 @@ var icons = hashMapOf(
 fun OpenControllerIcon(icon: String, text: String, size: Int? = 0) =
     (when (size) {
         0 -> 24.dp
-        1 -> 24.dp
-        2 -> 30.dp
+        1 -> 26.dp
+        2 -> 40.dp
         else -> 24.dp
     }).let { sz ->
         when (val iconValue = icons[icon]) {

@@ -186,7 +186,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                                     OpenControllerIcon(
                                         icon = it.icon,
                                         text = "No Room Icon",
-                                        size = 2
+                                        size = 1
                                     )
                                     Text(it.displayName)
                                 }

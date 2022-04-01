@@ -108,7 +108,7 @@ fun ColumnScope.Widget(
         "swipepad" -> Surface(
             modifier = sizedModifier.weight(1f, true),
             color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 4.dp,
+            tonalElevation = 5.dp,
             shape = RoundedCornerShape(40.dp)
         ) {
             Box {
@@ -150,7 +150,8 @@ fun ColumnScope.Widget(
                                 }) {
                                     OpenControllerIcon(
                                         widget.params["bottomDecreaseIcon"] as String,
-                                        "Decrease"
+                                        "Decrease",
+                                        1
                                     )
                                 }
                                 IconButton(onClick = {
@@ -159,7 +160,8 @@ fun ColumnScope.Widget(
                                 }) {
                                     OpenControllerIcon(
                                         widget.params["bottomIncreaseIcon"] as String,
-                                        "Increase"
+                                        "Increase",
+                                        1
                                     )
                                 }
                             }
