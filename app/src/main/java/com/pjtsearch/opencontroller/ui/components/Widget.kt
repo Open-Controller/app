@@ -134,7 +134,7 @@ fun ColumnScope.Widget(
                         Row(
                             Modifier
                                 .align(Alignment.BottomCenter)
-                                .padding(15.dp)
+                                .padding(20.dp)
                                 .then(
                                     if (widget.params["expand"] as Boolean? == true) Modifier.fillMaxWidth() else Modifier.defaultMinSize(
                                         200.dp,
