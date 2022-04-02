@@ -46,8 +46,9 @@ fun RoomControllerPicker(
                     { OpenControllerIcon(room.icon, room.displayName) }) {
                     Row(
                         Modifier
+                            .fillMaxWidth()
                             .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(15.dp)
                     ) {
                         room.controllers.map { (controllerId, controller) ->
                             ControllerButton(
@@ -79,7 +80,7 @@ fun ControllerButton(
     } ?: MaterialTheme.colorScheme.secondary).let { color ->
         Button(
             modifier = Modifier
-                .width(120.dp)
+                .width(130.dp)
                 .height(100.dp),
             shape = RoundedCornerShape(15.dp),
             onClick = { onSelectController(Pair(roomId, controllerId)) },
