@@ -1,7 +1,6 @@
 package com.pjtsearch.opencontroller.ui.components
 
 import android.view.HapticFeedbackConstants
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -53,6 +52,22 @@ fun ColumnScope.Widget(
                 }
             }
         }
+        "buttongroup" ->
+            ControllerButtonGroup(
+                modifier = sizedModifier,
+                size = widget.params["size"] as Int?,
+                buttons = widget.children.map { btn ->
+                    check(btn.widgetType == "button")
+                    ButtonItemParams(
+                        btn.params["text"] as String,
+                        btn.params["icon"] as String?,
+                    ) {
+                        GlobalScope.launch {
+                            (btn.params["onClick"] as Fn)(listOf())
+                        }
+                    }
+                }
+            )
         "button" ->
             ControllerButton(
                 sizedModifier,
