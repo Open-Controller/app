@@ -99,6 +99,7 @@ fun HomeRoute(
                 HomeControllerScreen(
                     controller = uiState.selectedController,
                     controllerMenuState = uiState.controllerMenuState,
+                    roomDisplayName = uiState.roomDisplayName,
                     onInteractWithControllerMenu = onInteractWithControllerMenu,
                     onBack = onInteractWithRooms,
                     onError = onError

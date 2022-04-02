@@ -96,7 +96,7 @@ fun HomeRoomsWithControllerScreen(
                             Scaffold(
                                 topBar = {
                                     CenterAlignedTopAppBar(
-                                        title = { Text(controller.displayName) },
+                                        title = { Text(uiState.roomDisplayName + " " + controller.displayName) },
                                     )
                                 },
                                 content = { innerPadding ->

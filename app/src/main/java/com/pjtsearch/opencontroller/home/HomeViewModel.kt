@@ -63,6 +63,7 @@ sealed interface HomeUiState {
      * There is guaranteed to be a [selectedPost], which is one of the posts from [postsFeed].
      */
     data class HasController(
+        val roomDisplayName: String,
         val selectedController: Controller,
         val isControllerOpen: Boolean,
         val controllerMenuState: ControllerMenuState,
@@ -104,6 +105,7 @@ private data class HomeViewModelState(
 //                TODO: What if reloaded? Should it only have the ids, so that can refresh? It actually probably already will
                 selectedController = house.rooms.find { it.id == selectedController.first }!!.controllers.find { it.id == selectedController.second }!!,
                 isControllerOpen = isControllerOpen,
+                roomDisplayName = house.rooms.find { it.id == selectedController.first }!!.displayName,
                 houseLoadingState = HouseLoadingState.fromLoadingAndError(isLoading, loadingError, house),
                 controllerMenuState = if (isControllerMenuOpen) {
                     ControllerMenuState.Open(controllerMenuItems)

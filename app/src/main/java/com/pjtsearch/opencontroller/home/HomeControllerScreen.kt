@@ -23,6 +23,7 @@ import com.pjtsearch.opencontroller.ui.components.ControllerView
 @OptIn(ExperimentalComposeUiApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun HomeControllerScreen(
+    roomDisplayName: String,
     controller: Controller,
     onBack: () -> Unit,
     onError: (Throwable) -> Unit,
@@ -32,7 +33,7 @@ fun HomeControllerScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBarWithPadding(
-                title = { Text(controller.displayName) },
+                title = { Text(roomDisplayName + " " + controller.displayName) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
