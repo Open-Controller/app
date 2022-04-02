@@ -72,6 +72,10 @@ fun ControllerButton(
                 view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                 onClick()
             },
+        color = when (size) {
+            2 -> MaterialTheme.colorScheme.primaryContainer
+            else -> MaterialTheme.colorScheme.surface
+        },
         tonalElevation = 5.dp,
         shape = CircleShape,
     ) {

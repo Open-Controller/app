@@ -59,7 +59,7 @@ fun ControllerButtonGroup(
                 }
             )
             .clip(CircleShape),
-        color = MaterialTheme.colorScheme.tertiaryContainer,
+        color = MaterialTheme.colorScheme.tertiary,
         shape = CircleShape,
     ) {
         Row {
@@ -70,21 +70,6 @@ fun ControllerButtonGroup(
                     size,
                     btn.onClick
                 )
-                if (i < buttons.size - 1) {
-                    Box(
-                        Modifier
-                            .height(
-                                when (size) {
-                                    0 -> 55.dp
-                                    1 -> 70.dp
-                                    2 -> 176.dp
-                                    else -> 65.dp
-                                }
-                            )
-                            .width(0.5.dp)
-                            .background(MaterialTheme.colorScheme.tertiary)
-                    )
-                }
             }
         }
     }

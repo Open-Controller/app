@@ -122,8 +122,7 @@ fun ColumnScope.Widget(
         }
         "swipepad" -> Surface(
             modifier = sizedModifier.weight(1f, true),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 5.dp,
+            color = MaterialTheme.colorScheme.secondaryContainer,
             shape = RoundedCornerShape(40.dp)
         ) {
             Box {
