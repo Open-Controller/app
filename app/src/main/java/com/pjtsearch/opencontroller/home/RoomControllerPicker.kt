@@ -27,7 +27,7 @@ import com.pjtsearch.opencontroller.ui.theme.typography
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun RoomControllerPicker(
-    rooms: Map<String, Room>,
+    rooms: List<Room>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onSelectController: (Pair<String, String>) -> Unit
@@ -37,7 +37,7 @@ fun RoomControllerPicker(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        rooms.map { (roomId, room) ->
+        rooms.map { room ->
             item {
                 ControlledExpandableListItem(
                     Modifier
@@ -50,11 +50,11 @@ fun RoomControllerPicker(
                             .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(15.dp)
                     ) {
-                        room.controllers.map { (controllerId, controller) ->
+                        room.controllers.map { controller ->
                             ControllerButton(
                                 controller,
-                                controllerId,
-                                roomId,
+                                controller.id,
+                                room.id,
                                 onSelectController
                             )
                         }

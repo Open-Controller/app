@@ -71,16 +71,18 @@ fun <T> syntaxCtx(name: String, params: List<Any>, position: Position, cb: Stack
 data class House(
     val id: String,
     val displayName: String,
-    val rooms: Map<String, Room>,
+    val rooms: List<Room>,
 ) : Serializable
 
 data class Room(
+    val id: String,
     val displayName: String,
     val icon: String,
-    val controllers: Map<String, Controller>
+    val controllers: List<Controller>
 ) : Serializable
 
 data class Controller(
+    val id: String,
     val displayName: String,
     val brandColor: String?,
     val displayInterface: DisplayInterface?
@@ -181,7 +183,7 @@ class OpenControllerLibExecutor(
                                     localScope,
                                 ).ctx().bind()
                             ).bind(),
-                            it.roomsMap.mapValues { (_, roomExpr) ->
+                            it.roomsList.map { roomExpr ->
                                 tryCast<Room>(
                                     interpretExpr(
                                         roomExpr,
@@ -200,6 +202,13 @@ class OpenControllerLibExecutor(
                         Room(
                             tryCast<String>(
                                 interpretExpr(
+                                    it.id,
+                                    moduleScope,
+                                    localScope,
+                                ).ctx().bind()
+                            ).bind(),
+                            tryCast<String>(
+                                interpretExpr(
                                     it.displayName,
                                     moduleScope,
                                     localScope,
@@ -212,7 +221,7 @@ class OpenControllerLibExecutor(
                                     localScope,
                                 ).ctx().bind()
                             ).bind(),
-                            it.controllersMap.mapValues { (_, controllerExpr) ->
+                            it.controllersList.map { controllerExpr ->
                                 tryCast<Controller>(
                                     interpretExpr(
                                         controllerExpr,
@@ -229,6 +238,13 @@ class OpenControllerLibExecutor(
                 syntaxCtx("CONTROLLER", listOf(), expr.position) {
                     binding {
                         Controller(
+                            tryCast<String>(
+                                interpretExpr(
+                                    it.id,
+                                    moduleScope,
+                                    localScope,
+                                ).ctx().bind()
+                            ).bind(),
                             tryCast<String>(
                                 interpretExpr(
                                     it.displayName,

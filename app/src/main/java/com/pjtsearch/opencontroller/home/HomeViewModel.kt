@@ -12,11 +12,7 @@ import com.pjtsearch.opencontroller.executor.Widget
 import com.pjtsearch.opencontroller.extensions.resolveHouseRef
 import com.pjtsearch.opencontroller.settings.HouseRef
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 sealed interface ControllerMenuState {
@@ -106,7 +102,7 @@ private data class HomeViewModelState(
                 // If there is none (or that post isn't in the current feed), default to the
                 // highlighted post
 //                TODO: What if reloaded? Should it only have the ids, so that can refresh? It actually probably already will
-                selectedController = house.rooms[selectedController.first]!!.controllers[selectedController.second]!!,
+                selectedController = house.rooms.find { it.id == selectedController.first }!!.controllers.find { it.id == selectedController.second }!!,
                 isControllerOpen = isControllerOpen,
                 houseLoadingState = HouseLoadingState.fromLoadingAndError(isLoading, loadingError, house),
                 controllerMenuState = if (isControllerMenuOpen) {
