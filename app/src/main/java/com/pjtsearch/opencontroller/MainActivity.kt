@@ -19,18 +19,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.navigation.compose.rememberNavController
 import com.pjtsearch.opencontroller.components.SystemUi
-import com.pjtsearch.opencontroller.extensions.SettingsSerializer
-import com.pjtsearch.opencontroller.extensions.WindowSize
-import com.pjtsearch.opencontroller.extensions.copy
-import com.pjtsearch.opencontroller.extensions.rememberWindowSizeClass
+import com.pjtsearch.opencontroller.extensions.*
 import com.pjtsearch.opencontroller.settings.Settings
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
-import java.net.URLEncoder
 
 val Context.settingsDataStore: DataStore<Settings> by dataStore(
     fileName = "Settings.proto",
@@ -44,12 +42,18 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val windowSizeClass = rememberWindowSizeClass()
+            val windowSizeClass = rememberWindowWidthClass()
+            val windowHeightClass = rememberWindowHeightClass()
             CompositionLocalProvider(
                 LocalOverScrollConfiguration provides OverScrollConfiguration(
                     forceShowAlways = true
+                ),
+                LocalDensity provides Density(
+                    density = if (windowHeightClass == WindowSize.Compact) 3.0f else LocalDensity.current.density,
+                    fontScale = LocalDensity.current.fontScale
                 )
             ) {
+                println(windowHeightClass)
                 SystemUi(this.window) {
                     MainActivityView(windowSizeClass)
                 }
