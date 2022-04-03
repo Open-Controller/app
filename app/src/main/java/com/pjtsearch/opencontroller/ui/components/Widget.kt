@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import com.pjtsearch.opencontroller.executor.Fn
 import com.pjtsearch.opencontroller.executor.Panic
 import com.pjtsearch.opencontroller.executor.StackCtx
@@ -39,7 +41,10 @@ fun ColumnScope.Widget(
         GlobalScope.launch {
             val param = widget.params[paramName] as Fn?
             if (param != null) {
-                param(params.toList())
+                when (val result = param(params.toList())) {
+                    is Err -> onError(result.error.asThrowable())
+                    else -> {}
+                }
             } else {
 //                TODO: make a message
                 onError(Panic.Type(listOf()).asThrowable())
@@ -234,6 +239,7 @@ fun ColumnScope.Widget(
             widget.params["icon"] as String,
             widget.params["size"] as Int
         ) {
+            println(it)
             callParam("onInput", it)
         }
         null -> Text("Widget type must be set")
