@@ -155,65 +155,63 @@ fun ColumnScope.Widget(
                         }
                     )
                 }
-                widget.params["onBottomDecrease"]?.let {
-                    widget.params["onBottomIncrease"]?.let {
-                        Row(
-                            Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(10.dp)
-                                .then(
-                                    if (widget.params["expand"] as Boolean? == true) Modifier.fillMaxWidth() else Modifier.defaultMinSize(
-                                        200.dp,
-                                        10.dp
+                if (widget.params["onBottomIncrease"] != null && widget.params["onBottomDecrease"] != null) {
+                    Row(
+                        Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(10.dp)
+                            .then(
+                                if (widget.params["expand"] as Boolean? == true) Modifier.fillMaxWidth() else Modifier.defaultMinSize(
+                                    200.dp,
+                                    10.dp
+                                )
+                            ),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+                            Box(
+                                modifier = Modifier
+                                    .combinedClickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        onLongClick = {
+                                            view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                            callParam("onBottomHold")
+                                        },
+                                        onClick = {
+                                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                            callParam("onBottomDecrease")
+                                        },
+                                        indication = rememberRipple(true, 32.dp)
                                     )
-                                ),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-                                Box(
-                                    modifier = Modifier
-                                        .combinedClickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            onLongClick = {
-                                                view.performHapticFeedback(HapticFeedbackConstants.REJECT)
-                                                callParam("onBottomHold")
-                                            },
-                                            onClick = {
-                                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                                                callParam("onBottomDecrease")
-                                            },
-                                            indication = rememberRipple(true, 32.dp)
-                                        )
-                                        .clip(CircleShape)
-                                        .size(64.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    OpenControllerIcon(
-                                        widget.params["bottomDecreaseIcon"] as String,
-                                        "Decrease",
-                                        1
+                                    .clip(CircleShape)
+                                    .size(64.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                OpenControllerIcon(
+                                    widget.params["bottomDecreaseIcon"] as String,
+                                    "Decrease",
+                                    1
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .combinedClickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        onClick = {
+                                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                            callParam("onBottomIncrease")
+                                        },
+                                        indication = rememberRipple(true, 32.dp)
                                     )
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .combinedClickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            onClick = {
-                                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                                                callParam("onBottomIncrease")
-                                            },
-                                            indication = rememberRipple(true, 32.dp)
-                                        )
-                                        .clip(CircleShape)
-                                        .size(64.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    OpenControllerIcon(
-                                        widget.params["bottomIncreaseIcon"] as String,
-                                        "Increase",
-                                        1
-                                    )
-                                }
+                                    .clip(CircleShape)
+                                    .size(64.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                OpenControllerIcon(
+                                    widget.params["bottomIncreaseIcon"] as String,
+                                    "Increase",
+                                    1
+                                )
                             }
                         }
                     }
