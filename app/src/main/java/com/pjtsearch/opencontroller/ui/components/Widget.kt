@@ -228,15 +228,14 @@ fun ColumnScope.Widget(
             ) {
                 onOpenMenu(widget.children)
             }
-//        FIXME: readd
-//        "textinput" -> TextInput(
-//            sizedModifier,
-//            widget.params["text"] as String,
-//            widget.params["icon"] as String,
-//            widget.params["size"] as Int
-//        ) {
-//            callParam("onInput")
-//        }
+        "textinput" -> TextInput(
+            sizedModifier,
+            widget.params["text"] as String,
+            widget.params["icon"] as String,
+            widget.params["size"] as Int
+        ) {
+            callParam("onInput", it)
+        }
         null -> Text("Widget type must be set")
     }
 }
