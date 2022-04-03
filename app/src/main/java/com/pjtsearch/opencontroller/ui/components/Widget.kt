@@ -17,6 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.executor.Fn
+import com.pjtsearch.opencontroller.executor.Panic
+import com.pjtsearch.opencontroller.executor.StackCtx
 import com.pjtsearch.opencontroller.executor.Widget
 import com.pjtsearch.opencontroller.extensions.DirectionVector
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
@@ -35,7 +37,13 @@ fun ColumnScope.Widget(
 ) {
     fun callParam(paramName: String, vararg params: Any) {
         GlobalScope.launch {
-            (widget.params[paramName] as Fn)(params.toList())
+            val param = widget.params[paramName] as Fn?
+            if (param != null) {
+                param(params.toList())
+            } else {
+//                TODO: make a message
+                onError(Panic.Type(listOf()).asThrowable())
+            }
         }
     }
     val view = LocalView.current
