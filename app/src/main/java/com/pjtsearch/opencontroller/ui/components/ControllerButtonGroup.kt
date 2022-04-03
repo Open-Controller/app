@@ -98,12 +98,20 @@ fun ButtonInside(
 
     Box(
         Modifier
-            .size(
+            .height(
                 when (size) {
                     0 -> 55.dp
                     1 -> 70.dp
                     2 -> 176.dp
                     else -> 65.dp
+                }
+            )
+            .width(
+                when (size) {
+                    0 -> 35.dp
+                    1 -> 50.dp
+                    2 -> 156.dp
+                    else -> 35.dp
                 }
             )
             .clickable(
