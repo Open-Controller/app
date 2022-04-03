@@ -1,16 +1,19 @@
 package com.pjtsearch.opencontroller.ui.components
 
 import android.view.HapticFeedbackConstants
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.executor.Fn
@@ -21,6 +24,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalComposeUiApi
 @Composable
 fun ColumnScope.Widget(
@@ -148,7 +152,7 @@ fun ColumnScope.Widget(
                         Row(
                             Modifier
                                 .align(Alignment.BottomCenter)
-                                .padding(20.dp)
+                                .padding(10.dp)
                                 .then(
                                     if (widget.params["expand"] as Boolean? == true) Modifier.fillMaxWidth() else Modifier.defaultMinSize(
                                         200.dp,
@@ -158,20 +162,44 @@ fun ColumnScope.Widget(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-                                IconButton(onClick = {
-                                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                                    callParam("onBottomDecrease")
-                                }) {
+                                Box(
+                                    modifier = Modifier
+                                        .combinedClickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            onLongClick = {
+                                                view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                                callParam("onBottomHold")
+                                            },
+                                            onClick = {
+                                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                                callParam("onBottomDecrease")
+                                            },
+                                            indication = rememberRipple(true, 32.dp)
+                                        )
+                                        .clip(CircleShape)
+                                        .size(64.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     OpenControllerIcon(
                                         widget.params["bottomDecreaseIcon"] as String,
                                         "Decrease",
                                         1
                                     )
                                 }
-                                IconButton(onClick = {
-                                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                                    callParam("onBottomIncrease")
-                                }) {
+                                Box(
+                                    modifier = Modifier
+                                        .combinedClickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            onClick = {
+                                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                                callParam("onBottomIncrease")
+                                            },
+                                            indication = rememberRipple(true, 32.dp)
+                                        )
+                                        .clip(CircleShape)
+                                        .size(64.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     OpenControllerIcon(
                                         widget.params["bottomIncreaseIcon"] as String,
                                         "Increase",
