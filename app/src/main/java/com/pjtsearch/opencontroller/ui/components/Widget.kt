@@ -1,5 +1,6 @@
 package com.pjtsearch.opencontroller.ui.components
 
+import android.os.Build
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -179,7 +180,11 @@ fun ColumnScope.Widget(
                                     .combinedClickable(
                                         interactionSource = remember { MutableInteractionSource() },
                                         onLongClick = {
-                                            view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                                view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                            } else {
+                                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                            }
                                             callParam("onBottomHold")
                                         },
                                         onClick = {
