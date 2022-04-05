@@ -1,30 +1,19 @@
 package com.pjtsearch.opencontroller.ui.components
 
-import android.os.Build
-import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.unit.dp
 import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import com.pjtsearch.opencontroller.executor.Fn
 import com.pjtsearch.opencontroller.executor.Panic
-import com.pjtsearch.opencontroller.executor.StackCtx
 import com.pjtsearch.opencontroller.executor.Widget
-import com.pjtsearch.opencontroller.extensions.DirectionVector
-import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -52,7 +41,6 @@ fun ColumnScope.Widget(
             }
         }
     }
-    val view = LocalView.current
     val sizedModifier = if (widget.params["expand"] as Boolean? == true) {
         modifier.weight(1f, false)
     } else modifier
@@ -138,96 +126,24 @@ fun ColumnScope.Widget(
                 )
             }
         }
-        "swipepad" -> Surface(
+        "swipepad" -> ControllerSwipePad(
             modifier = sizedModifier.weight(1f, true),
-            color = MaterialTheme.colorScheme.secondaryContainer,
-            shape = RoundedCornerShape(40.dp)
-        ) {
-            Box {
-                SwipePad(
-                    if (widget.params["expand"] as Boolean? == true)
-                        Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth()
-                    else Modifier.defaultMinSize(200.dp, 200.dp)
-                ) {
-                    callParam(
-                        when (it) {
-                            is DirectionVector.Down -> "onSwipeDown"
-                            is DirectionVector.Left -> "onSwipeLeft"
-                            is DirectionVector.Right -> "onSwipeRight"
-                            is DirectionVector.Up -> "onSwipeUp"
-                            DirectionVector.Zero -> "onClick"
-                        }
-                    )
-                }
-                if (widget.params["onBottomIncrease"] != null && widget.params["onBottomDecrease"] != null) {
-                    Row(
-                        Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(10.dp)
-                            .then(
-                                if (widget.params["expand"] as Boolean? == true) Modifier.fillMaxWidth() else Modifier.defaultMinSize(
-                                    200.dp,
-                                    10.dp
-                                )
-                            ),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-                            Box(
-                                modifier = Modifier
-                                    .combinedClickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        onLongClick = {
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                                view.performHapticFeedback(HapticFeedbackConstants.REJECT)
-                                            } else {
-                                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                                            }
-                                            callParam("onBottomHold")
-                                        },
-                                        onClick = {
-                                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                                            callParam("onBottomDecrease")
-                                        },
-                                        indication = rememberRipple(true, 32.dp)
-                                    )
-                                    .clip(CircleShape)
-                                    .size(64.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                OpenControllerIcon(
-                                    widget.params["bottomDecreaseIcon"] as String,
-                                    "Decrease",
-                                    1
-                                )
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .combinedClickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        onClick = {
-                                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                                            callParam("onBottomIncrease")
-                                        },
-                                        indication = rememberRipple(true, 32.dp)
-                                    )
-                                    .clip(CircleShape)
-                                    .size(64.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                OpenControllerIcon(
-                                    widget.params["bottomIncreaseIcon"] as String,
-                                    "Increase",
-                                    1
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
+            expand = widget.params["expand"] as Boolean?,
+            onBottomDecrease = widget.params["onBottomDecrease"]?.let {
+                { callParam("onBottomDecrease") }
+            },
+            onBottomIncrease = widget.params["onBottomIncrease"]?.let {
+                { callParam("onBottomIncrease") }
+            },
+            onBottomHold = { callParam("onBottomHold") },
+            onSwipeDown = { callParam("onSwipeDown") },
+            onSwipeUp = { callParam("onSwipeUp") },
+            onSwipeLeft = { callParam("onSwipeLeft") },
+            onSwipeRight = { callParam("onSwipeRight") },
+            onClick = { callParam("onClick") },
+            bottomDecreaseIcon = widget.params["bottomDecreaseIcon"] as String,
+            bottomIncreaseIcon = widget.params["bottomIncreaseIcon"] as String,
+        )
         "space" -> Spacer(sizedModifier)
         "menubutton" ->
             ControllerButton(

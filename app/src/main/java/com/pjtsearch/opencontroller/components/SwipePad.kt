@@ -1,4 +1,4 @@
-package com.pjtsearch.opencontroller.ui.components
+package com.pjtsearch.opencontroller.components
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.clickable
