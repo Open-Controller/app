@@ -1,6 +1,7 @@
 package com.pjtsearch.opencontroller.executor
 
 import com.github.michaelbull.result.*
+import com.pjtsearch.opencontroller.extensions.mapOr
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.*
@@ -675,6 +676,31 @@ val builtins: Map<String, Fn> = mapOf(
                         }
                         is Optional<*> -> binding<Optional<*>, Panic> {
                             input.map {
+                                it?.let { transformer(listOf(it)).bind() }
+                                    ?: Err(typePanic()).bind()
+                            }
+                        }
+                        else -> Err(typePanic())
+                    }
+                }
+            }
+        }
+    },
+    "mapOr" to { args: List<Any> ->
+        fnCtx("mapOr", args) {
+            binding {
+                val default = args[0];
+                val transformer = tryCast<Fn>(args[1]).bind();
+                { innerArgs: List<Any> ->
+                    when (val input = innerArgs[0]) {
+                        is Result<*, *> -> binding<Any, Panic> {
+                            input.mapOr(default) {
+                                it?.let { transformer(listOf(it)).bind() }
+                                    ?: Err(typePanic()).bind()
+                            }
+                        }
+                        is Optional<*> -> binding<Any, Panic> {
+                            input.mapOr(default) {
                                 it?.let { transformer(listOf(it)).bind() }
                                     ?: Err(typePanic()).bind()
                             }
