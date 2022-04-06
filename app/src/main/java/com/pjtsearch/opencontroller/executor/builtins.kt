@@ -771,6 +771,8 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
     }
 )
 val builtinValues = mapOf<String, Any>(
-    "None" to Optional.empty<Any>()
+    "None" to Optional.empty<Any>(),
+    "true" to true,
+    "false" to false,
 )
 val builtins = builtinFns + builtinValues
