@@ -107,6 +107,9 @@ fun StackCtx.Fn.eq(args: List<Any>): Result<Boolean, Panic> {
         is Number -> tryCast<Number>(second).map {
             first == second
         }
+        is Boolean -> tryCast<Boolean>(second).map {
+            first == second
+        }
         is List<*> -> tryCast<List<*>>(second).map {
             first == second
         }
