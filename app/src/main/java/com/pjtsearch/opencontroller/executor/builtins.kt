@@ -97,7 +97,7 @@ fun asString(item: Any): Result<String, Panic> = fnCtx("asString", listOf(item))
     }
 }
 
-fun StackCtx.Fn.eq(args: List<Any>): Result<Any, Panic> {
+fun StackCtx.Fn.eq(args: List<Any>): Result<Boolean, Panic> {
     val first = args[0]
     val second = args[1]
     return when (first) {
@@ -113,11 +113,11 @@ fun StackCtx.Fn.eq(args: List<Any>): Result<Any, Panic> {
         is Map<*, *> -> tryCast<Map<*, *>>(second).map {
             first == second
         }
-        is Optional<*> -> tryCast<Optional<*>>(second).map {
+        is Optional<*> -> tryCast<Optional<*>>(second).flatMap {
             when (first.isPresent to it.isPresent) {
                 true to true -> eq(listOf(first.get(), it.get()))
-                false to false -> true
-                else -> false
+                false to false -> Ok(true)
+                else -> Ok(false)
             }
         }
         else -> Err(typePanic())
