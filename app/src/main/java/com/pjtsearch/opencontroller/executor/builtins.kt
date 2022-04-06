@@ -125,6 +125,11 @@ fun StackCtx.Fn.eq(args: List<Any>): Result<Boolean, Panic> {
 }
 
 val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
+    "!" to { args: List<Any> ->
+        fnCtx("!", args) {
+            tryCast<Boolean>(args[0]).map { !it }
+        }
+    },
     "!=" to { args: List<Any> ->
         fnCtx("=", args) {
             eq(args).map { !it }
