@@ -56,8 +56,10 @@ fun HomeRoute(
         targetState = homeScreenType,
         modifier = Modifier.fillMaxHeight(),
         transitionSpec = {
-            val intSpec = tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing)
-            val floatSpec = tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
+            val intSpec =
+                tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing)
+            val floatSpec =
+                tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
             val dir = if (targetState == HomeScreenType.Rooms) {
                 -1
             } else {

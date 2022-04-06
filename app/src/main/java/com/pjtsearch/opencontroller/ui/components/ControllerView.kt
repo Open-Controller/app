@@ -34,7 +34,12 @@ fun ControllerView(
                     Modifier
                         .fillMaxWidth()
                         .padding(bottom = 10.dp),
-                    { items -> onInteractMenu(menuState is ControllerMenuState.Closed, items) },
+                    { items ->
+                        onInteractMenu(
+                            menuState is ControllerMenuState.Closed,
+                            items
+                        )
+                    },
                     onError
                 )
             }

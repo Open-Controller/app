@@ -109,7 +109,10 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                         1 -> Row {
                             IconButton(
                                 onClick = {
-                                    editing = Pair(selected[0], settings.value.houseRefsMap[selected[0]]!!)
+                                    editing = Pair(
+                                        selected[0],
+                                        settings.value.houseRefsMap[selected[0]]!!
+                                    )
                                 }
                             ) {
                                 Icon(Icons.Outlined.Edit, "Edit this house")
@@ -121,11 +124,12 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                             onClick = {
                                 scope.launch {
                                     ctx.settingsDataStore.updateData { settings ->
-                                        settings.toBuilder().clearHouseRefs().putAllHouseRefs(
-                                            settings.houseRefsMap.filter { (id, _) ->
-                                                !selected.contains(id)
-                                            }
-                                        ).build()
+                                        settings.toBuilder().clearHouseRefs()
+                                            .putAllHouseRefs(
+                                                settings.houseRefsMap.filter { (id, _) ->
+                                                    !selected.contains(id)
+                                                }
+                                            ).build()
                                     }
                                     selected = listOf()
                                 }
@@ -260,7 +264,8 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                     scope.launch {
                         ctx.settingsDataStore.updateData { settings ->
                             settings.toBuilder()
-                                .putHouseRefs(UUID.randomUUID().toString() ,addingState).build()
+                                .putHouseRefs(UUID.randomUUID().toString(), addingState)
+                                .build()
                         }
                         adding = null
                     }

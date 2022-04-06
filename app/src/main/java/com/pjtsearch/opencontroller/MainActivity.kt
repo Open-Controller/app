@@ -36,7 +36,8 @@ val Context.settingsDataStore: DataStore<Settings> by dataStore(
 )
 
 class MainActivity : AppCompatActivity() {
-    @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class,
+    @OptIn(
+        ExperimentalFoundationApi::class, ExperimentalAnimationApi::class,
         ExperimentalComposeUiApi::class
     )
     override fun onCreate(savedInstanceState: Bundle?) {

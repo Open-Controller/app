@@ -79,9 +79,13 @@ fun ControllerSwipePad(
                                     interactionSource = remember { MutableInteractionSource() },
                                     onLongClick = {
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                            view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                            view.performHapticFeedback(
+                                                HapticFeedbackConstants.REJECT
+                                            )
                                         } else {
-                                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                            view.performHapticFeedback(
+                                                HapticFeedbackConstants.LONG_PRESS
+                                            )
                                         }
                                         onBottomHold()
                                     },

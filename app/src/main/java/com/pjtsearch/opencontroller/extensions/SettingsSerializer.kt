@@ -1,13 +1,13 @@
 package com.pjtsearch.opencontroller.extensions
 
 import androidx.datastore.core.CorruptionException
+import androidx.datastore.core.Serializer
 import com.google.protobuf.InvalidProtocolBufferException
 import com.pjtsearch.opencontroller.settings.Settings
-import java.io.InputStream
-import java.io.OutputStream
-import androidx.datastore.core.Serializer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.InputStream
+import java.io.OutputStream
 
 object SettingsSerializer : Serializer<Settings> {
     override suspend fun readFrom(input: InputStream): Settings {

@@ -52,7 +52,10 @@ fun HomeRoomsWithControllerScreen(
                     onClick = { onExit() },
                     modifier = Modifier
                         .padding(5.dp)
-                        .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
+                        .background(
+                            MaterialTheme.colorScheme.secondaryContainer,
+                            CircleShape
+                        )
                 ) {
                     Icon(Icons.Outlined.ArrowBack, "Exit Home")
                 }
@@ -70,29 +73,50 @@ fun HomeRoomsWithControllerScreen(
                             .fillMaxHeight(),
                         onSelectController = onSelectController
                     )
-                    is HouseLoadingState.Loading -> RoomsLoading(Modifier
-                        .fillMaxHeight())
+                    is HouseLoadingState.Loading -> RoomsLoading(
+                        Modifier
+                            .fillMaxHeight()
+                    )
                 }
             }
         }
         Column(
             Modifier
                 .weight(5f)
-                .padding(horizontal = 15.dp)) {
+                .padding(horizontal = 15.dp)
+        ) {
             Crossfade(targetState = uiState is HomeUiState.HasController) { hasController ->
                 when (hasController) {
                     true -> {
                         check(uiState is HomeUiState.HasController)
-                        AnimatedContent(targetState = uiState.selectedController, transitionSpec = {
-                            slideInVertically(
-                                tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing),
-                                { height -> 1 * height / 10 },
-                            ) + fadeIn(tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing), 0f) with
-                                    slideOutVertically(
-                                        tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing),
-                                        { height -> -1 * height / 10 },
-                                    ) + fadeOut(tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing), 0f)
-                        }) { controller ->
+                        AnimatedContent(
+                            targetState = uiState.selectedController,
+                            transitionSpec = {
+                                slideInVertically(
+                                    tween<IntOffset>(
+                                        durationMillis = 300,
+                                        easing = FastOutSlowInEasing
+                                    ),
+                                    { height -> 1 * height / 10 },
+                                ) + fadeIn(
+                                    tween<Float>(
+                                        durationMillis = 300,
+                                        easing = FastOutSlowInEasing
+                                    ), 0f
+                                ) with
+                                        slideOutVertically(
+                                            tween<IntOffset>(
+                                                durationMillis = 300,
+                                                easing = FastOutSlowInEasing
+                                            ),
+                                            { height -> -1 * height / 10 },
+                                        ) + fadeOut(
+                                    tween<Float>(
+                                        durationMillis = 300,
+                                        easing = FastOutSlowInEasing
+                                    ), 0f
+                                )
+                            }) { controller ->
                             Scaffold(
                                 topBar = {
                                     CenterAlignedTopAppBar(

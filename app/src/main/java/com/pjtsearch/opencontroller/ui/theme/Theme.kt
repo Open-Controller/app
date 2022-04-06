@@ -4,7 +4,6 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val LightColorPalette = lightColorScheme(
@@ -68,7 +67,10 @@ private val DarkColorPalette = darkColorScheme(
 )
 
 @Composable
-fun OpenControllerTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+fun OpenControllerTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
     val ctx = LocalContext.current
     val colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         if (darkTheme) {

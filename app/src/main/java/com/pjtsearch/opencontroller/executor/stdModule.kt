@@ -34,10 +34,11 @@ fun getStdModule(
                 val (host, port) = (args[0] as String).split(":")
                 var client: Socket? = null
                 try {
-                    client = getSocket("$host:$port") ?: Socket(host, port.toInt()).let { s ->
-                        updateSocket("$host:$port", s)
-                        s
-                    }
+                    client =
+                        getSocket("$host:$port") ?: Socket(host, port.toInt()).let { s ->
+                            updateSocket("$host:$port", s)
+                            s
+                        }
                 } catch (err: Exception) {
                     err.printStackTrace()
                 }

@@ -11,7 +11,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.TextFieldValue
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.apache.commons.text.diff.CommandVisitor
@@ -20,7 +19,13 @@ import org.apache.commons.text.diff.StringsComparator
 
 @ExperimentalComposeUiApi
 @Composable
-fun TextInput(modifier: Modifier = Modifier, text: String, icon: String, size: Int, onInput: (Map<String, Any>) -> Unit) {
+fun TextInput(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: String,
+    size: Int,
+    onInput: (Map<String, Any>) -> Unit
+) {
     var value by remember { mutableStateOf(TextFieldValue()) }
     var isOpen by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
@@ -38,7 +43,7 @@ fun TextInput(modifier: Modifier = Modifier, text: String, icon: String, size: I
             runCatching { focusRequester.freeFocus() }
             keyboardController?.hide()
         }
-        onDispose {  }
+        onDispose { }
     }
 
     ControllerButton(

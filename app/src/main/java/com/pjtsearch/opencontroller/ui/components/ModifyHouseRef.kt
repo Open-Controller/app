@@ -29,7 +29,11 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
             HouseRef.newBuilder(houseRef).build()
         )
     }
-    var choosingIconState by remember { mutableStateOf<ChoosingIconState>(ChoosingIconState.Closed) }
+    var choosingIconState by remember {
+        mutableStateOf<ChoosingIconState>(
+            ChoosingIconState.Closed
+        )
+    }
 
     LaunchedEffect(houseRefBuilder) {
         onChange(houseRefBuilder)
@@ -62,7 +66,9 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
             )
         }
         TextButton(
-            onClick = { choosingIconState = ChoosingIconState.Opened(houseRefBuilder.icon) },
+            onClick = {
+                choosingIconState = ChoosingIconState.Opened(houseRefBuilder.icon)
+            },
             modifier = Modifier.align(
                 Alignment.CenterHorizontally
             )

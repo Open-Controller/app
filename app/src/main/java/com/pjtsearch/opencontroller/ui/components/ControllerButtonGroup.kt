@@ -2,7 +2,6 @@ package com.pjtsearch.opencontroller.ui.components
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -115,12 +114,13 @@ fun ButtonInside(
                 }
             )
             .clickable(
-                interactionSource = interactionSource, indication = LocalIndication.current
+                interactionSource = interactionSource,
+                indication = LocalIndication.current
             ) {
                 view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                 onClick()
             },
-            contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center,
     ) {
         if (icon != null) {
             OpenControllerIcon(icon, text, size)

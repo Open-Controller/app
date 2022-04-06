@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 sealed interface ControllerMenuState {
     val items: List<Widget>
+
     data class Open(override val items: List<Widget>) : ControllerMenuState
     data class Closed(override val items: List<Widget>) : ControllerMenuState
 }
@@ -27,7 +28,11 @@ sealed interface HouseLoadingState {
     data class Error(val error: Throwable, val house: House?) : HouseLoadingState
 
     companion object From {
-        fun fromLoadingAndError(isLoading: Boolean, loadingError: Throwable?, house: House?) =
+        fun fromLoadingAndError(
+            isLoading: Boolean,
+            loadingError: Throwable?,
+            house: House?
+        ) =
             if (isLoading) {
                 if (loadingError != null) Error(loadingError, house)
                 else Loading(house)
@@ -91,11 +96,19 @@ private data class HomeViewModelState(
     fun toUiState(): HomeUiState =
         if (house == null) {
             HomeUiState.NoController(
-                houseLoadingState = HouseLoadingState.fromLoadingAndError(isLoading, loadingError, null)
+                houseLoadingState = HouseLoadingState.fromLoadingAndError(
+                    isLoading,
+                    loadingError,
+                    null
+                )
             )
         } else if (selectedController == null) {
             HomeUiState.NoController(
-                houseLoadingState = HouseLoadingState.fromLoadingAndError(isLoading, loadingError, house)
+                houseLoadingState = HouseLoadingState.fromLoadingAndError(
+                    isLoading,
+                    loadingError,
+                    house
+                )
             )
         } else {
             HomeUiState.HasController(
@@ -106,7 +119,11 @@ private data class HomeViewModelState(
                 selectedController = house.rooms.find { it.id == selectedController.first }!!.controllers.find { it.id == selectedController.second }!!,
                 isControllerOpen = isControllerOpen,
                 roomDisplayName = house.rooms.find { it.id == selectedController.first }!!.displayName,
-                houseLoadingState = HouseLoadingState.fromLoadingAndError(isLoading, loadingError, house),
+                houseLoadingState = HouseLoadingState.fromLoadingAndError(
+                    isLoading,
+                    loadingError,
+                    house
+                ),
                 controllerMenuState = if (isControllerMenuOpen) {
                     ControllerMenuState.Open(controllerMenuItems)
                 } else {
@@ -151,7 +168,11 @@ class HomeViewModel(
             viewModelState.update {
                 when (fetchResult) {
                     is Ok -> when (val evalResult = fetchResult.value) {
-                        is Ok -> it.copy(house = evalResult.value, isLoading = false, loadingError = null)
+                        is Ok -> it.copy(
+                            house = evalResult.value,
+                            isLoading = false,
+                            loadingError = null
+                        )
                         is Err -> {
                             onPanic(evalResult.error)
                             it

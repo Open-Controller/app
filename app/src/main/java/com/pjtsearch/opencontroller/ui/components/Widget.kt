@@ -10,7 +10,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalView
 import com.github.michaelbull.result.Err
 import com.pjtsearch.opencontroller.executor.Fn
 import com.pjtsearch.opencontroller.executor.Panic
@@ -43,6 +42,7 @@ fun ColumnScope.Widget(
             }
         }
     }
+
     val sizedModifier = if (widget.params["expand"] as Boolean? == true) {
         modifier.weight(1f, false)
     } else modifier

@@ -714,7 +714,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
     "mapOr" to { args: List<Any> ->
         fnCtx("mapOr", args) {
             binding {
-                val default = args[0];
+                val default = args[0]
                 val transformer = tryCast<Fn>(args[1]).bind();
                 { innerArgs: List<Any> ->
                     when (val input = innerArgs[0]) {
@@ -739,7 +739,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
     "mapOrElse" to { args: List<Any> ->
         fnCtx("mapOrElse", args) {
             binding {
-                val getDefault = tryCast<Fn>(args[0]).bind();
+                val getDefault = tryCast<Fn>(args[0]).bind()
                 val transformer = tryCast<Fn>(args[1]).bind();
                 { innerArgs: List<Any> ->
                     when (val input = innerArgs[0]) {

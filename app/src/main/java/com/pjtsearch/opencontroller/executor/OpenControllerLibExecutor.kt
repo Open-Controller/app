@@ -65,8 +65,17 @@ sealed class StackCtx {
 fun <T> fnCtx(lambdaName: String, args: List<Any>, cb: StackCtx.Fn.() -> T) =
     StackCtx.Fn(lambdaName, args).run(cb)
 
-fun <T> syntaxCtx(name: String, params: List<Any>, position: Position, cb: StackCtx.Syntax.() -> T) =
-    StackCtx.Syntax(name, params, CodePosition(position.line, position.column, position.file)).run(cb)
+fun <T> syntaxCtx(
+    name: String,
+    params: List<Any>,
+    position: Position,
+    cb: StackCtx.Syntax.() -> T
+) =
+    StackCtx.Syntax(
+        name,
+        params,
+        CodePosition(position.line, position.column, position.file)
+    ).run(cb)
 
 data class House(
     val id: String,
@@ -121,7 +130,8 @@ class OpenControllerLibExecutor(
         when (expr.innerCase) {
             Expr.InnerCase.REF -> expr.ref.let {
                 syntaxCtx("REF", listOf(it.ref), expr.position) {
-                    (localScope[it.ref] ?: builtins[it.ref] ?: moduleScope[it.ref])?.let { r ->
+                    (localScope[it.ref] ?: builtins[it.ref]
+                    ?: moduleScope[it.ref])?.let { r ->
                         Ok(r)
                     } ?: Err(typePanic())
                 }
