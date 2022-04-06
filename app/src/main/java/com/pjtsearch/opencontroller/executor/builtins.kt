@@ -755,7 +755,10 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
             Ok(Unit)
         }
     },
-    "asString" to { args: List<Any> -> asString(args[0]) }
+    "asString" to { args: List<Any> -> asString(args[0]) },
+    "some" to { args: List<Any> ->
+        Ok(Optional.of(args[0]))
+    }
 )
 val builtinValues = mapOf<String, Any>(
     "None" to Optional.empty<Any>()
