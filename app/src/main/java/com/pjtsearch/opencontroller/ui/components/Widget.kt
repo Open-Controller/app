@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -27,8 +28,9 @@ fun ColumnScope.Widget(
     onOpenMenu: (List<Widget>) -> Unit,
     onError: (Throwable) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     fun callParam(paramName: String, vararg params: Any) {
-        GlobalScope.launch {
+        scope.launch {
             val param = widget.params[paramName] as Fn?
             if (param != null) {
                 when (val result = param(params.toList())) {
