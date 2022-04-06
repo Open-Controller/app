@@ -97,26 +97,37 @@ fun asString(item: Any): Result<String, Panic> = fnCtx("asString", listOf(item))
     }
 }
 
-val builtins: Map<String, Fn> = mapOf(
+fun StackCtx.Fn.eq(args: List<Any>): Result<Any, Panic> {
+    val first = args[0]
+    val second = args[1]
+    return when (first) {
+        is String -> tryCast<String>(second).map {
+            first == second
+        }
+        is Number -> tryCast<Number>(second).map {
+            first == second
+        }
+        is List<*> -> tryCast<List<*>>(second).map {
+            first == second
+        }
+        is Map<*, *> -> tryCast<Map<*, *>>(second).map {
+            first == second
+        }
+        is Optional<*> -> tryCast<Optional<*>>(second).map {
+            when (first.isPresent to it.isPresent) {
+                true to true -> eq(listOf(first.get(), it.get()))
+                false to false -> true
+                else -> false
+            }
+        }
+        else -> Err(typePanic())
+    }
+}
+
+val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
     "=" to { args: List<Any> ->
         fnCtx("=", args) {
-            val first = args[0]
-            val second = args[1]
-            when (first) {
-                is String -> tryCast<String>(second).map {
-                    first == second
-                }
-                is Number -> tryCast<Number>(second).map {
-                    first == second
-                }
-                is List<*> -> tryCast<List<*>>(second).map {
-                    first == second
-                }
-                is Map<*, *> -> tryCast<Map<*, *>>(second).map {
-                    first == second
-                }
-                else -> Err(typePanic())
-            }
+            eq(args)
         }
     },
     "<=" to { args: List<Any> ->
@@ -746,3 +757,7 @@ val builtins: Map<String, Fn> = mapOf(
     },
     "asString" to { args: List<Any> -> asString(args[0]) }
 )
+val builtinValues = mapOf<String, Any>(
+    "None" to Optional.empty<Any>()
+)
+val builtins = builtinFns + builtinValues
