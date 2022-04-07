@@ -1,6 +1,5 @@
 package com.pjtsearch.opencontroller.ui.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,11 +13,12 @@ import com.github.michaelbull.result.Err
 import com.pjtsearch.opencontroller.executor.Fn
 import com.pjtsearch.opencontroller.executor.Panic
 import com.pjtsearch.opencontroller.executor.Widget
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class)
+
 @ExperimentalComposeUiApi
 @Composable
 fun ColumnScope.Widget(
@@ -29,7 +29,7 @@ fun ColumnScope.Widget(
 ) {
     val scope = rememberCoroutineScope()
     fun callParam(paramName: String, vararg params: Any) {
-        scope.launch {
+        scope.launch(Dispatchers.IO) {
             val param = widget.params[paramName] as Fn?
             if (param != null) {
                 when (val result = param(params.toList())) {
