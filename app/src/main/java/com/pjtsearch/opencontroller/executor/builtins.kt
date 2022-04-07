@@ -636,6 +636,15 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
             }
         }
     },
+    "runEffects" to { args: List<Any> ->
+        fnCtx("runEffects", args) {
+            binding {
+                args.forEach { fn ->
+                    tryCast<Fn>(fn).bind()(listOf())
+                }
+            }
+        }
+    },
     "listOf" to { args: List<Any> ->
         fnCtx("listOf", args) {
             Ok(args)
