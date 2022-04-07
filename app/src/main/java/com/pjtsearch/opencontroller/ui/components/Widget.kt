@@ -11,7 +11,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import com.github.michaelbull.result.Err
 import com.pjtsearch.opencontroller.executor.Fn
-import com.pjtsearch.opencontroller.executor.Panic
 import com.pjtsearch.opencontroller.executor.Widget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -37,8 +36,7 @@ fun ColumnScope.Widget(
                     else -> {}
                 }
             } else {
-//                TODO: make a message
-                onError(Panic.Type(listOf()).asThrowable())
+                onError(Error("Param missing: $paramName"))
             }
         }
     }
