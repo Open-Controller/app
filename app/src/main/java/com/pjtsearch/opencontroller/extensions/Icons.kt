@@ -83,17 +83,36 @@ var icons = hashMapOf(
     "MINUS" to Icons.Outlined.Remove
 )
 
+var houseIcons = hashMapOf(
+    "GARAGE" to Icons.Outlined.DirectionsCar,
+    "NOOK" to Icons.Outlined.BreakfastDining,
+    "MEDIA_ROOM" to Icons.Outlined.Theaters,
+    "DINING_ROOM" to Icons.Outlined.BrunchDining,
+    "ROOM" to Icons.Outlined.Room,
+    "HOME" to Icons.Outlined.Home,
+    "HOUSE" to Icons.Outlined.House,
+    "APARTMENT" to Icons.Outlined.Apartment,
+    "COTTAGE" to Icons.Outlined.Cottage,
+    "FACTORY" to Icons.Outlined.Factory,
+    "WAREHOUSE" to Icons.Outlined.Warehouse,
+    "VILLA" to Icons.Outlined.Villa,
+    "CABIN" to Icons.Outlined.Cabin,
+    "CHALET" to Icons.Outlined.Chalet,
+    "HOUSEBOAT" to Icons.Outlined.Houseboat,
+)
+
 @Composable
-fun OpenControllerIcon(icon: String, text: String, size: Int? = 0) =
-    (when (size) {
-        0 -> 24.dp
-        1 -> 26.dp
-        2 -> 40.dp
-        else -> 24.dp
-    }).let { sz ->
-        when (val iconValue = icons[icon]) {
-            is Int -> Icon(painterResource(iconValue), text, Modifier.size(sz))
-            is ImageVector -> Icon(iconValue, text, Modifier.size(sz))
-            else -> Text(text)
-        }
+fun OpenControllerIcon(
+    icon: String, text: String, size: Int? = 0, iconSet: HashMap<String, *> = icons
+) = (when (size) {
+    0 -> 24.dp
+    1 -> 26.dp
+    2 -> 40.dp
+    else -> 24.dp
+}).let { sz ->
+    when (val iconValue = iconSet[icon]) {
+        is Int -> Icon(painterResource(iconValue), text, Modifier.size(sz))
+        is ImageVector -> Icon(iconValue, text, Modifier.size(sz))
+        else -> Text(text)
     }
+}

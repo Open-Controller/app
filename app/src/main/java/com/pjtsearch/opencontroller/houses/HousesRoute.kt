@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.components.LargeTopAppBarWithPadding
 import com.pjtsearch.opencontroller.components.ListItem
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
+import com.pjtsearch.opencontroller.extensions.houseIcons
 import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.settingsDataStore
@@ -225,8 +226,9 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                                 ) {
                                     OpenControllerIcon(
                                         icon = it.icon,
-                                        text = "No Room Icon",
-                                        size = 1
+                                        text = it.icon ?: "No Room Icon",
+                                        size = 1,
+                                        iconSet = houseIcons
                                     )
                                     Text(it.displayName)
                                 }

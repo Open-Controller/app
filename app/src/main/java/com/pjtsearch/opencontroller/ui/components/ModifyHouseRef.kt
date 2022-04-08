@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
+import com.pjtsearch.opencontroller.extensions.houseIcons
 import com.pjtsearch.opencontroller.settings.HouseRef
 
 sealed interface ChoosingIconState {
@@ -64,7 +65,7 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
                 text = {
                     IconPicker(currentIconState.currentIcon, onPick = {
                         choosingIconState = ChoosingIconState.Opened(it)
-                    })
+                    }, iconSet = houseIcons)
                 },
                 onDismissRequest = {
                     choosingIconState = ChoosingIconState.Closed
@@ -94,7 +95,8 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
                 OpenControllerIcon(
                     icon = houseRefBuilder.icon,
                     text = houseRefBuilder.icon,
-                    size = 2
+                    size = 2,
+                    iconSet = houseIcons
                 )
             } else {
                 Text("Chose Icon")
