@@ -1,3 +1,20 @@
+/*
+ Copyright (C) 2022 PJTSearch
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+ 
 /**
  * OpenController Proto
  *
@@ -15,21 +32,23 @@ package model;
 message HouseExpr {
     required Expr display_name = 1; // The name to be displayed by clients
     required Expr id = 2; // A unique identifier
-    map<string, Expr> rooms = 3; // The Rooms inside the House
+    repeated Expr rooms = 3; // The Rooms inside the House
 }
 
 /** A message representing a room. */
 message RoomExpr {
-    required Expr display_name = 1; // The name to be displayed by clients
-    map<string, Expr> controllers = 2; // The Controllers inside the Room
-    optional Expr icon = 3; // The icon of the Room to be displayed by clients
+    required Expr id = 1; // A unique id for the room
+    required Expr display_name = 2; // The name to be displayed by clients
+    repeated Expr controllers = 3; // The Controllers inside the Room
+    optional Expr icon = 4; // The icon of the Room to be displayed by clients
 }
 
 /** A message representing a controller */
 message ControllerExpr {
-    required Expr display_name = 1; // The name to be displayed by clients
-    optional Expr brand_color = 2; // A brand color to be displayed by clients
-    optional Expr display_interface = 3; // The interface for display clients for the Controller
+    required Expr id = 1; // A unique id for the controller
+    required Expr display_name = 2; // The name to be displayed by clients
+    optional Expr brand_color = 3; // A brand color to be displayed by clients
+    optional Expr display_interface = 4; // The interface for display clients for the Controller
 }
 
 /** A Controller interface for clients with displays */
