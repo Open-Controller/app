@@ -1,0 +1,7 @@
+<p><i>OpenController</i> is a free and open-source controller framework for your smart home.</p>
+<p><b>Highlighted features:</b></p>
+<ul>
+    <li>Design both the layout and functionality of your controllers with a custom language</li>
+    <li>All requests sent directly from the client--no extra hops</li>
+    <li>Beautiful Material You UI</li>
+</ul>

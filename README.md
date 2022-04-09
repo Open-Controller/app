@@ -1,3 +1,6 @@
+<img align="left" width="80" height="80"
+src="fastlane/metadata/android/en-US/images/icon.png" alt="App icon">
+
 # OpenController App
 
 OpenController is a free and open-source controller framework for your smart home.
@@ -9,6 +12,11 @@ OpenController is a free and open-source controller framework for your smart hom
   controllers
 - All requests sent directly from the client--no extra hops
 - Beautiful Material You UI
+
+## Screenshots
+
+| ![Screenshot of houses](fastlane/metadata/android/en-US/images/phoneScreenshots/3.png) | ![Screenshot of Rooms](fastlane/metadata/android/en-US/images/phoneScreenshots/2.png) | ![Screenshot of Controller](fastlane/metadata/android/en-US/images/phoneScreenshots/1.png) |
+|----------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
 
 ## [Debug Builds](https://github.com/Open-Controller/app/actions)
 
