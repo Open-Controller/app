@@ -10,6 +10,8 @@ OpenController is a free and open-source controller framework for your smart hom
 - All requests sent directly from the client--no extra hops
 - Beautiful Material You UI
 
+## [Debug Builds](https://github.com/Open-Controller/app/actions)
+
 ## License
 
     Copyright (C) 2022 PJTSearch
