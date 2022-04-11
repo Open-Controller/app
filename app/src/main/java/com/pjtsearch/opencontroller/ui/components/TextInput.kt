@@ -34,6 +34,15 @@ import org.apache.commons.text.diff.CommandVisitor
 import org.apache.commons.text.diff.StringsComparator
 
 
+/**
+ * A component for a button that opens a text input dialog
+ *
+ * @param modifier A modifier for the layout
+ * @param text The text for the button
+ * @param icon The icon for the button
+ * @param size The size of the button
+ * @param onInput Function to be called when a character is inputted or deleted
+ */
 @ExperimentalComposeUiApi
 @Composable
 fun TextInput(
@@ -51,6 +60,7 @@ fun TextInput(
 
     DisposableEffect(isOpen) {
         if (isOpen) {
+//            Focus the input and open keyboard on open
             scope.launch {
                 delay(50)
                 focusRequester.requestFocus()

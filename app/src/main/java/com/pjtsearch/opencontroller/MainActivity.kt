@@ -67,11 +67,11 @@ class MainActivity : AppCompatActivity() {
                     forceShowAlways = true
                 ),
                 LocalDensity provides Density(
+//                    Lower density for small devices
                     density = if (windowHeightClass == WindowSize.Compact) 3.0f else LocalDensity.current.density,
                     fontScale = LocalDensity.current.fontScale
                 )
             ) {
-                println(windowHeightClass)
                 SystemUi(this.window) {
                     MainActivityView(windowSizeClass)
                 }
@@ -80,11 +80,28 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+/**
+ * Represents the state of the error dialog
+ */
 sealed interface ErrorDialogState {
+    /**
+     * State representing a closed dialog
+     */
     object Closed : ErrorDialogState
+
+    /**
+     * State representing an open dialog
+     *
+     * @property error The error to be shown in the dialog
+     */
     data class Opened(val error: Throwable) : ErrorDialogState
 }
 
+/**
+ * A component for the main activity
+ *
+ * @param windowSize The size from the width of the window
+ */
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
 @Composable
@@ -92,6 +109,7 @@ fun MainActivityView(windowSize: WindowSize) {
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
     val navController = rememberNavController()
+//    The destination to start from, starts as null so can load from settings
     var initialStartDestination: String? by remember { mutableStateOf(null) }
 
     val isExpandedScreen = windowSize == WindowSize.Expanded
@@ -105,9 +123,10 @@ fun MainActivityView(windowSize: WindowSize) {
         }
     }
 
+//    On launch, get the settings once and set the initialStartDestination
     LaunchedEffect(ctx.settingsDataStore) {
-        ctx.settingsDataStore.data.take(1).collect { setttings ->
-            initialStartDestination = if (setttings.hasLastHouse()) {
+        ctx.settingsDataStore.data.take(1).collect { settings ->
+            initialStartDestination = if (settings.hasLastHouse()) {
                 Destinations.LAST_HOME_ROUTE
             } else {
                 Destinations.HOUSES_ROUTE
@@ -115,6 +134,7 @@ fun MainActivityView(windowSize: WindowSize) {
         }
     }
 
+//    Hide the navigation until initialStartDestination is loaded so that will go there immediately
     initialStartDestination?.let { startDestination ->
         NavigationGraph(
             isExpandedScreen = isExpandedScreen,

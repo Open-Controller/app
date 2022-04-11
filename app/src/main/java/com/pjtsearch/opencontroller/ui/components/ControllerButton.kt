@@ -41,6 +41,15 @@ import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import kotlinx.coroutines.launch
 
+/**
+ * A button component for controllers
+ *
+ * @param modifier Modifier to be applied to the layout
+ * @param text The text to display
+ * @param icon The icon to display
+ * @param size The size of the button
+ * @param onClick Function to be called when user clicks on the element
+ */
 @Composable
 fun ControllerButton(
     modifier: Modifier,
@@ -55,6 +64,7 @@ fun ControllerButton(
 
     LaunchedEffect(interactionSource) {
         scope.launch {
+//            Haptic feedback on mouse down
             interactionSource.interactions.collect { value ->
                 if (value is PressInteraction.Press) {
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)

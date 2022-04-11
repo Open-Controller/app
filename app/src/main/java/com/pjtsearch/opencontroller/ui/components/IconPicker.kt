@@ -32,6 +32,14 @@ import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.extensions.icons
 
+/**
+ * A widget to pick icons
+ *
+ * @param icon The currently selected icon
+ * @param onPick A function to be called when an icon is picked
+ * @param modifier A modifier for the layout
+ * @param iconSet The set of icons to choose from
+ */
 @Composable
 fun IconPicker(
     icon: String?,
@@ -49,6 +57,7 @@ fun IconPicker(
             val opacity by animateFloatAsState(targetValue = if (icon == it) 1f else 0f)
             Button(
                 onClick = {
+//                    Toggle selected icon
                     if (icon == it) {
                         onPick(null)
                     } else {

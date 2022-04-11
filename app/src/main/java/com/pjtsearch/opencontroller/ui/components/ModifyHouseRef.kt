@@ -34,12 +34,30 @@ import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.extensions.houseIcons
 import com.pjtsearch.opencontroller.settings.HouseRef
 
+/**
+ * An interface representing state of the icon choosing dialog
+ */
 sealed interface ChoosingIconState {
+    /**
+     * The closed state of the icon choosing dialog
+     */
     object Closed : ChoosingIconState
+
+    /**
+     * The open state of the icon choosing dialog
+     *
+     * @property currentIcon The currently selected icon
+     */
     data class Opened(val currentIcon: String?) : ChoosingIconState
 }
 
 
+/**
+ * A component for modifying a [HouseRef]
+ *
+ * @param houseRef The [HouseRef] to modify
+ * @param onChange Function to be called when the house ref is modified
+ */
 @Composable
 fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
     var houseRefBuilder by remember(houseRef) {
@@ -58,6 +76,7 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+//        Icon chooser
         val currentIconState = choosingIconState
         if (currentIconState is ChoosingIconState.Opened) {
             AlertDialog(
@@ -91,6 +110,7 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
                 Alignment.CenterHorizontally
             )
         ) {
+//            Show current icon or "Chose Icon"
             if (houseRefBuilder.icon != "") {
                 OpenControllerIcon(
                     icon = houseRefBuilder.icon,

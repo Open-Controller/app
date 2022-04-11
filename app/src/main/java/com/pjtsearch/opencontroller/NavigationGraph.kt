@@ -35,6 +35,16 @@ import com.pjtsearch.opencontroller.houses.HousesRoute
 import com.pjtsearch.opencontroller.settings.HouseRef
 import kotlinx.coroutines.flow.take
 
+/**
+ * A component that navigates between the destinations
+ *
+ * @param isExpandedScreen Whether the screen is the expanded size
+ * @param modifier The modifier to be applied to the layout
+ * @param navController The navigation host controller
+ * @param navigationActions The navigation actions
+ * @param onError Function called when a destination has an error
+ * @param startDestination The initial destination
+ */
 @Composable
 fun NavigationGraph(
     isExpandedScreen: Boolean,
@@ -59,6 +69,7 @@ fun NavigationGraph(
         ) {
             val homeViewModel: HomeViewModel = viewModel(
                 factory = HomeViewModel.provideFactory(
+//                    Parse the HouseRef from the param string
                     HouseRef.parseFrom(
                         it.arguments?.getString("house")!!.encodeToByteArray()
                     ),
@@ -67,6 +78,7 @@ fun NavigationGraph(
             HomeRoute(
                 homeViewModel = homeViewModel,
                 isExpandedScreen = isExpandedScreen,
+//                Don't save old state so don't return to the previous home when navigating to another home
                 onExit = { navigationActions.navigateToHouses(false) },
                 onError = onError
             )
@@ -76,12 +88,16 @@ fun NavigationGraph(
                 onHouseSelected = { navigationActions.navigateToHome(it, true) }
             )
         }
+//        Navigates to the last used home
         composable(Destinations.LAST_HOME_ROUTE) {
             val ctx = LocalContext.current
 
+//            Navigate to last home from settings on launch if it exists
             LaunchedEffect(ctx.settingsDataStore) {
                 ctx.settingsDataStore.data.take(1).collect { settings ->
+//                    Clear the current (LAST_HOME_ROUTE) destination from the back stack so don't go back to it
                     navController.popBackStack()
+//                    Navigate to last house ref if it still exists, otherwise navigate to houses
                     settings.houseRefsMap[settings.lastHouse]?.let { houseRef ->
                         navigationActions.navigateToHome(
                             houseRef,

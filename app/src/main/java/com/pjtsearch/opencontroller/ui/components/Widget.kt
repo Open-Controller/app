@@ -18,7 +18,6 @@
 package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,6 +34,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 
+/**
+ * A component to display a [Widget]
+ *
+ * @param widget The [Widget] to display
+ * @param modifier A modifier for the layout
+ * @param onOpenMenu Function to be called when the an expansion menu is opened
+ * @param onError Function to be called when there is an execution error
+ */
 @ExperimentalComposeUiApi
 @Composable
 fun ColumnScope.Widget(
@@ -44,6 +51,13 @@ fun ColumnScope.Widget(
     onError: (Throwable) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+
+    /**
+     * Calls a param that is a function
+     *
+     * @param paramName The name of the param to call
+     * @param params The parameters to pass to the function call
+     */
     fun callParam(paramName: String, vararg params: Any) {
         scope.launch(Dispatchers.IO) {
             val param = widget.params[paramName] as Fn?
@@ -58,6 +72,7 @@ fun ColumnScope.Widget(
         }
     }
 
+//    Modifier for expanded widgets to set full weight
     val sizedModifier = if (widget.params["expand"] as Boolean? == true) {
         modifier.weight(1f, false)
     } else modifier
@@ -180,6 +195,5 @@ fun ColumnScope.Widget(
             println(it)
             callParam("onInput", it)
         }
-        null -> Text("Widget type must be set")
     }
 }

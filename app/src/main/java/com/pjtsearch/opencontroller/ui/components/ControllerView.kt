@@ -30,6 +30,14 @@ import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.executor.Widget
 import com.pjtsearch.opencontroller.home.ControllerMenuState
 
+/**
+ * A component that displays a [Controller]
+ *
+ * @param controller The [Controller] to display
+ * @param onError Function to be called when the controller has an error in evaluation
+ * @param menuState The state of the expansion menu
+ * @param onInteractMenu Function to be called when the expansion menu is interacted with
+ */
 @ExperimentalComposeUiApi
 @Composable
 fun ControllerView(
@@ -61,6 +69,7 @@ fun ControllerView(
                 )
             }
         }
+//        Expansion menu
         AnimatedVisibility(
             visible = menuState is ControllerMenuState.Open,
             enter = fadeIn() + expandVertically(),

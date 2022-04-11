@@ -23,6 +23,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
+/**
+ * The light color palette
+ */
 private val LightColorPalette = lightColorScheme(
 
     primary = md_theme_light_primary,
@@ -53,6 +56,9 @@ private val LightColorPalette = lightColorScheme(
     inversePrimary = md_theme_light_inversePrimary,
 )
 
+/**
+ * The dark color palette
+ */
 private val DarkColorPalette = darkColorScheme(
 
     primary = md_theme_dark_primary,
@@ -83,12 +89,19 @@ private val DarkColorPalette = darkColorScheme(
     inversePrimary = md_theme_dark_inversePrimary,
 )
 
+/**
+ * A component that provides the material theme
+ *
+ * @param darkTheme Whether should provide the dark theme
+ * @param content The content to display inside
+ */
 @Composable
 fun OpenControllerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     val ctx = LocalContext.current
+//    Uses dynamic colors if S or greater, otherwise uses default palettes
     val colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         if (darkTheme) {
             dynamicDarkColorScheme(ctx)

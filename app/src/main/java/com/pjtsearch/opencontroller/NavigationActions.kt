@@ -22,13 +22,38 @@ import androidx.navigation.NavHostController
 import com.pjtsearch.opencontroller.settings.HouseRef
 import java.net.URLEncoder
 
+/**
+ * The destinations for the navigation
+ */
 object Destinations {
+    /**
+     * The destination for the home route
+     */
     const val HOME_ROUTE = "home"
+
+    /**
+     * The destination for the houses route
+     */
     const val HOUSES_ROUTE = "houses"
+
+    /**
+     * The destination for the last home route
+     */
     const val LAST_HOME_ROUTE = "lastHome"
 }
 
+/**
+ * Actions to navigate to destinations
+ *
+ * @constructor
+ * Creates a new instance of the NavigationActions class for a controller
+ *
+ * @param navController The navigation host controller
+ */
 class NavigationActions(navController: NavHostController) {
+    /**
+     * Navigates to the Home route
+     */
     val navigateToHome: (home: HouseRef, saveOldState: Boolean) -> Unit =
         { home, saveOldState ->
             navController.navigate(
@@ -49,6 +74,10 @@ class NavigationActions(navController: NavHostController) {
                 restoreState = true
             }
         }
+
+    /**
+     * Navigates to the Houses route
+     */
     val navigateToHouses: (saveOldState: Boolean) -> Unit = { saveOldState ->
         navController.navigate(Destinations.HOUSES_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {

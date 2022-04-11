@@ -39,31 +39,32 @@ import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import kotlinx.coroutines.launch
 
+/**
+ * The parameters for a button item
+ *
+ * @property text The text for the button
+ * @property icon The icon for the button
+ * @property onClick Function to be called when the button is clicked
+ */
 data class ButtonItemParams(
     val text: String,
     val icon: String?,
     val onClick: () -> Unit,
 )
 
+/**
+ * A component for a group of adjacent controller buttons
+ *
+ * @param modifier A modifier for the layout
+ * @param size The size of the button group
+ * @param buttons The buttons to place inside the group
+ */
 @Composable
 fun ControllerButtonGroup(
     modifier: Modifier,
     size: Int?,
     buttons: List<ButtonItemParams>
-) {
-    val view = LocalView.current
-    val scope = rememberCoroutineScope()
-    val interactionSource = remember { MutableInteractionSource() }
-
-    LaunchedEffect(interactionSource) {
-        scope.launch {
-            interactionSource.interactions.collect { value ->
-                if (value is PressInteraction.Press) {
-                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                }
-            }
-        }
-    }
+) =
     Surface(
         modifier = modifier
             .padding(
@@ -79,7 +80,7 @@ fun ControllerButtonGroup(
         shape = CircleShape,
     ) {
         Row {
-            buttons.mapIndexed { i, btn ->
+            buttons.map { btn ->
                 ButtonInside(
                     btn.text,
                     btn.icon,
@@ -89,7 +90,6 @@ fun ControllerButtonGroup(
             }
         }
     }
-}
 
 @Composable
 fun ButtonInside(
@@ -104,6 +104,7 @@ fun ButtonInside(
 
     LaunchedEffect(interactionSource) {
         scope.launch {
+//            Haptics on mouse down
             interactionSource.interactions.collect { value ->
                 if (value is PressInteraction.Press) {
                     view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)

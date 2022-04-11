@@ -41,6 +41,22 @@ import com.pjtsearch.opencontroller.components.SwipePad
 import com.pjtsearch.opencontroller.extensions.DirectionVector
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 
+/**
+ * A component for a swipe pad for a controller
+ *
+ * @param modifier A modifier for the layout
+ * @param expand Whether to expand the widget over available width and height
+ * @param onBottomIncrease Function to be called when the bottom increase button is pressed
+ * @param onBottomDecrease Function to be called when the bottom decrease button is pressed
+ * @param onBottomHold Function to be called when the bottom decrease button is held
+ * @param onSwipeDown Function to be called when the pad is swiped down
+ * @param onSwipeLeft Function to be called when the pad is swiped left
+ * @param onSwipeRight Function to be called when the pad is swiped right
+ * @param onSwipeUp Function to be called when the pad is swiped up
+ * @param onClick Function to be called when the pad is clicked
+ * @param bottomDecreaseIcon Icon to be displayed on the bottom decrease button
+ * @param bottomIncreaseIcon Icon to be displayed on the bottom increase button
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ControllerSwipePad(
@@ -78,6 +94,7 @@ fun ControllerSwipePad(
                     DirectionVector.Zero -> onClick()
                 }
             }
+//            Bottom controls to be displayed if have bottom increase and decrease
             if (onBottomIncrease != null && onBottomDecrease != null) {
                 Row(
                     Modifier
@@ -90,6 +107,7 @@ fun ControllerSwipePad(
                         ), horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+//                        Decrease button with hold functionality
                         Box(
                             modifier = Modifier
                                 .combinedClickable(
@@ -119,6 +137,7 @@ fun ControllerSwipePad(
                                 bottomDecreaseIcon, "Decrease", 1
                             )
                         }
+//                        Increase button
                         Box(
                             modifier = Modifier
                                 .combinedClickable(

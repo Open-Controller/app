@@ -50,29 +50,12 @@ import com.pjtsearch.opencontroller.ui.components.ModifyHouseRef
 import kotlinx.coroutines.launch
 import java.util.*
 
-//sealed interface EditMode {
-//    operator fun not(): EditMode =
-//        when (this) {
-//            is Editing -> NotEditing
-//            is NotEditing -> Editing(DialogMode.NoDialog)
-//        }
-//
-//    object NotEditing : EditMode
-//    data class Editing(val dialogMode: DialogMode) : EditMode
-//}
 
-//sealed interface DialogMode {
-//    data class EditDialog(val index: Int, val current: HouseRef) : DialogMode
-//    data class AddDialog(val current: HouseRef) : DialogMode
-//    object NoDialog : DialogMode
-//}
-
-sealed interface EditingState {
-    object NotEditing : EditingState
-    data class Editing(val index: Int, val current: HouseRef, val dialogOpen: Boolean) :
-        EditingState
-}
-
+/**
+ * A component for the houses display route
+ *
+ * @param onHouseSelected Function to be called when a house is selected to be opened
+ */
 @OptIn(
     ExperimentalMaterial3Api::class,
     androidx.compose.foundation.ExperimentalFoundationApi::class
@@ -102,6 +85,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
         onHouseSelected(houseRef)
     }
 
+//    Clear the last house setting when launched
     LaunchedEffect(ctx.settingsDataStore) {
         scope.launch {
             ctx.settingsDataStore.updateData { oldSettings ->
@@ -142,6 +126,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                             onClick = {
                                 scope.launch {
                                     ctx.settingsDataStore.updateData { settings ->
+//                                        Remove all in builder and add the unselected ones back
                                         settings.toBuilder().clearHouseRefs()
                                             .putAllHouseRefs(
                                                 settings.houseRefsMap.filter { (id, _) ->
@@ -198,10 +183,13 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                                 Modifier.combinedClickable(
                                     interactionSource = remember { MutableInteractionSource() },
                                     onClick = {
+//                                         If none selected, then open
                                         if (selected.isEmpty()) {
                                             beforeHouseSelected(id, it)
+//                                         If others selected, then add this to selected
                                         } else if (!selected.contains(id)) {
                                             selected = selected + id
+//                                         If this is selected, then remove this from selected
                                         } else {
                                             selected = selected - id
                                         }
@@ -210,8 +198,10 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                                         view.performHapticFeedback(
                                             HapticFeedbackConstants.LONG_PRESS
                                         )
+//                                         If others selected, then add this to selected
                                         if (!selected.contains(id)) {
                                             selected = selected + id
+//                                         If this is selected, then remove this from selected
                                         } else {
                                             selected = selected - id
                                         }
@@ -239,6 +229,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
             }
         }
     )
+//    Edit house dialog
     val editingState = editing
     if (editingState != null) {
         AlertDialog(
@@ -273,6 +264,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
             },
         )
     }
+//    Add house dialog
     when (val addingState = adding) {
         is HouseRef -> AlertDialog(
             onDismissRequest = {
@@ -282,6 +274,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                 Button(onClick = {
                     scope.launch {
                         ctx.settingsDataStore.updateData { settings ->
+//                            Add house with new UUID
                             settings.toBuilder()
                                 .putHouseRefs(UUID.randomUUID().toString(), addingState)
                                 .build()
