@@ -24,8 +24,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.LocalOverScrollConfiguration
-import androidx.compose.foundation.gestures.OverScrollConfiguration
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -63,9 +61,9 @@ class MainActivity : AppCompatActivity() {
             val windowSizeClass = rememberWindowWidthClass()
             val windowHeightClass = rememberWindowHeightClass()
             CompositionLocalProvider(
-                LocalOverScrollConfiguration provides OverScrollConfiguration(
-                    forceShowAlways = true
-                ),
+//                LocalOverscrollConfiguration provides OverscrollConfiguration(
+//                    forceShowAlways = true
+//                ),
                 LocalDensity provides Density(
 //                    Lower density for small devices
                     density = if (windowHeightClass == WindowSize.Compact) 3.0f else LocalDensity.current.density,
