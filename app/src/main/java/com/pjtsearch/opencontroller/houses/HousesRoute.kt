@@ -39,7 +39,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
-import com.pjtsearch.opencontroller.components.LargeTopAppBarWithPadding
 import com.pjtsearch.opencontroller.components.ListItem
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.extensions.houseIcons
@@ -72,9 +71,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
 
     val view = LocalView.current
     val decayAnimationSpec = rememberSplineBasedDecay<Float>()
-    val scrollBehavior = remember(decayAnimationSpec) {
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(decayAnimationSpec)
-    }
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     val beforeHouseSelected = { id: String, houseRef: HouseRef ->
         scope.launch {
@@ -99,7 +96,7 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .fillMaxSize(),
         topBar = {
-            LargeTopAppBarWithPadding(
+            LargeTopAppBar(
                 title = { Text("Houses") },
                 actions = {
                     when (selected.size) {
@@ -143,11 +140,11 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
                     }
                 },
                 scrollBehavior = scrollBehavior,
-                contentPadding = WindowInsets.statusBars.exclude(
+                windowInsets = WindowInsets.statusBars.exclude(
                     WindowInsets.statusBars.only(
                         WindowInsetsSides.Bottom
                     )
-                ).asPaddingValues()
+                )
             )
         },
         floatingActionButton = {

@@ -58,6 +58,7 @@ sealed interface ChoosingIconState {
  * @param houseRef The [HouseRef] to modify
  * @param onChange Function to be called when the house ref is modified
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
     var houseRefBuilder by remember(houseRef) {

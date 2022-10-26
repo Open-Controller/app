@@ -24,11 +24,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.OtherHouses
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import com.pjtsearch.opencontroller.components.LargeTopAppBarWithPadding
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -39,14 +37,12 @@ fun HomeRoomsScreen(
     onExit: () -> Unit
 ) {
     val decayAnimationSpec = rememberSplineBasedDecay<Float>()
-    val scrollBehavior = remember(decayAnimationSpec) {
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(decayAnimationSpec)
-    }
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            LargeTopAppBarWithPadding(
+            LargeTopAppBar(
                 title = { Text("Rooms") },
                 navigationIcon = {
                     IconButton(onClick = onExit) {
@@ -57,32 +53,34 @@ fun HomeRoomsScreen(
                     }
                 },
                 scrollBehavior = scrollBehavior,
-                contentPadding = WindowInsets.statusBars.exclude(
+                windowInsets = WindowInsets.statusBars.exclude(
                     WindowInsets.statusBars.only(
                         WindowInsetsSides.Bottom
                     )
-                ).asPaddingValues()
+                )
             )
         },
         content = { innerPadding ->
-            when (houseLoadingState) {
-                is HouseLoadingState.Error ->
-                    RoomsErrorLoading(
-                        houseLoadingState.error, modifier = Modifier
-                            .fillMaxHeight()
-                            .padding(horizontal = 15.dp),
-                        onReload = onReload
+            Box(Modifier.padding(innerPadding)) {
+                when (houseLoadingState) {
+                    is HouseLoadingState.Error ->
+                        RoomsErrorLoading(
+                            houseLoadingState.error, modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(horizontal = 15.dp),
+                            onReload = onReload
+                        )
+                    is HouseLoadingState.Loaded -> RoomControllerPicker(
+                        houseLoadingState.house.rooms,
+                        modifier = Modifier.fillMaxHeight(),
+                        contentPadding = PaddingValues(horizontal = 15.dp),
+                        onSelectController = onSelectController
                     )
-                is HouseLoadingState.Loaded -> RoomControllerPicker(
-                    houseLoadingState.house.rooms,
-                    modifier = Modifier.fillMaxHeight(),
-                    contentPadding = PaddingValues(horizontal = 15.dp),
-                    onSelectController = onSelectController
-                )
-                is HouseLoadingState.Loading -> RoomsLoading(
-                    modifier = Modifier.fillMaxHeight(),
-                    contentPadding = PaddingValues(horizontal = 15.dp),
-                )
+                    is HouseLoadingState.Loading -> RoomsLoading(
+                        modifier = Modifier.fillMaxHeight(),
+                        contentPadding = PaddingValues(horizontal = 15.dp),
+                    )
+                }
             }
         }
     )

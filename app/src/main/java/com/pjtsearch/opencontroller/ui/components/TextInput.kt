@@ -17,10 +17,7 @@
 
 package com.pjtsearch.opencontroller.ui.components
 
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -43,6 +40,7 @@ import org.apache.commons.text.diff.StringsComparator
  * @param size The size of the button
  * @param onInput Function to be called when a character is inputted or deleted
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalComposeUiApi
 @Composable
 fun TextInput(
