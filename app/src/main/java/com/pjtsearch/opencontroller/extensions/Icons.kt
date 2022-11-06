@@ -108,6 +108,7 @@ fun OpenControllerIcon(
     0 -> 24.dp
     1 -> 26.dp
     2 -> 40.dp
+    3 -> 95.dp
     else -> 24.dp
 }).let { sz ->
     when (val iconValue = iconSet[icon]) {

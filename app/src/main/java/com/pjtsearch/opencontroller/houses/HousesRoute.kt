@@ -22,8 +22,7 @@ import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
@@ -33,13 +32,12 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
-import com.pjtsearch.opencontroller.components.ListItem
+import com.pjtsearch.opencontroller.components.HeroButton
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.extensions.houseIcons
 import com.pjtsearch.opencontroller.settings.HouseRef
@@ -162,64 +160,64 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
         },
         floatingActionButtonPosition = FabPosition.Center,
         content = { innerPadding ->
-            BoxWithConstraints(Modifier.padding(innerPadding)) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(maxOf((maxWidth / 150.dp).toInt(), 1)),
-                    modifier = Modifier.fillMaxHeight(),
-                    contentPadding = PaddingValues(horizontal = 15.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    settings.value.houseRefsMap.forEach { (id, it) ->
-                        item {
-                            ListItem(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                selected = selected.contains(id),
-                                clickAndSemanticsModifier =
-                                Modifier.combinedClickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    onClick = {
+            LazyColumn(
+                modifier = Modifier.fillMaxHeight(),
+                contentPadding = PaddingValues(
+                    start = 15.dp,
+                    end = 15.dp,
+                    top = innerPadding.calculateTopPadding() + 15.dp,
+                    bottom = innerPadding.calculateBottomPadding()
+                ),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                settings.value.houseRefsMap.forEach { (id, it) ->
+                    item {
+                        HeroButton(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            selected = selected.contains(id),
+                            clickAndSemanticsModifier =
+                            Modifier.combinedClickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                onClick = {
 //                                         If none selected, then open
-                                        if (selected.isEmpty()) {
-                                            beforeHouseSelected(id, it)
+                                    if (selected.isEmpty()) {
+                                        beforeHouseSelected(id, it)
 //                                         If others selected, then add this to selected
-                                        } else if (!selected.contains(id)) {
-                                            selected = selected + id
+                                    } else if (!selected.contains(id)) {
+                                        selected = selected + id
 //                                         If this is selected, then remove this from selected
-                                        } else {
-                                            selected = selected - id
-                                        }
-                                    },
-                                    onLongClick = {
-                                        view.performHapticFeedback(
-                                            HapticFeedbackConstants.LONG_PRESS
-                                        )
-//                                         If others selected, then add this to selected
-                                        if (!selected.contains(id)) {
-                                            selected = selected + id
-//                                         If this is selected, then remove this from selected
-                                        } else {
-                                            selected = selected - id
-                                        }
-                                    },
-                                    indication = rememberRipple()
-                                )
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    OpenControllerIcon(
-                                        icon = it.icon,
-                                        text = it.icon ?: "No Room Icon",
-                                        size = 1,
-                                        iconSet = houseIcons
+                                    } else {
+                                        selected = selected - id
+                                    }
+                                },
+                                onLongClick = {
+                                    view.performHapticFeedback(
+                                        HapticFeedbackConstants.LONG_PRESS
                                     )
-                                    Text(it.displayName)
-                                }
+//                                         If others selected, then add this to selected
+                                    if (!selected.contains(id)) {
+                                        selected = selected + id
+//                                         If this is selected, then remove this from selected
+                                    } else {
+                                        selected = selected - id
+                                    }
+                                },
+                                indication = rememberRipple()
+                            ),
+                            icon = {
+                                OpenControllerIcon(
+                                    icon = it.icon,
+                                    text = it.icon ?: "No Room Icon",
+                                    size = 3,
+                                    iconSet = houseIcons
+                                )
                             }
+                        ) {
+                            Text(
+                                it.displayName,
+                                style = MaterialTheme.typography.titleLarge
+                            )
                         }
                     }
                 }
