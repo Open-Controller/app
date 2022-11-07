@@ -22,7 +22,8 @@ import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
@@ -160,7 +161,8 @@ fun HousesRoute(onHouseSelected: (HouseRef) -> Unit) {
         },
         floatingActionButtonPosition = FabPosition.Center,
         content = { innerPadding ->
-            LazyColumn(
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(1),
                 modifier = Modifier.fillMaxHeight(),
                 contentPadding = PaddingValues(
                     start = 15.dp,
