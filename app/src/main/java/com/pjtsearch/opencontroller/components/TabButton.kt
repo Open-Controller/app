@@ -22,6 +22,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.contentColorFor
@@ -38,12 +41,13 @@ import androidx.core.graphics.ColorUtils
 
 @Composable
 private fun TabButton(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(15.dp),
     color: Color = MaterialTheme.colorScheme.secondaryContainer,
     height: Dp,
     selected: Boolean = false,
-    clickAndSemanticsModifier: Modifier,
+    clickAndSemanticsModifier: Modifier = Modifier,
+    expandable: Boolean = false,
     icon: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -64,22 +68,30 @@ private fun TabButton(
             Modifier
                 .height(height)
                 .padding(horizontal = 15.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            icon()
-            content()
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                icon()
+                content()
+            }
+            if (expandable) {
+                Icon(Icons.Outlined.ChevronRight, "Open up")
+            }
         }
     }
 }
 
 @Composable
 fun SmallTabButton(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(15.dp),
     color: Color = MaterialTheme.colorScheme.secondaryContainer,
     selected: Boolean = false,
-    clickAndSemanticsModifier: Modifier,
+    clickAndSemanticsModifier: Modifier = Modifier,
+    expandable: Boolean = false,
     icon: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -90,6 +102,7 @@ fun SmallTabButton(
         height = 50.dp,
         selected,
         clickAndSemanticsModifier,
+        expandable,
         icon,
         content
     )
@@ -97,11 +110,12 @@ fun SmallTabButton(
 
 @Composable
 fun MediumTabButton(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(15.dp),
     color: Color = MaterialTheme.colorScheme.secondaryContainer,
     selected: Boolean = false,
-    clickAndSemanticsModifier: Modifier,
+    clickAndSemanticsModifier: Modifier = Modifier,
+    expandable: Boolean = false,
     icon: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -112,6 +126,7 @@ fun MediumTabButton(
         height = 65.dp,
         selected,
         clickAndSemanticsModifier,
+        expandable,
         icon,
         content
     )
@@ -119,11 +134,12 @@ fun MediumTabButton(
 
 @Composable
 fun LargeTabButton(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(15.dp),
     color: Color = MaterialTheme.colorScheme.secondaryContainer,
     selected: Boolean = false,
-    clickAndSemanticsModifier: Modifier,
+    clickAndSemanticsModifier: Modifier = Modifier,
+    expandable: Boolean = false,
     icon: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -134,6 +150,7 @@ fun LargeTabButton(
         height = 80.dp,
         selected,
         clickAndSemanticsModifier,
+        expandable,
         icon,
         content
     )

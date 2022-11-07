@@ -17,29 +17,41 @@
 
 package com.pjtsearch.opencontroller.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import com.pjtsearch.opencontroller.components.ControlledExpandableListItem
+import com.pjtsearch.opencontroller.components.LargeTabButton
+import com.pjtsearch.opencontroller.components.MediumTabButton
 import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.executor.Room
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.ui.theme.typography
+
+private sealed interface DialogState {
+    object Closed : DialogState
+    data class Opened(val controllers: List<Controller>, val roomId: String) : DialogState
+}
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -48,38 +60,79 @@ fun RoomControllerPicker(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onSelectController: (Pair<String, String>) -> Unit
-) =
-    LazyColumn(
-        contentPadding = contentPadding,
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        rooms.map { room ->
-            item {
-                ControlledExpandableListItem(
-                    Modifier
-                        .fillMaxWidth(),
-                    { Text(room.displayName) },
-                    { OpenControllerIcon(room.icon, room.displayName) }) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(15.dp)
+) {
+//    TODO: Saveable?
+    var dialogState by remember { mutableStateOf<DialogState>(DialogState.Closed) }
+    BoxWithConstraints {
+        val state = dialogState
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(maxOf((maxWidth / 150.dp).toInt(), 1)),
+            contentPadding = contentPadding,
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            rooms.map { room ->
+                item {
+                    AnimatedVisibility(
+                        visible = !(state is DialogState.Opened && state.roomId == room.id),
+                        enter = fadeIn(),
+                        exit = fadeOut()
                     ) {
-                        room.controllers.map { controller ->
-                            ControllerButton(
-                                controller,
-                                controller.id,
-                                room.id,
-                                onSelectController
-                            )
+                        LargeTabButton(
+                            icon = { OpenControllerIcon(room.icon, room.displayName) },
+                            clickAndSemanticsModifier = Modifier.clickable {
+                                dialogState =
+                                    DialogState.Opened(room.controllers, room.id)
+                            },
+                            expandable = true
+                        ) {
+                            Text(room.displayName)
                         }
                     }
                 }
             }
         }
+        if (state is DialogState.Opened) {
+            Dialog(
+                onDismissRequest = {
+                    dialogState = DialogState.Closed
+                },
+                content = {
+                    Surface(
+                        shape = AlertDialogDefaults.shape,
+                        modifier = Modifier.heightIn(300.dp, 400.dp)
+                    ) {
+                        BoxWithConstraints {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                contentPadding = PaddingValues(24.dp),
+                                modifier = Modifier.fillMaxHeight(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                state.controllers.map { controller ->
+                                    item {
+                                        ControllerButton(
+                                            controller,
+                                            controller.id,
+                                            state.roomId
+                                        ) {
+                                            dialogState =
+                                                DialogState.Closed; onSelectController(
+                                            it
+                                        )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            )
+        }
     }
+}
 
 @Composable
 fun ControllerButton(
@@ -95,16 +148,17 @@ fun ControllerButton(
             )
         )
     } ?: MaterialTheme.colorScheme.secondary).let { color ->
-        Button(
-            modifier = Modifier
-                .width(130.dp)
-                .height(100.dp),
-            shape = RoundedCornerShape(15.dp),
-            onClick = { onSelectController(Pair(roomId, controllerId)) },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = color,
-                contentColor = contentColorFor(backgroundColor = color)
-            )
+        MediumTabButton(
+            clickAndSemanticsModifier = Modifier.clickable {
+                onSelectController(
+                    Pair(
+                        roomId,
+                        controllerId
+                    )
+                )
+            },
+            color = color,
+            icon = {}
         ) {
             Text(controller.displayName)
         }
