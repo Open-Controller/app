@@ -19,7 +19,6 @@ package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Link
@@ -127,7 +126,7 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
             value = houseRefBuilder.displayName,
             leadingIcon = { Icon(Icons.Outlined.TextFields, "Name") },
             label = { Text("Name") },
-            shape = RoundedCornerShape(15.dp),
+            shape = MaterialTheme.shapes.medium,
             onValueChange = {
                 houseRefBuilder =
                     houseRefBuilder.toBuilder().setDisplayName(it).build()
@@ -136,7 +135,7 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
             value = houseRefBuilder.networkHouseRef.url,
             label = { Text("URL") },
             leadingIcon = { Icon(Icons.Outlined.Link, "URL") },
-            shape = RoundedCornerShape(15.dp),
+            shape = MaterialTheme.shapes.medium,
             onValueChange = {
                 houseRefBuilder = houseRefBuilder.toBuilder().setNetworkHouseRef(
                     houseRefBuilder.networkHouseRef.toBuilder().setUrl(it)

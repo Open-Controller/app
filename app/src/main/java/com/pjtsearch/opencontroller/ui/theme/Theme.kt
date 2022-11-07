@@ -120,5 +120,6 @@ fun OpenControllerTheme(
         colorScheme = colors,
         typography = typography,
         content = content,
+        shapes = shapes
     )
 }

@@ -27,7 +27,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.*
@@ -220,7 +219,7 @@ fun RoomsErrorLoading(
         )
         Surface(
             tonalElevation = 6.dp,
-            shape = RoundedCornerShape(25.dp)
+            shape = MaterialTheme.shapes.extraLarge
         ) {
             LazyColumn(Modifier.fillMaxHeight(), contentPadding = PaddingValues(10.dp)) {
                 item {

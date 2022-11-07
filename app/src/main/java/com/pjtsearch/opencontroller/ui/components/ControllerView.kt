@@ -19,7 +19,6 @@ package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -80,7 +79,7 @@ fun ControllerView(
                     .weight(1f)
                     .padding(5.dp),
                 color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(25.dp),
+                shape = MaterialTheme.shapes.extraLarge,
                 tonalElevation = 1.dp
             ) {
                 Column(

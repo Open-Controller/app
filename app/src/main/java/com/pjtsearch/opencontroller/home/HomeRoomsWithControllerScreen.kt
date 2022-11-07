@@ -23,7 +23,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.OtherHouses
 import androidx.compose.material.icons.twotone.SettingsRemote
@@ -62,7 +61,7 @@ fun HomeRoomsWithControllerScreen(
                 .padding(20.dp),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 4.dp,
-            shape = RoundedCornerShape(25.dp)
+            shape = MaterialTheme.shapes.extraLarge
         ) {
             Column(Modifier.padding(10.dp)) {
                 IconButton(

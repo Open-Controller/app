@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.Icon
@@ -42,7 +41,7 @@ import androidx.core.graphics.ColorUtils
 @Composable
 private fun TabButton(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(15.dp),
+    shape: Shape = MaterialTheme.shapes.medium,
     color: Color = MaterialTheme.colorScheme.secondaryContainer,
     height: Dp,
     selected: Boolean = false,
@@ -87,7 +86,7 @@ private fun TabButton(
 @Composable
 fun SmallTabButton(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(15.dp),
+    shape: Shape = MaterialTheme.shapes.small,
     color: Color = MaterialTheme.colorScheme.secondaryContainer,
     selected: Boolean = false,
     clickAndSemanticsModifier: Modifier = Modifier,
@@ -111,7 +110,7 @@ fun SmallTabButton(
 @Composable
 fun MediumTabButton(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(15.dp),
+    shape: Shape = MaterialTheme.shapes.medium,
     color: Color = MaterialTheme.colorScheme.secondaryContainer,
     selected: Boolean = false,
     clickAndSemanticsModifier: Modifier = Modifier,
@@ -135,7 +134,7 @@ fun MediumTabButton(
 @Composable
 fun LargeTabButton(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(15.dp),
+    shape: Shape = MaterialTheme.shapes.large,
     color: Color = MaterialTheme.colorScheme.secondaryContainer,
     selected: Boolean = false,
     clickAndSemanticsModifier: Modifier = Modifier,

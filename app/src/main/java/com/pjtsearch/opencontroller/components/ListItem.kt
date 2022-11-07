@@ -19,7 +19,6 @@ package com.pjtsearch.opencontroller.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -34,7 +33,7 @@ import androidx.core.graphics.ColorUtils
 @Composable
 fun ListItem(
     modifier: Modifier,
-    shape: Shape = RoundedCornerShape(15.dp),
+    shape: Shape = MaterialTheme.shapes.medium,
     color: Color = MaterialTheme.colorScheme.secondaryContainer,
     selected: Boolean = false,
     clickAndSemanticsModifier: Modifier,
