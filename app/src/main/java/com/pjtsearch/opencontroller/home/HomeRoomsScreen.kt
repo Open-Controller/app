@@ -61,26 +61,30 @@ fun HomeRoomsScreen(
             )
         },
         content = { innerPadding ->
-            Box(Modifier.padding(innerPadding)) {
-                when (houseLoadingState) {
-                    is HouseLoadingState.Error ->
-                        RoomsErrorLoading(
-                            houseLoadingState.error, modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(horizontal = 15.dp),
-                            onReload = onReload
-                        )
-                    is HouseLoadingState.Loaded -> RoomControllerPicker(
-                        houseLoadingState.house.rooms,
-                        modifier = Modifier.fillMaxHeight(),
-                        contentPadding = PaddingValues(horizontal = 15.dp),
-                        onSelectController = onSelectController
+            val paddingValues = PaddingValues(
+                start = 15.dp,
+                end = 15.dp,
+                top = innerPadding.calculateTopPadding() + 15.dp,
+                bottom = innerPadding.calculateBottomPadding()
+            )
+            when (houseLoadingState) {
+                is HouseLoadingState.Error ->
+                    RoomsErrorLoading(
+                        houseLoadingState.error, modifier = Modifier
+                            .fillMaxHeight(),
+                        contentPadding = paddingValues,
+                        onReload = onReload
                     )
-                    is HouseLoadingState.Loading -> RoomsLoading(
-                        modifier = Modifier.fillMaxHeight(),
-                        contentPadding = PaddingValues(horizontal = 15.dp),
-                    )
-                }
+                is HouseLoadingState.Loaded -> RoomControllerPicker(
+                    houseLoadingState.house.rooms,
+                    modifier = Modifier.fillMaxHeight(),
+                    contentPadding = paddingValues,
+                    onSelectController = onSelectController
+                )
+                is HouseLoadingState.Loading -> RoomsLoading(
+                    modifier = Modifier.fillMaxHeight(),
+                    contentPadding = paddingValues,
+                )
             }
         }
     )

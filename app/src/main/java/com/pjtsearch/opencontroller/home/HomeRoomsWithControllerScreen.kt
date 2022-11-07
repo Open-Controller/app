@@ -80,8 +80,8 @@ fun HomeRoomsWithControllerScreen(
                     is HouseLoadingState.Error ->
                         RoomsErrorLoading(
                             state.error, modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(5.dp),
+                                .fillMaxHeight(),
+                            contentPadding = PaddingValues(5.dp),
                             onReload = onReload
                         )
                     is HouseLoadingState.Loaded -> RoomControllerPicker(

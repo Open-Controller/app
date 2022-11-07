@@ -194,11 +194,12 @@ fun RoomsLoading(
 @Composable
 fun RoomsErrorLoading(
     error: Throwable,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     onReload: () -> Unit,
     modifier: Modifier = Modifier
 ) =
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(contentPadding),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Icon(
