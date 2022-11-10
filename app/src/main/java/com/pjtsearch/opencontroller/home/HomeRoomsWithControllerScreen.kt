@@ -20,11 +20,8 @@ package com.pjtsearch.opencontroller.home
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.OtherHouses
 import androidx.compose.material.icons.twotone.SettingsRemote
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -46,7 +43,6 @@ fun HomeRoomsWithControllerScreen(
     uiState: HomeUiState,
     onSelectController: (Pair<String, String>) -> Unit,
     onInteractWithControllerMenu: (open: Boolean, items: List<Widget>) -> Unit,
-    onExit: () -> Unit,
     onReload: () -> Unit,
     onError: (Throwable) -> Unit
 ) {
@@ -64,17 +60,6 @@ fun HomeRoomsWithControllerScreen(
             shape = MaterialTheme.shapes.extraLarge
         ) {
             Column(Modifier.padding(10.dp)) {
-                IconButton(
-                    onClick = { onExit() },
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .background(
-                            MaterialTheme.colorScheme.secondaryContainer,
-                            CircleShape
-                        )
-                ) {
-                    Icon(Icons.Outlined.OtherHouses, "Exit Home")
-                }
                 when (val state = uiState.houseLoadingState) {
                     is HouseLoadingState.Error ->
                         RoomsErrorLoading(

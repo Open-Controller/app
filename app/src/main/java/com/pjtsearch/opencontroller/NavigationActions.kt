@@ -32,9 +32,9 @@ object Destinations {
     const val HOME_ROUTE = "home"
 
     /**
-     * The destination for the houses route
+     * The destination for the home route
      */
-    const val HOUSES_ROUTE = "houses"
+    const val WELCOME_ROUTE = "welcome"
 
     /**
      * The destination for the last home route
@@ -54,8 +54,8 @@ class NavigationActions(navController: NavHostController) {
     /**
      * Navigates to the Home route
      */
-    val navigateToHome: (home: HouseRef, saveOldState: Boolean) -> Unit =
-        { home, saveOldState ->
+    val navigateToHome: (home: HouseRef, saveOldState: Boolean, allowDuplicate: Boolean) -> Unit =
+        { home, saveOldState, allowDuplicate ->
             navController.navigate(
                 Destinations.HOME_ROUTE + "/" + URLEncoder.encode(
                     home.toByteArray().decodeToString(), "utf-8"
@@ -69,22 +69,28 @@ class NavigationActions(navController: NavHostController) {
                 }
                 // Avoid multiple copies of the same destination when
                 // reselecting the same item
-                launchSingleTop = true
+                launchSingleTop = !allowDuplicate
                 // Restore state when reselecting a previously selected item
                 restoreState = true
             }
         }
 
-    /**
-     * Navigates to the Houses route
-     */
-    val navigateToHouses: (saveOldState: Boolean) -> Unit = { saveOldState ->
-        navController.navigate(Destinations.HOUSES_ROUTE) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = saveOldState
+    val navigateToWelcome: () -> Unit =
+        {
+            navController.navigate(
+                Destinations.WELCOME_ROUTE
+            ) {
+                // Pop up to the start destination of the graph to
+                // avoid building up a large stack of destinations
+                // on the back stack as users select items
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = false
+                }
+                // Avoid multiple copies of the same destination when
+                // reselecting the same item
+                launchSingleTop = true
+                // Restore state when reselecting a previously selected item
+                restoreState = true
             }
-            launchSingleTop = true
-            restoreState = true
         }
-    }
 }

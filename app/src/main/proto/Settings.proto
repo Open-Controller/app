@@ -4,16 +4,17 @@ option java_package = "com.pjtsearch.opencontroller.settings";
 option java_multiple_files = true;
 
 message Settings {
-  map<string, HouseRef> house_refs = 1;
+  repeated HouseRef house_refs = 1;
   optional string last_house = 2;
 }
 
 message HouseRef {
-  string display_name = 1;
+  string id = 1;
+  string display_name = 2;
   oneof inner {
-    NetworkHouseRef network_house_ref = 2;
+    NetworkHouseRef network_house_ref = 3;
   }
-  string icon = 3;
+  string icon = 4;
 }
 
 message NetworkHouseRef {

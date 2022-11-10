@@ -42,7 +42,6 @@ import androidx.navigation.compose.rememberNavController
 import com.pjtsearch.opencontroller.components.SystemUi
 import com.pjtsearch.opencontroller.extensions.*
 import com.pjtsearch.opencontroller.settings.Settings
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
 val Context.settingsDataStore: DataStore<Settings> by dataStore(
@@ -122,28 +121,27 @@ fun MainActivityView(windowSize: WindowSize) {
     }
 
 //    On launch, get the settings once and set the initialStartDestination
-    LaunchedEffect(ctx.settingsDataStore) {
-        ctx.settingsDataStore.data.take(1).collect { settings ->
-            initialStartDestination = if (settings.hasLastHouse()) {
-                Destinations.LAST_HOME_ROUTE
-            } else {
-                Destinations.HOUSES_ROUTE
-            }
-        }
-    }
+//    LaunchedEffect(ctx.settingsDataStore) {
+//        ctx.settingsDataStore.data.take(1).collect { settings ->
+//            initialStartDestination = if (settings.hasLastHouse()) {
+//                Destinations.LAST_HOME_ROUTE
+//            } else {
+////                FIXME
+//                TODO("FIX WHEN NO HOUSES")
+//            }
+//        }
+//    }
 
 //    Hide the navigation until initialStartDestination is loaded so that will go there immediately
-    initialStartDestination?.let { startDestination ->
-        NavigationGraph(
-            isExpandedScreen = isExpandedScreen,
-            navController = navController,
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
-                .fillMaxSize(),
-            onError = { onError(it) },
-            startDestination = startDestination
-        )
-    }
+    NavigationGraph(
+        isExpandedScreen = isExpandedScreen,
+        navController = navController,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .fillMaxSize(),
+        onError = { onError(it) },
+        startDestination = Destinations.LAST_HOME_ROUTE
+    )
 
     val state = errorDialogState
     if (state is ErrorDialogState.Opened) {

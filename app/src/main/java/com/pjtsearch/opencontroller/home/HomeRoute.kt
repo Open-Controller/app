@@ -28,12 +28,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import com.pjtsearch.opencontroller.executor.Widget
+import com.pjtsearch.opencontroller.settings.HouseRef
 
 @Composable
 fun HomeRoute(
     homeViewModel: HomeViewModel,
     isExpandedScreen: Boolean,
-    onExit: () -> Unit,
+    onHouseSelected: (HouseRef) -> Unit,
     onError: (Throwable) -> Unit,
 ) {
     // UiState of the HomeScreen
@@ -51,7 +52,7 @@ fun HomeRoute(
         onReload = { homeViewModel.refreshHouse() },
         onSelectController = { homeViewModel.selectController(it) },
         onInteractWithRooms = { homeViewModel.interactedWithRooms() },
-        onExit = onExit,
+        onHouseSelected = onHouseSelected,
         onError = onError
     )
 }
@@ -62,9 +63,9 @@ fun HomeRoute(
     uiState: HomeUiState,
     isExpandedScreen: Boolean,
     onSelectController: (Pair<String, String>) -> Unit,
+    onHouseSelected: (HouseRef) -> Unit,
     onInteractWithRooms: () -> Unit,
     onInteractWithControllerMenu: (open: Boolean, items: List<Widget>) -> Unit,
-    onExit: () -> Unit,
     onReload: () -> Unit,
     onError: (Throwable) -> Unit,
 ) {
@@ -98,7 +99,6 @@ fun HomeRoute(
                     uiState = uiState,
                     onSelectController = onSelectController,
                     onInteractWithControllerMenu = onInteractWithControllerMenu,
-                    onExit = onExit,
                     onReload = onReload,
                     onError = onError,
                 )
@@ -107,8 +107,8 @@ fun HomeRoute(
                 HomeRoomsScreen(
                     houseLoadingState = uiState.houseLoadingState,
                     onSelectController = onSelectController,
+                    onHouseSelected = onHouseSelected,
                     onReload = onReload,
-                    onExit = onExit
                 )
             }
             HomeScreenType.Controller -> {

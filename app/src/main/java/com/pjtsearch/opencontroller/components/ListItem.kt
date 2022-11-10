@@ -32,11 +32,11 @@ import androidx.core.graphics.ColorUtils
 
 @Composable
 fun ListItem(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.medium,
     color: Color = MaterialTheme.colorScheme.secondaryContainer,
     selected: Boolean = false,
-    clickAndSemanticsModifier: Modifier,
+    clickAndSemanticsModifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     Surface(

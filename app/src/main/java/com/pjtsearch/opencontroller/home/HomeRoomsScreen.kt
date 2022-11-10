@@ -18,34 +18,70 @@
 package com.pjtsearch.opencontroller.home
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.rememberSplineBasedDecay
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.OtherHouses
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
+import com.pjtsearch.opencontroller.extensions.houseIcons
+import com.pjtsearch.opencontroller.settings.HouseRef
+import com.pjtsearch.opencontroller.settings.Settings
+import com.pjtsearch.opencontroller.settingsDataStore
+import com.pjtsearch.opencontroller.ui.components.ModifyHouseRef
+import kotlinx.coroutines.launch
+import java.util.*
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeRoomsScreen(
     houseLoadingState: HouseLoadingState,
+    onHouseSelected: (HouseRef) -> Unit,
     onSelectController: (Pair<String, String>) -> Unit,
     onReload: () -> Unit,
-    onExit: () -> Unit
 ) {
-    val decayAnimationSpec = rememberSplineBasedDecay<Float>()
+    var houseSelectorOpened by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val settings by ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
+    val beforeHouseSelected = { houseRef: HouseRef ->
+        houseSelectorOpened = false
+        scope.launch {
+            ctx.settingsDataStore.updateData { oldSettings ->
+                oldSettings.toBuilder().clone().setLastHouse(houseRef.id).build()
+            }
+        }
+        onHouseSelected(houseRef)
+    }
+    var editing: HouseRef? by remember { mutableStateOf(null) }
+    var adding: HouseRef? by remember { mutableStateOf(null) }
     Scaffold(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text("Rooms") },
+                title = {
+                    when (houseLoadingState) {
+                        is HouseLoadingState.Error -> Text("Error")
+                        is HouseLoadingState.Loaded -> Text(houseLoadingState.house.displayName)
+                        is HouseLoadingState.Loading -> Text(
+                            houseLoadingState.house?.displayName ?: "Loading"
+                        )
+                    }
+                },
                 navigationIcon = {
-                    IconButton(onClick = onExit) {
+                    IconButton(onClick = { houseSelectorOpened = true }) {
                         Icon(
                             imageVector = Icons.Outlined.OtherHouses,
                             contentDescription = "Exit house"
@@ -88,4 +124,143 @@ fun HomeRoomsScreen(
             }
         }
     )
+    if (houseSelectorOpened) {
+        AlertDialog(
+            onDismissRequest = { houseSelectorOpened = false },
+            title = { Text("Choose House") },
+            modifier = Modifier.height(500.dp),
+            text = {
+                HouseSelector(
+                    modifier = Modifier.fillMaxHeight(),
+                    houseRefsList = remember(settings) { settings.houseRefsList },
+                    onHouseSelected = beforeHouseSelected,
+                    currentHouse = houseLoadingState.houseRef.id,
+                    onEdit = { editing = it },
+                    onDelete = {
+                        scope.launch {
+                            ctx.settingsDataStore.updateData { settings ->
+                                settings.toBuilder()
+                                    .removeHouseRefs(settings.houseRefsList.indexOfFirst { h ->
+                                        h.id == it
+                                    })
+                                    .build()
+                            }
+                            editing = null
+                        }
+                    }
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    adding =
+                        HouseRef.newBuilder().setId(UUID.randomUUID().toString()).build()
+                }) {
+                    Text("Add")
+                }
+            })
+    }
+    //    Edit house dialog
+    when (val editingState = editing) {
+        is HouseRef -> EditingDialog(
+            state = editingState,
+            onDismissRequest = { editing = null },
+            onSave = {
+                scope.launch {
+                    ctx.settingsDataStore.updateData { settings ->
+                        settings.toBuilder()
+                            .setHouseRefs(settings.houseRefsList.indexOfFirst { h ->
+                                h.id == it.id
+                            }, it)
+                            .build()
+                    }
+                    editing = null
+                }
+            },
+            onChange = { editing = it }
+        )
+    }
+//    Add house dialog
+    when (val addingState = adding) {
+        is HouseRef -> EditingDialog(
+            state = addingState,
+            onDismissRequest = { adding = null },
+            onSave = {
+                scope.launch {
+                    ctx.settingsDataStore.updateData { settings ->
+                        settings.toBuilder()
+                            .addHouseRefs(it)
+                            .build()
+                    }
+                    adding = null
+                    settings.toString()
+                }
+            },
+            onChange = { adding = it }
+        )
+    }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HouseSelector(
+    modifier: Modifier = Modifier,
+    houseRefsList: List<HouseRef>,
+    currentHouse: String,
+    onHouseSelected: (HouseRef) -> Unit,
+    onEdit: (HouseRef) -> Unit,
+    onDelete: (String) -> Unit
+) {
+    LazyColumn(modifier) {
+        items(houseRefsList, { it.id }) {
+            ListItem(
+                headlineText = { Text(it.displayName) },
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.medium)
+                    .clickable { onHouseSelected(it) },
+                tonalElevation = if (currentHouse != it.id) {
+                    ListItemDefaults.Elevation
+                } else {
+                    50.dp
+                },
+                leadingContent = {
+                    OpenControllerIcon(
+                        icon = it.icon,
+                        text = it.icon,
+                        iconSet = houseIcons
+                    )
+                },
+                trailingContent = {
+                    Row {
+                        IconButton(onClick = { onEdit(it) }) {
+                            Icon(Icons.Outlined.Edit, "Edit")
+                        }
+                        IconButton(onClick = { onDelete(it.id) }) {
+                            Icon(Icons.Outlined.DeleteOutline, "Delete")
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun EditingDialog(
+    state: HouseRef,
+    onDismissRequest: () -> Unit,
+    onSave: (HouseRef) -> Unit,
+    onChange: (HouseRef) -> Unit
+) = AlertDialog(
+    onDismissRequest = onDismissRequest,
+    confirmButton = {
+        Button(onClick = {
+            onSave(state)
+        }) { Text("Save") }
+    },
+    text = {
+        ModifyHouseRef(
+            houseRef = state,
+            onChange = onChange,
+        )
+    },
+)

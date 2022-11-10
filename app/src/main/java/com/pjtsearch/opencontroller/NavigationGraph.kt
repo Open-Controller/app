@@ -20,6 +20,7 @@ package com.pjtsearch.opencontroller
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,9 +32,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.pjtsearch.opencontroller.home.HomeRoute
 import com.pjtsearch.opencontroller.home.HomeViewModel
-import com.pjtsearch.opencontroller.houses.HousesRoute
 import com.pjtsearch.opencontroller.settings.HouseRef
+import com.pjtsearch.opencontroller.welcome.WelcomeRoute
 import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
 
 /**
  * A component that navigates between the destinations
@@ -54,7 +56,7 @@ fun NavigationGraph(
         NavigationActions(navController)
     },
     onError: (Throwable) -> Unit,
-    startDestination: String = Destinations.HOUSES_ROUTE
+    startDestination: String
 ) {
     NavHost(
         navController = navController,
@@ -67,6 +69,7 @@ fun NavigationGraph(
                 type = NavType.StringType
             })
         ) {
+            println(it.arguments?.getString("house"))
             val homeViewModel: HomeViewModel = viewModel(
                 factory = HomeViewModel.provideFactory(
 //                    Parse the HouseRef from the param string
@@ -78,16 +81,35 @@ fun NavigationGraph(
             HomeRoute(
                 homeViewModel = homeViewModel,
                 isExpandedScreen = isExpandedScreen,
-//                Don't save old state so don't return to the previous home when navigating to another home
-                onExit = { navigationActions.navigateToHouses(false) },
+                onHouseSelected = { h ->
+                    navigationActions.navigateToHome(
+                        h,
+                        false,
+                        true
+                    )
+                },
                 onError = onError
             )
         }
-        composable(Destinations.HOUSES_ROUTE) {
-            HousesRoute(
-                onHouseSelected = { navigationActions.navigateToHome(it, true) }
-            )
+
+        composable(Destinations.WELCOME_ROUTE) {
+            val ctx = LocalContext.current
+            val scope = rememberCoroutineScope()
+
+            WelcomeRoute(onHouseAdded = { house ->
+                scope.launch {
+                    ctx.settingsDataStore.updateData { oldSettings ->
+                        oldSettings.toBuilder().clone().setLastHouse(house.id).build()
+                    }
+                    navigationActions.navigateToHome(
+                        house,
+                        false,
+                        true
+                    )
+                }
+            })
         }
+
 //        Navigates to the last used home
         composable(Destinations.LAST_HOME_ROUTE) {
             val ctx = LocalContext.current
@@ -98,12 +120,14 @@ fun NavigationGraph(
 //                    Clear the current (LAST_HOME_ROUTE) destination from the back stack so don't go back to it
                     navController.popBackStack()
 //                    Navigate to last house ref if it still exists, otherwise navigate to houses
-                    settings.houseRefsMap[settings.lastHouse]?.let { houseRef ->
-                        navigationActions.navigateToHome(
-                            houseRef,
-                            false
-                        )
-                    } ?: navigationActions.navigateToHouses(false)
+                    settings.houseRefsList.find { it.id == settings.lastHouse }
+                        ?.let { houseRef ->
+                            navigationActions.navigateToHome(
+                                houseRef,
+                                false,
+                                false
+                            )
+                        } ?: navigationActions.navigateToWelcome()
                 }
             }
         }

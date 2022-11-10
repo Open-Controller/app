@@ -40,22 +40,33 @@ sealed interface ControllerMenuState {
 }
 
 sealed interface HouseLoadingState {
-    data class Loading(val house: House?) : HouseLoadingState
-    data class Loaded(val house: House) : HouseLoadingState
-    data class Error(val error: Throwable, val house: House?) : HouseLoadingState
+    val houseRef: HouseRef
+
+    data class Loading(val house: House?, override val houseRef: HouseRef) :
+        HouseLoadingState
+
+    data class Loaded(val house: House, override val houseRef: HouseRef) :
+        HouseLoadingState
+
+    data class Error(
+        val error: Throwable,
+        val house: House?,
+        override val houseRef: HouseRef
+    ) : HouseLoadingState
 
     companion object From {
         fun fromLoadingAndError(
             isLoading: Boolean,
             loadingError: Throwable?,
-            house: House?
+            house: House?,
+            houseRef: HouseRef
         ) =
             if (isLoading) {
-                if (loadingError != null) Error(loadingError, house)
-                else Loading(house)
+                if (loadingError != null) Error(loadingError, house, houseRef)
+                else Loading(house, houseRef)
             } else {
                 checkNotNull(house)
-                Loaded(house)
+                Loaded(house, houseRef)
             }
     }
 }
@@ -98,6 +109,7 @@ sealed interface HomeUiState {
  */
 private data class HomeViewModelState(
     val house: House? = null,
+    val houseRef: HouseRef,
     val selectedController: Pair<String, String>? = null, // TODO back selectedController in a SavedStateHandle
     val isControllerOpen: Boolean = false,
     val isLoading: Boolean = false,
@@ -116,7 +128,8 @@ private data class HomeViewModelState(
                 houseLoadingState = HouseLoadingState.fromLoadingAndError(
                     isLoading,
                     loadingError,
-                    null
+                    null,
+                    houseRef
                 )
             )
         } else if (selectedController == null) {
@@ -124,7 +137,8 @@ private data class HomeViewModelState(
                 houseLoadingState = HouseLoadingState.fromLoadingAndError(
                     isLoading,
                     loadingError,
-                    house
+                    house,
+                    houseRef
                 )
             )
         } else {
@@ -139,7 +153,8 @@ private data class HomeViewModelState(
                 houseLoadingState = HouseLoadingState.fromLoadingAndError(
                     isLoading,
                     loadingError,
-                    house
+                    house,
+                    houseRef
                 ),
                 controllerMenuState = if (isControllerMenuOpen) {
                     ControllerMenuState.Open(controllerMenuItems)
@@ -158,7 +173,8 @@ class HomeViewModel(
     private val onPanic: (Panic) -> Unit
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(HomeViewModelState(isLoading = true))
+    private val viewModelState =
+        MutableStateFlow(HomeViewModelState(isLoading = true, houseRef = houseRef))
 
     // UI state exposed to the UI
     val uiState = viewModelState
