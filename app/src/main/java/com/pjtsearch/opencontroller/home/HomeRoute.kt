@@ -99,6 +99,7 @@ fun HomeRoute(
                     uiState = uiState,
                     onSelectController = onSelectController,
                     onInteractWithControllerMenu = onInteractWithControllerMenu,
+                    onHouseSelected = onHouseSelected,
                     onReload = onReload,
                     onError = onError,
                 )

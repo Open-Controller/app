@@ -18,27 +18,18 @@
 package com.pjtsearch.opencontroller.home
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.OtherHouses
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
-import com.pjtsearch.opencontroller.extensions.houseIcons
 import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.settingsDataStore
-import com.pjtsearch.opencontroller.ui.components.ModifyHouseRef
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -199,68 +190,3 @@ fun HomeRoomsScreen(
         )
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HouseSelector(
-    modifier: Modifier = Modifier,
-    houseRefsList: List<HouseRef>,
-    currentHouse: String,
-    onHouseSelected: (HouseRef) -> Unit,
-    onEdit: (HouseRef) -> Unit,
-    onDelete: (String) -> Unit
-) {
-    LazyColumn(modifier) {
-        items(houseRefsList, { it.id }) {
-            ListItem(
-                headlineText = { Text(it.displayName) },
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.medium)
-                    .clickable { onHouseSelected(it) },
-                tonalElevation = if (currentHouse != it.id) {
-                    ListItemDefaults.Elevation
-                } else {
-                    50.dp
-                },
-                leadingContent = {
-                    OpenControllerIcon(
-                        icon = it.icon,
-                        text = it.icon,
-                        iconSet = houseIcons
-                    )
-                },
-                trailingContent = {
-                    Row {
-                        IconButton(onClick = { onEdit(it) }) {
-                            Icon(Icons.Outlined.Edit, "Edit")
-                        }
-                        IconButton(onClick = { onDelete(it.id) }) {
-                            Icon(Icons.Outlined.DeleteOutline, "Delete")
-                        }
-                    }
-                }
-            )
-        }
-    }
-}
-
-@Composable
-fun EditingDialog(
-    state: HouseRef,
-    onDismissRequest: () -> Unit,
-    onSave: (HouseRef) -> Unit,
-    onChange: (HouseRef) -> Unit
-) = AlertDialog(
-    onDismissRequest = onDismissRequest,
-    confirmButton = {
-        Button(onClick = {
-            onSave(state)
-        }) { Text("Save") }
-    },
-    text = {
-        ModifyHouseRef(
-            houseRef = state,
-            onChange = onChange,
-        )
-    },
-)
