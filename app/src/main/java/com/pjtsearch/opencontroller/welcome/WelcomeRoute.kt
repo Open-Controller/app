@@ -18,10 +18,13 @@
 package com.pjtsearch.opencontroller.welcome
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settingsDataStore
@@ -30,11 +33,10 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WelcomeRoute(onHouseAdded: (HouseRef) -> Unit) {
     val ctx = LocalContext.current
-//    val settings =
-//        ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
     val scope = rememberCoroutineScope()
     var adding: HouseRef by rememberSaveable {
         mutableStateOf(
@@ -44,22 +46,31 @@ fun WelcomeRoute(onHouseAdded: (HouseRef) -> Unit) {
         )
     }
 
-    Column {
-        ModifyHouseRef(
-            houseRef = adding,
-            onChange = { n ->
-                adding = n
-            }
-        )
-        Button(onClick = {
-            scope.launch {
-                ctx.settingsDataStore.updateData { settings ->
-                    onHouseAdded(adding)
-                    settings.toBuilder()
-                        .addHouseRefs(adding)
-                        .build()
+    Scaffold(topBar = {
+        LargeTopAppBar(title = { Text("Add First House") })
+    }) { contentPadding ->
+        Column(
+            Modifier
+                .padding(contentPadding)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ModifyHouseRef(
+                houseRef = adding,
+                onChange = { n ->
+                    adding = n
                 }
-            }
-        }) { Text("Save") }
+            )
+            Button(onClick = {
+                scope.launch {
+                    ctx.settingsDataStore.updateData { settings ->
+                        onHouseAdded(adding)
+                        settings.toBuilder()
+                            .addHouseRefs(adding)
+                            .build()
+                    }
+                }
+            }) { Text("Save") }
+        }
     }
 }
