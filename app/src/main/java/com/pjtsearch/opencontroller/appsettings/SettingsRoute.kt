@@ -28,10 +28,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import com.pjtsearch.opencontroller.SettingsDestinations
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsRoute(onOpenManageHouses: () -> Unit, onExit: () -> Unit) {
+fun SettingsRoute(onOpenSubRoute: (String) -> Unit, onExit: () -> Unit) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(modifier = Modifier
         .nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -55,7 +56,7 @@ fun SettingsRoute(onOpenManageHouses: () -> Unit, onExit: () -> Unit) {
         ) {
             item {
                 ListItem(
-                    modifier = Modifier.clickable { onOpenManageHouses() },
+                    modifier = Modifier.clickable { onOpenSubRoute(SettingsDestinations.MANAGE_HOUSES_ROUTE) },
                     headlineText = { Text("Manage Houses") },
                     supportingText = { Text("Edit & add houses") },
                     leadingContent = {

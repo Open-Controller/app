@@ -90,8 +90,11 @@ fun NavigationGraph(
                         true
                     )
                 },
-                onOpenSettings = navigationActions.navigateToSettings,
-                onOpenManageHouses = navigationActions.navigateToSettingsManageHouses,
+                onOpenSettings = { subRoute ->
+                    navigationActions.navigateToSettings(
+                        subRoute
+                    )
+                },
                 onError = onError
             )
         }
@@ -116,11 +119,17 @@ fun NavigationGraph(
 
         composable(Destinations.SETTINGS_ROUTE) {
             SettingsRoute(
-                onOpenManageHouses = navigationActions.navigateToSettingsManageHouses,
+                onOpenSubRoute = { subRoute ->
+                    navigationActions.navigateToSettings(
+                        subRoute
+                    )
+                },
                 onExit = { navController.popBackStack() })
         }
 
-        composable(Destinations.SETTINGS_MANAGE_HOUSES_ROUTE) {
+        composable(
+            Destinations.SETTINGS_ROUTE + "/" + SettingsDestinations.MANAGE_HOUSES_ROUTE
+        ) {
             ManageHousesRoute(onExit = { navController.popBackStack() })
         }
 

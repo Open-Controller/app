@@ -22,6 +22,23 @@ import androidx.navigation.NavHostController
 import com.pjtsearch.opencontroller.settings.HouseRef
 import java.net.URLEncoder
 
+object SettingsDestinations {
+    /**
+     * The destination for the manage houses route
+     */
+    const val MANAGE_HOUSES_ROUTE = "manageHouses"
+
+    /**
+     * The destination for the add house route
+     */
+    const val ADD_HOUSE_ROUTE = "addHouse"
+
+    /**
+     * The destination for the edit house route
+     */
+    const val EDIT_HOUSE_ROUTE = "editHouse"
+}
+
 /**
  * The destinations for the navigation
  */
@@ -35,11 +52,6 @@ object Destinations {
      * The destination for the settings route
      */
     const val SETTINGS_ROUTE = "settings"
-
-    /**
-     * The destination for the manage houses route
-     */
-    const val SETTINGS_MANAGE_HOUSES_ROUTE = "settings/manageHouses"
 
     /**
      * The destination for the home route
@@ -104,29 +116,14 @@ class NavigationActions(navController: NavHostController) {
             }
         }
 
-    val navigateToSettings: () -> Unit =
-        {
+    val navigateToSettings: (destination: String?) -> Unit =
+        { destination ->
             navController.navigate(
-                Destinations.SETTINGS_ROUTE
-            ) {
-                // Pop up to the start destination of the graph to
-                // avoid building up a large stack of destinations
-                // on the back stack as users select items
-                popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = false
+                Destinations.SETTINGS_ROUTE + if (destination != null) {
+                    "/$destination"
+                } else {
+                    ""
                 }
-                // Avoid multiple copies of the same destination when
-                // reselecting the same item
-                launchSingleTop = true
-                // Restore state when reselecting a previously selected item
-                restoreState = true
-            }
-        }
-
-    val navigateToSettingsManageHouses: () -> Unit =
-        {
-            navController.navigate(
-                Destinations.SETTINGS_MANAGE_HOUSES_ROUTE
             ) {
                 // Pop up to the start destination of the graph to
                 // avoid building up a large stack of destinations

@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.pjtsearch.opencontroller.SettingsDestinations
 import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.settingsDataStore
@@ -40,8 +41,7 @@ fun HomeRoomsScreen(
     onHouseSelected: (HouseRef) -> Unit,
     onSelectController: (Pair<String, String>) -> Unit,
     onReload: () -> Unit,
-    onOpenSettings: () -> Unit,
-    onOpenManageHouses: () -> Unit
+    onOpenSettings: (String?) -> Unit,
 ) {
     var houseSelectorOpened by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -80,7 +80,7 @@ fun HomeRoomsScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onOpenSettings) {
+                    IconButton(onClick = { onOpenSettings(null) }) {
                         Icon(
                             imageVector = Icons.Outlined.Settings,
                             contentDescription = "Open Settings"
@@ -137,7 +137,11 @@ fun HomeRoomsScreen(
                 )
             },
             confirmButton = {
-                Button(onClick = { houseSelectorOpened = false; onOpenManageHouses() }) {
+                Button(onClick = {
+                    houseSelectorOpened = false; onOpenSettings(
+                    SettingsDestinations.MANAGE_HOUSES_ROUTE
+                )
+                }) {
                     Text("Manage")
                 }
             })

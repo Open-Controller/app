@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.pjtsearch.opencontroller.SettingsDestinations
 import com.pjtsearch.opencontroller.executor.Widget
 import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.Settings
@@ -52,8 +53,7 @@ fun HomeRoomsWithControllerScreen(
     onHouseSelected: (HouseRef) -> Unit,
     onReload: () -> Unit,
     onError: (Throwable) -> Unit,
-    onOpenSettings: () -> Unit,
-    onOpenManageHouses: () -> Unit
+    onOpenSettings: (String?) -> Unit,
 ) {
     var houseSelectorOpened by remember { mutableStateOf(false) }
     val ctx = LocalContext.current
@@ -226,7 +226,11 @@ fun HomeRoomsWithControllerScreen(
                 )
             },
             confirmButton = {
-                Button(onClick = { houseSelectorOpened = false; onOpenManageHouses() }) {
+                Button(onClick = {
+                    houseSelectorOpened = false; onOpenSettings(
+                    SettingsDestinations.MANAGE_HOUSES_ROUTE
+                )
+                }) {
                     Text("Manage")
                 }
             })
