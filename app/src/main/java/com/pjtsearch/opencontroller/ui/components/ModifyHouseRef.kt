@@ -19,8 +19,10 @@ package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material3.*
@@ -119,7 +121,14 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
                     iconSet = houseIcons
                 )
             } else {
-                Text("Chose Icon")
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        Icons.Outlined.AddCircleOutline,
+                        "Choose Icon",
+                        Modifier.size(40.dp)
+                    )
+                    Text("Chose Icon")
+                }
             }
         }
         OutlinedTextField(
