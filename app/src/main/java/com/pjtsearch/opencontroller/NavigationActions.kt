@@ -32,6 +32,16 @@ object Destinations {
     const val HOME_ROUTE = "home"
 
     /**
+     * The destination for the settings route
+     */
+    const val SETTINGS_ROUTE = "settings"
+
+    /**
+     * The destination for the manage houses route
+     */
+    const val SETTINGS_MANAGE_HOUSES_ROUTE = "settings/manageHouses"
+
+    /**
      * The destination for the home route
      */
     const val WELCOME_ROUTE = "welcome"
@@ -79,6 +89,44 @@ class NavigationActions(navController: NavHostController) {
         {
             navController.navigate(
                 Destinations.WELCOME_ROUTE
+            ) {
+                // Pop up to the start destination of the graph to
+                // avoid building up a large stack of destinations
+                // on the back stack as users select items
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = false
+                }
+                // Avoid multiple copies of the same destination when
+                // reselecting the same item
+                launchSingleTop = true
+                // Restore state when reselecting a previously selected item
+                restoreState = true
+            }
+        }
+
+    val navigateToSettings: () -> Unit =
+        {
+            navController.navigate(
+                Destinations.SETTINGS_ROUTE
+            ) {
+                // Pop up to the start destination of the graph to
+                // avoid building up a large stack of destinations
+                // on the back stack as users select items
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = false
+                }
+                // Avoid multiple copies of the same destination when
+                // reselecting the same item
+                launchSingleTop = true
+                // Restore state when reselecting a previously selected item
+                restoreState = true
+            }
+        }
+
+    val navigateToSettingsManageHouses: () -> Unit =
+        {
+            navController.navigate(
+                Destinations.SETTINGS_MANAGE_HOUSES_ROUTE
             ) {
                 // Pop up to the start destination of the graph to
                 // avoid building up a large stack of destinations

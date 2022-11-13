@@ -18,12 +18,8 @@
 package com.pjtsearch.opencontroller.home
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -40,9 +36,7 @@ fun HouseSelector(
     modifier: Modifier = Modifier,
     houseRefsList: List<HouseRef>,
     currentHouse: String,
-    onHouseSelected: (HouseRef) -> Unit,
-    onEdit: (HouseRef) -> Unit,
-    onDelete: (String) -> Unit
+    onHouseSelected: (HouseRef) -> Unit
 ) {
     LazyColumn(modifier) {
         items(houseRefsList, { it.id }) {
@@ -62,16 +56,6 @@ fun HouseSelector(
                         text = it.icon,
                         iconSet = houseIcons
                     )
-                },
-                trailingContent = {
-                    Row {
-                        IconButton(onClick = { onEdit(it) }) {
-                            Icon(Icons.Outlined.Edit, "Edit")
-                        }
-                        IconButton(onClick = { onDelete(it.id) }) {
-                            Icon(Icons.Outlined.DeleteOutline, "Delete")
-                        }
-                    }
                 }
             )
         }

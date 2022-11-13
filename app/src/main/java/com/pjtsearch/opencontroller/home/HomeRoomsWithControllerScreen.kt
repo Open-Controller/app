@@ -38,7 +38,6 @@ import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.settingsDataStore
 import com.pjtsearch.opencontroller.ui.components.ControllerView
 import kotlinx.coroutines.launch
-import java.util.*
 
 @OptIn(
     ExperimentalAnimationApi::class,
@@ -52,7 +51,9 @@ fun HomeRoomsWithControllerScreen(
     onInteractWithControllerMenu: (open: Boolean, items: List<Widget>) -> Unit,
     onHouseSelected: (HouseRef) -> Unit,
     onReload: () -> Unit,
-    onError: (Throwable) -> Unit
+    onError: (Throwable) -> Unit,
+    onOpenSettings: () -> Unit,
+    onOpenManageHouses: () -> Unit
 ) {
     var houseSelectorOpened by remember { mutableStateOf(false) }
     val ctx = LocalContext.current
@@ -67,8 +68,6 @@ fun HomeRoomsWithControllerScreen(
         }
         onHouseSelected(houseRef)
     }
-    var editing: HouseRef? by remember { mutableStateOf(null) }
-    var adding: HouseRef? by remember { mutableStateOf(null) }
 
     Row(
         Modifier.padding(
@@ -223,68 +222,13 @@ fun HomeRoomsWithControllerScreen(
                     modifier = Modifier.fillMaxHeight(),
                     houseRefsList = remember(settings) { settings.houseRefsList },
                     onHouseSelected = beforeHouseSelected,
-                    currentHouse = uiState.houseLoadingState.houseRef.id,
-                    onEdit = { editing = it },
-                    onDelete = {
-                        scope.launch {
-                            ctx.settingsDataStore.updateData { settings ->
-                                settings.toBuilder()
-                                    .removeHouseRefs(settings.houseRefsList.indexOfFirst { h ->
-                                        h.id == it
-                                    })
-                                    .build()
-                            }
-                            editing = null
-                        }
-                    }
+                    currentHouse = uiState.houseLoadingState.houseRef.id
                 )
             },
             confirmButton = {
-                Button(onClick = {
-                    adding =
-                        HouseRef.newBuilder().setId(UUID.randomUUID().toString()).build()
-                }) {
-                    Text("Add")
+                Button(onClick = { houseSelectorOpened = false; onOpenManageHouses() }) {
+                    Text("Manage")
                 }
             })
-    }
-    //    Edit house dialog
-    when (val editingState = editing) {
-        is HouseRef -> EditingDialog(
-            state = editingState,
-            onDismissRequest = { editing = null },
-            onSave = {
-                scope.launch {
-                    ctx.settingsDataStore.updateData { settings ->
-                        settings.toBuilder()
-                            .setHouseRefs(settings.houseRefsList.indexOfFirst { h ->
-                                h.id == it.id
-                            }, it)
-                            .build()
-                    }
-                    editing = null
-                }
-            },
-            onChange = { editing = it }
-        )
-    }
-//    Add house dialog
-    when (val addingState = adding) {
-        is HouseRef -> EditingDialog(
-            state = addingState,
-            onDismissRequest = { adding = null },
-            onSave = {
-                scope.launch {
-                    ctx.settingsDataStore.updateData { settings ->
-                        settings.toBuilder()
-                            .addHouseRefs(it)
-                            .build()
-                    }
-                    adding = null
-                    settings.toString()
-                }
-            },
-            onChange = { adding = it }
-        )
     }
 }

@@ -30,6 +30,7 @@ fun EditingDialog(
     state: HouseRef,
     onDismissRequest: () -> Unit,
     onSave: (HouseRef) -> Unit,
+    onDelete: ((HouseRef) -> Unit)? = null,
     onChange: (HouseRef) -> Unit
 ) = AlertDialog(
     onDismissRequest = onDismissRequest,
@@ -37,6 +38,13 @@ fun EditingDialog(
         Button(onClick = {
             onSave(state)
         }) { Text("Save") }
+    },
+    dismissButton = {
+        if (onDelete != null) {
+            Button(onClick = {
+                onDelete(state)
+            }) { Text("Delete") }
+        }
     },
     text = {
         ModifyHouseRef(

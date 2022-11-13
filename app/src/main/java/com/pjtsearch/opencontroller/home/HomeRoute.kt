@@ -36,6 +36,8 @@ fun HomeRoute(
     isExpandedScreen: Boolean,
     onHouseSelected: (HouseRef) -> Unit,
     onError: (Throwable) -> Unit,
+    onOpenSettings: () -> Unit,
+    onOpenManageHouses: () -> Unit
 ) {
     // UiState of the HomeScreen
     val uiState by homeViewModel.uiState.collectAsState()
@@ -53,6 +55,8 @@ fun HomeRoute(
         onSelectController = { homeViewModel.selectController(it) },
         onInteractWithRooms = { homeViewModel.interactedWithRooms() },
         onHouseSelected = onHouseSelected,
+        onOpenManageHouses = onOpenManageHouses,
+        onOpenSettings = onOpenSettings,
         onError = onError
     )
 }
@@ -68,6 +72,8 @@ fun HomeRoute(
     onInteractWithControllerMenu: (open: Boolean, items: List<Widget>) -> Unit,
     onReload: () -> Unit,
     onError: (Throwable) -> Unit,
+    onOpenSettings: () -> Unit,
+    onOpenManageHouses: () -> Unit
 ) {
     val homeScreenType = getHomeScreenType(isExpandedScreen, uiState)
     AnimatedContent(
@@ -102,6 +108,8 @@ fun HomeRoute(
                     onHouseSelected = onHouseSelected,
                     onReload = onReload,
                     onError = onError,
+                    onOpenManageHouses = onOpenManageHouses,
+                    onOpenSettings = onOpenSettings
                 )
             }
             HomeScreenType.Rooms -> {
@@ -110,6 +118,8 @@ fun HomeRoute(
                     onSelectController = onSelectController,
                     onHouseSelected = onHouseSelected,
                     onReload = onReload,
+                    onOpenManageHouses = onOpenManageHouses,
+                    onOpenSettings = onOpenSettings
                 )
             }
             HomeScreenType.Controller -> {

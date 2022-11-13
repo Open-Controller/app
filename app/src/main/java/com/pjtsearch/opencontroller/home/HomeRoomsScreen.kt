@@ -21,6 +21,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.OtherHouses
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -31,7 +32,6 @@ import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.settingsDataStore
 import kotlinx.coroutines.launch
-import java.util.*
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +40,8 @@ fun HomeRoomsScreen(
     onHouseSelected: (HouseRef) -> Unit,
     onSelectController: (Pair<String, String>) -> Unit,
     onReload: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onOpenManageHouses: () -> Unit
 ) {
     var houseSelectorOpened by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -55,8 +57,6 @@ fun HomeRoomsScreen(
         }
         onHouseSelected(houseRef)
     }
-    var editing: HouseRef? by remember { mutableStateOf(null) }
-    var adding: HouseRef? by remember { mutableStateOf(null) }
     Scaffold(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -76,6 +76,14 @@ fun HomeRoomsScreen(
                         Icon(
                             imageVector = Icons.Outlined.OtherHouses,
                             contentDescription = "Exit house"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(
+                            imageVector = Icons.Outlined.Settings,
+                            contentDescription = "Open Settings"
                         )
                     }
                 },
@@ -125,68 +133,13 @@ fun HomeRoomsScreen(
                     modifier = Modifier.fillMaxHeight(),
                     houseRefsList = remember(settings) { settings.houseRefsList },
                     onHouseSelected = beforeHouseSelected,
-                    currentHouse = houseLoadingState.houseRef.id,
-                    onEdit = { editing = it },
-                    onDelete = {
-                        scope.launch {
-                            ctx.settingsDataStore.updateData { settings ->
-                                settings.toBuilder()
-                                    .removeHouseRefs(settings.houseRefsList.indexOfFirst { h ->
-                                        h.id == it
-                                    })
-                                    .build()
-                            }
-                            editing = null
-                        }
-                    }
+                    currentHouse = houseLoadingState.houseRef.id
                 )
             },
             confirmButton = {
-                Button(onClick = {
-                    adding =
-                        HouseRef.newBuilder().setId(UUID.randomUUID().toString()).build()
-                }) {
-                    Text("Add")
+                Button(onClick = { houseSelectorOpened = false; onOpenManageHouses() }) {
+                    Text("Manage")
                 }
             })
-    }
-    //    Edit house dialog
-    when (val editingState = editing) {
-        is HouseRef -> EditingDialog(
-            state = editingState,
-            onDismissRequest = { editing = null },
-            onSave = {
-                scope.launch {
-                    ctx.settingsDataStore.updateData { settings ->
-                        settings.toBuilder()
-                            .setHouseRefs(settings.houseRefsList.indexOfFirst { h ->
-                                h.id == it.id
-                            }, it)
-                            .build()
-                    }
-                    editing = null
-                }
-            },
-            onChange = { editing = it }
-        )
-    }
-//    Add house dialog
-    when (val addingState = adding) {
-        is HouseRef -> EditingDialog(
-            state = addingState,
-            onDismissRequest = { adding = null },
-            onSave = {
-                scope.launch {
-                    ctx.settingsDataStore.updateData { settings ->
-                        settings.toBuilder()
-                            .addHouseRefs(it)
-                            .build()
-                    }
-                    adding = null
-                    settings.toString()
-                }
-            },
-            onChange = { adding = it }
-        )
     }
 }

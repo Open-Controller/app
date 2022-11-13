@@ -30,6 +30,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.pjtsearch.opencontroller.appsettings.ManageHousesRoute
+import com.pjtsearch.opencontroller.appsettings.SettingsRoute
 import com.pjtsearch.opencontroller.home.HomeRoute
 import com.pjtsearch.opencontroller.home.HomeViewModel
 import com.pjtsearch.opencontroller.settings.HouseRef
@@ -88,6 +90,8 @@ fun NavigationGraph(
                         true
                     )
                 },
+                onOpenSettings = navigationActions.navigateToSettings,
+                onOpenManageHouses = navigationActions.navigateToSettingsManageHouses,
                 onError = onError
             )
         }
@@ -108,6 +112,16 @@ fun NavigationGraph(
                     )
                 }
             })
+        }
+
+        composable(Destinations.SETTINGS_ROUTE) {
+            SettingsRoute(
+                onOpenManageHouses = navigationActions.navigateToSettingsManageHouses,
+                onExit = { navController.popBackStack() })
+        }
+
+        composable(Destinations.SETTINGS_MANAGE_HOUSES_ROUTE) {
+            ManageHousesRoute(onExit = { navController.popBackStack() })
         }
 
 //        Navigates to the last used home
