@@ -68,36 +68,53 @@ fun NavigationGraph(
         modifier = modifier
     ) {
         composable(
-            Destinations.HOME_ROUTE + "/{house}",
-            arguments = listOf(navArgument("house") {
+            Destinations.HOME_ROUTE + "/{id}",
+            arguments = listOf(navArgument("id") {
                 type = NavType.StringType
             })
         ) {
-            val homeViewModel: HomeViewModel = viewModel(
-                factory = HomeViewModel.provideFactory(
-//                    Parse the HouseRef from the param string
-                    HouseRef.parseFrom(
-                        it.arguments?.getString("house")!!.encodeToByteArray()
-                    ),
-                ) { panic -> onError(panic.asThrowable()) }
-            )
-            HomeRoute(
-                homeViewModel = homeViewModel,
-                isExpandedScreen = isExpandedScreen,
-                onHouseSelected = { h ->
-                    navigationActions.navigateToHome(
-                        h,
-                        false,
-                        true
+            val ctx = LocalContext.current
+            val settings by ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
+
+            val houseRef = remember(settings) {
+                settings.houseRefsList.find { h -> h.id == it.arguments?.getString("id")!! }
+            }
+
+            val homeViewModel: HomeViewModel? = if (houseRef != null) {
+                viewModel(
+                    factory = HomeViewModel.provideFactory(
+                        houseRef
+                    ) { panic -> onError(panic.asThrowable()) }
+                )
+            } else {
+                null
+            }
+
+            when (homeViewModel) {
+                null -> {
+                    Text(
+                        "Could not find house",
+                        style = MaterialTheme.typography.displayLarge
                     )
-                },
-                onOpenSettings = { subRoute ->
-                    navigationActions.navigateToSettings(
-                        subRoute
-                    )
-                },
-                onError = onError
-            )
+                }
+                else -> HomeRoute(
+                    homeViewModel = homeViewModel,
+                    isExpandedScreen = isExpandedScreen,
+                    onHouseSelected = { h ->
+                        navigationActions.navigateToHome(
+                            h.id,
+                            false,
+                            true
+                        )
+                    },
+                    onOpenSettings = { subRoute ->
+                        navigationActions.navigateToSettings(
+                            subRoute
+                        )
+                    },
+                    onError = onError
+                )
+            }
         }
 
         composable(Destinations.WELCOME_ROUTE) {
@@ -110,7 +127,7 @@ fun NavigationGraph(
                         oldSettings.toBuilder().clone().setLastHouse(house.id).build()
                     }
                     navigationActions.navigateToHome(
-                        house,
+                        house.id,
                         false,
                         true
                     )
@@ -227,7 +244,7 @@ fun NavigationGraph(
                     settings.houseRefsList.find { it.id == settings.lastHouse }
                         ?.let { houseRef ->
                             navigationActions.navigateToHome(
-                                houseRef,
+                                houseRef.id,
                                 false,
                                 false
                             )

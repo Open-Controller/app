@@ -19,8 +19,6 @@ package com.pjtsearch.opencontroller
 
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import com.pjtsearch.opencontroller.settings.HouseRef
-import java.net.URLEncoder
 
 object SettingsDestinations {
     /**
@@ -76,12 +74,10 @@ class NavigationActions(navController: NavHostController) {
     /**
      * Navigates to the Home route
      */
-    val navigateToHome: (home: HouseRef, saveOldState: Boolean, allowDuplicate: Boolean) -> Unit =
-        { home, saveOldState, allowDuplicate ->
+    val navigateToHome: (houseRefId: String, saveOldState: Boolean, allowDuplicate: Boolean) -> Unit =
+        { houseRefId, saveOldState, allowDuplicate ->
             navController.navigate(
-                Destinations.HOME_ROUTE + "/" + URLEncoder.encode(
-                    home.toByteArray().decodeToString(), "utf-8"
-                )
+                Destinations.HOME_ROUTE + "/" + houseRefId
             ) {
                 // Pop up to the start destination of the graph to
                 // avoid building up a large stack of destinations
