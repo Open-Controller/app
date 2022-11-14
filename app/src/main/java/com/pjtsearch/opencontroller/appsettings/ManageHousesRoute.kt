@@ -32,36 +32,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.pjtsearch.opencontroller.SettingsDestinations
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.extensions.houseIcons
-import com.pjtsearch.opencontroller.home.EditingDialog
-import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.settingsDataStore
-import kotlinx.coroutines.launch
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ManageHousesRoute(onExit: () -> Unit) {
+fun ManageHousesRoute(onOpenSettings: (String?) -> Unit, onExit: () -> Unit) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val settings by ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
-    var editing: HouseRef? by remember { mutableStateOf(null) }
-    var adding: HouseRef? by remember { mutableStateOf(null) }
-    val onEdit = { houseRef: HouseRef -> editing = houseRef }
-    val onDelete = { houseRef: HouseRef ->
-        scope.launch {
-            ctx.settingsDataStore.updateData { settings ->
-                settings.toBuilder()
-                    .removeHouseRefs(settings.houseRefsList.indexOfFirst { h ->
-                        h.id == houseRef.id
-                    })
-                    .build()
-            }
-            editing = null
-        }
-    }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(modifier = Modifier
@@ -78,7 +61,7 @@ fun ManageHousesRoute(onExit: () -> Unit) {
             modifier = Modifier
                 .padding(bottom = 30.dp),
             onClick = {
-                adding = HouseRef.newBuilder().setId(UUID.randomUUID().toString()).build()
+                onOpenSettings(SettingsDestinations.ADD_HOUSE_ROUTE)
             },
             containerColor = MaterialTheme.colorScheme.tertiary,
             text = { Text("Add house") },
@@ -95,7 +78,11 @@ fun ManageHousesRoute(onExit: () -> Unit) {
                 ListItem(
                     headlineText = { Text(it.displayName) },
                     modifier = Modifier
-                        .clickable { onEdit(it) },
+                        .clickable {
+                            onOpenSettings(
+                                SettingsDestinations.EDIT_HOUSE_ROUTE + "/" + it.id
+                            )
+                        },
                     leadingContent = {
                         OpenControllerIcon(
                             icon = it.icon,
@@ -107,46 +94,4 @@ fun ManageHousesRoute(onExit: () -> Unit) {
             }
         }
     }
-
-    //    Edit house dialog
-    when (val editingState = editing) {
-        is HouseRef -> EditingDialog(
-            state = editingState,
-            onDismissRequest = { editing = null },
-            onSave = {
-                scope.launch {
-                    ctx.settingsDataStore.updateData { settings ->
-                        settings.toBuilder()
-                            .setHouseRefs(settings.houseRefsList.indexOfFirst { h ->
-                                h.id == it.id
-                            }, it)
-                            .build()
-                    }
-                    editing = null
-                }
-            },
-            onDelete = { onDelete(it) },
-            onChange = { editing = it }
-        )
-    }
-    //    Add house dialog
-    when (val addingState = adding) {
-        is HouseRef -> EditingDialog(
-            state = addingState,
-            onDismissRequest = { adding = null },
-            onSave = {
-                scope.launch {
-                    ctx.settingsDataStore.updateData { settings ->
-                        settings.toBuilder()
-                            .addHouseRefs(it)
-                            .build()
-                    }
-                    adding = null
-                    settings.toString()
-                }
-            },
-            onChange = { adding = it }
-        )
-    }
-
 }

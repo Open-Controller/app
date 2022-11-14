@@ -19,6 +19,7 @@ package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -61,7 +62,11 @@ sealed interface ChoosingIconState {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
+fun ModifyHouseRef(
+    modifier: Modifier = Modifier,
+    houseRef: HouseRef,
+    onChange: (HouseRef) -> Unit
+) {
     var houseRefBuilder by remember(houseRef) {
         mutableStateOf(
             HouseRef.newBuilder(houseRef).build()
@@ -77,7 +82,7 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
         onChange(houseRefBuilder)
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
 //        Icon chooser
         val currentIconState = choosingIconState
         if (currentIconState is ChoosingIconState.Opened) {
@@ -132,6 +137,7 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
             }
         }
         OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
             value = houseRefBuilder.displayName,
             leadingIcon = { Icon(Icons.Outlined.TextFields, "Name") },
             label = { Text("Name") },
@@ -141,6 +147,7 @@ fun ModifyHouseRef(houseRef: HouseRef, onChange: (HouseRef) -> Unit) {
                     houseRefBuilder.toBuilder().setDisplayName(it).build()
             })
         OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
             value = houseRefBuilder.networkHouseRef.url,
             label = { Text("URL") },
             leadingIcon = { Icon(Icons.Outlined.Link, "URL") },

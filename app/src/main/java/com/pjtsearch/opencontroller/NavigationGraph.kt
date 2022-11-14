@@ -17,10 +17,9 @@
 
 package com.pjtsearch.opencontroller
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -30,14 +29,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.pjtsearch.opencontroller.appsettings.AddEditHouse
 import com.pjtsearch.opencontroller.appsettings.ManageHousesRoute
 import com.pjtsearch.opencontroller.appsettings.SettingsRoute
 import com.pjtsearch.opencontroller.home.HomeRoute
 import com.pjtsearch.opencontroller.home.HomeViewModel
 import com.pjtsearch.opencontroller.settings.HouseRef
+import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.welcome.WelcomeRoute
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import java.util.*
 
 /**
  * A component that navigates between the destinations
@@ -71,7 +73,6 @@ fun NavigationGraph(
                 type = NavType.StringType
             })
         ) {
-            println(it.arguments?.getString("house"))
             val homeViewModel: HomeViewModel = viewModel(
                 factory = HomeViewModel.provideFactory(
 //                    Parse the HouseRef from the param string
@@ -130,7 +131,87 @@ fun NavigationGraph(
         composable(
             Destinations.SETTINGS_ROUTE + "/" + SettingsDestinations.MANAGE_HOUSES_ROUTE
         ) {
-            ManageHousesRoute(onExit = { navController.popBackStack() })
+            ManageHousesRoute(
+                onOpenSettings = navigationActions.navigateToSettings,
+                onExit = { navController.popBackStack() })
+        }
+
+        composable(
+            Destinations.SETTINGS_ROUTE + "/editHouse/{id}",
+            arguments = listOf(navArgument("id") {
+                type = NavType.StringType
+            })
+        ) {
+            val ctx = LocalContext.current
+            val settings by ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
+
+            var houseRef by remember(settings) {
+                mutableStateOf(
+                    settings.houseRefsList.find { h -> h.id == it.arguments?.getString("id")!! }
+                )
+            }
+            val scope = rememberCoroutineScope()
+
+            when (val ref = houseRef) {
+                null -> {
+                    Text(
+                        "Could not find house",
+                        style = MaterialTheme.typography.displayLarge
+                    )
+                }
+                else -> AddEditHouse(
+                    houseRef = ref,
+                    onChange = { houseRef = it },
+                    onSave = {
+                        scope.launch {
+                            ctx.settingsDataStore.updateData { settings ->
+                                settings.toBuilder()
+                                    .setHouseRefs(settings.houseRefsList.indexOfFirst { h ->
+                                        h.id == ref.id
+                                    }, ref)
+                                    .build()
+                            }
+                        }
+                    },
+                    onDelete = {
+                        scope.launch {
+                            ctx.settingsDataStore.updateData { settings ->
+                                settings.toBuilder()
+                                    .removeHouseRefs(settings.houseRefsList.indexOfFirst { h ->
+                                        h.id == ref.id
+                                    })
+                                    .build()
+                            }
+                        }
+                    },
+                    onExit = { navController.popBackStack() })
+            }
+        }
+
+        composable(
+            Destinations.SETTINGS_ROUTE + "/addHouse"
+        ) {
+            var houseRef by remember {
+                mutableStateOf(
+                    HouseRef.newBuilder().setId(UUID.randomUUID().toString()).build()
+                )
+            }
+            val ctx = LocalContext.current
+            val scope = rememberCoroutineScope()
+
+            AddEditHouse(
+                houseRef = houseRef,
+                onChange = { houseRef = it },
+                onSave = {
+                    scope.launch {
+                        ctx.settingsDataStore.updateData { settings ->
+                            settings.toBuilder()
+                                .addHouseRefs(houseRef)
+                                .build()
+                        }
+                    }
+                },
+                onExit = { navController.popBackStack() })
         }
 
 //        Navigates to the last used home
