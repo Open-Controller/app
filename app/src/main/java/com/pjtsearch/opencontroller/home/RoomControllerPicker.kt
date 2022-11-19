@@ -35,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
@@ -49,7 +48,11 @@ import com.pjtsearch.opencontroller.ui.theme.typography
 
 private sealed interface DialogState {
     object Closed : DialogState
-    data class Opened(val controllers: List<Controller>, val roomId: String) : DialogState
+    data class Opened(
+        val controllers: List<Controller>,
+        val roomId: String,
+        val displayName: String
+    ) : DialogState
 }
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -82,7 +85,11 @@ fun RoomControllerPicker(
                             icon = { OpenControllerIcon(room.icon, room.displayName) },
                             clickAndSemanticsModifier = Modifier.clickable {
                                 dialogState =
-                                    DialogState.Opened(room.controllers, room.id)
+                                    DialogState.Opened(
+                                        room.controllers,
+                                        room.id,
+                                        room.displayName
+                                    )
                             },
                             expandable = true
                         ) {
@@ -93,41 +100,37 @@ fun RoomControllerPicker(
             }
         }
         if (state is DialogState.Opened) {
-            Dialog(
+            AlertDialog(
                 onDismissRequest = {
                     dialogState = DialogState.Closed
                 },
-                content = {
-                    Surface(
-                        shape = AlertDialogDefaults.shape,
-                        modifier = Modifier.heightIn(300.dp, 400.dp)
+                title = { Text(state.displayName) },
+                text = {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(1),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        BoxWithConstraints {
-                            LazyVerticalGrid(
-                                columns = GridCells.Fixed(2),
-                                contentPadding = PaddingValues(24.dp),
-                                modifier = Modifier.fillMaxHeight(),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                state.controllers.map { controller ->
-                                    item {
-                                        ControllerButton(
-                                            controller,
-                                            controller.id,
-                                            state.roomId
-                                        ) {
-                                            dialogState =
-                                                DialogState.Closed; onSelectController(
-                                            it
-                                        )
-                                        }
-                                    }
+                        state.controllers.map { controller ->
+                            item {
+                                ControllerButton(
+                                    controller,
+                                    controller.id,
+                                    state.roomId
+                                ) {
+                                    dialogState =
+                                        DialogState.Closed;
+                                    onSelectController(it)
                                 }
                             }
                         }
                     }
                 },
+                confirmButton = {
+                    Button(onClick = { dialogState = DialogState.Closed }) {
+                        Text("Close")
+                    }
+                }
             )
         }
     }
