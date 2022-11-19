@@ -46,9 +46,9 @@ fun AddEditHouse(
         TopAppBar(title = {
             Text(
                 if (onDelete == null) {
-                    "Add House"
+                    "Add house"
                 } else {
-                    "Edit House"
+                    "Edit house"
                 }
             )
         }, navigationIcon = {

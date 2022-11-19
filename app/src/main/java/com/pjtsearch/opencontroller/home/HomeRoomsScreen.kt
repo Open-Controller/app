@@ -126,7 +126,7 @@ fun HomeRoomsScreen(
     if (houseSelectorOpened) {
         AlertDialog(
             onDismissRequest = { houseSelectorOpened = false },
-            title = { Text("Choose House") },
+            title = { Text("Choose house") },
             modifier = Modifier.height(500.dp),
             text = {
                 HouseSelector(

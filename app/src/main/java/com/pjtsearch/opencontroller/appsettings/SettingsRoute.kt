@@ -57,11 +57,11 @@ fun SettingsRoute(onOpenSubRoute: (String) -> Unit, onExit: () -> Unit) {
             item {
                 ListItem(
                     modifier = Modifier.clickable { onOpenSubRoute(SettingsDestinations.MANAGE_HOUSES_ROUTE) },
-                    headlineText = { Text("Manage Houses") },
+                    headlineText = { Text("Manage houses") },
                     supportingText = { Text("Edit & add houses") },
                     leadingContent = {
                         Icon(
-                            Icons.Outlined.AddHome, "Manage Houses"
+                            Icons.Outlined.AddHome, "Manage houses"
                         )
                     })
             }

@@ -87,7 +87,7 @@ fun ModifyHouseRef(
         val currentIconState = choosingIconState
         if (currentIconState is ChoosingIconState.Opened) {
             AlertDialog(
-                title = { Text("Choose Icon") },
+                title = { Text("Choose icon") },
                 text = {
                     IconPicker(currentIconState.currentIcon, onPick = {
                         choosingIconState = ChoosingIconState.Opened(it)

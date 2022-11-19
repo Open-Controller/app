@@ -49,7 +49,7 @@ fun ManageHousesRoute(onOpenSettings: (String?) -> Unit, onExit: () -> Unit) {
 
     Scaffold(modifier = Modifier
         .nestedScroll(scrollBehavior.nestedScrollConnection), topBar = {
-        LargeTopAppBar(title = { Text("Manage Houses") }, navigationIcon = {
+        LargeTopAppBar(title = { Text("Manage houses") }, navigationIcon = {
             IconButton(
                 onClick = onExit
             ) {
