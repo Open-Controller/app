@@ -34,7 +34,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.ColorUtils
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
@@ -145,11 +147,13 @@ fun ControllerButton(
 ) =
     (controller.brandColor?.let {
         Color(
-            android.graphics.Color.parseColor(
-                controller.brandColor
+            ColorUtils.blendARGB(
+                android.graphics.Color.parseColor(
+                    controller.brandColor
+                ), MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp).toArgb(), 0.5f
             )
         )
-    } ?: MaterialTheme.colorScheme.secondary).let { color ->
+    } ?: MaterialTheme.colorScheme.secondaryContainer).let { color ->
         MediumTabButton(
             clickAndSemanticsModifier = Modifier.clickable {
                 onSelectController(
@@ -160,7 +164,8 @@ fun ControllerButton(
                 )
             },
             color = color,
-            icon = {}
+            icon = {},
+            expandable = true
         ) {
             Text(controller.displayName)
         }
