@@ -81,7 +81,11 @@ fun AddEditHouse(
             top = innerPadding.calculateTopPadding() + 15.dp,
             bottom = innerPadding.calculateBottomPadding()
         )
-        LazyVerticalGrid(columns = GridCells.Fixed(1), contentPadding = paddingValues) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(1),
+            modifier = Modifier.fillMaxHeight(),
+            contentPadding = paddingValues
+        ) {
             item {
                 ModifyHouseRef(
                     modifier = Modifier

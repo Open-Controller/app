@@ -109,13 +109,15 @@ fun ModifyHouseRef(
                 }
             )
         }
-        TextButton(
+        FilledTonalButton(
             onClick = {
                 choosingIconState = ChoosingIconState.Opened(houseRefBuilder.icon)
             },
-            modifier = Modifier.align(
-                Alignment.CenterHorizontally
-            )
+            modifier = Modifier
+                .align(
+                    Alignment.CenterHorizontally
+                )
+                .size(80.dp)
         ) {
 //            Show current icon or "Chose Icon"
             if (houseRefBuilder.icon != "") {
@@ -126,14 +128,11 @@ fun ModifyHouseRef(
                     iconSet = houseIcons
                 )
             } else {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Outlined.AddCircleOutline,
-                        "Choose Icon",
-                        Modifier.size(40.dp)
-                    )
-                    Text("Chose Icon")
-                }
+                Icon(
+                    Icons.Outlined.AddCircleOutline,
+                    "Choose Icon",
+                    Modifier.size(40.dp)
+                )
             }
         }
         OutlinedTextField(
