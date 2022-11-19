@@ -59,7 +59,10 @@ fun AddEditHouse(
             }
         }, scrollBehavior = scrollBehavior)
     }, bottomBar = {
-        BottomAppBar(windowInsets = WindowInsets.ime) {
+        BottomAppBar(
+            windowInsets = WindowInsets.ime,
+            contentPadding = PaddingValues(horizontal = 20.dp)
+        ) {
             Spacer(Modifier.weight(1f))
             if (onDelete != null) {
                 OutlinedButton(onClick = { onDelete(); onExit() }) {
