@@ -17,6 +17,12 @@
 
 package com.pjtsearch.opencontroller.ui.theme
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
+import androidx.compose.ui.unit.dp
 
-val shapes = Shapes()
+val shapes = Shapes(
+    medium = RoundedCornerShape(20.dp),
+    large = RoundedCornerShape(25.dp),
+    extraLarge = RoundedCornerShape(36.dp)
+)
