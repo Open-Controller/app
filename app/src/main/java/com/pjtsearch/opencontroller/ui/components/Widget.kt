@@ -18,10 +18,7 @@
 package com.pjtsearch.opencontroller.ui.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -161,20 +158,33 @@ fun ColumnScope.Widget(
         "swipepad" -> ControllerSwipePad(
             modifier = sizedModifier.weight(1f, true),
             expand = widget.params["expand"] as Boolean?,
-            onBottomDecrease = widget.params["onBottomDecrease"]?.let {
-                { callParam("onBottomDecrease") }
+            bottomLeftContent = (widget.params["bottomLeftContent"] as Widget?)?.let {
+                {
+                    CompositionLocalProvider(LocalControllerButtonContext provides ControllerButtonContext.SwipePad) {
+                        this@Widget.Widget(
+                            it,
+                            onError = onError,
+                            onOpenMenu = onOpenMenu
+                        )
+                    }
+                }
             },
-            onBottomIncrease = widget.params["onBottomIncrease"]?.let {
-                { callParam("onBottomIncrease") }
+            bottomRightContent = (widget.params["bottomRightContent"] as Widget?)?.let {
+                {
+                    CompositionLocalProvider(LocalControllerButtonContext provides ControllerButtonContext.SwipePad) {
+                        this@Widget.Widget(
+                            it,
+                            onError = onError,
+                            onOpenMenu = onOpenMenu
+                        )
+                    }
+                }
             },
-            onBottomHold = { callParam("onBottomHold") },
             onSwipeDown = { callParam("onSwipeDown") },
             onSwipeUp = { callParam("onSwipeUp") },
             onSwipeLeft = { callParam("onSwipeLeft") },
             onSwipeRight = { callParam("onSwipeRight") },
-            onClick = { callParam("onClick") },
-            bottomDecreaseIcon = widget.params["bottomDecreaseIcon"] as String,
-            bottomIncreaseIcon = widget.params["bottomIncreaseIcon"] as String,
+            onClick = { callParam("onClick") }
         )
         "space" -> Spacer(sizedModifier)
         "menubutton" ->

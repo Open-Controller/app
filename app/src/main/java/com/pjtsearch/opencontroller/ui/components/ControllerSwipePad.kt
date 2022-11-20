@@ -17,28 +17,19 @@
 
 package com.pjtsearch.opencontroller.ui.components
 
-import android.os.Build
-import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.components.SwipePad
 import com.pjtsearch.opencontroller.extensions.DirectionVector
-import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 
 /**
  * A component for a swipe pad for a controller
@@ -61,16 +52,13 @@ import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 fun ControllerSwipePad(
     modifier: Modifier,
     expand: Boolean?,
-    onBottomIncrease: (() -> Unit)?,
-    onBottomDecrease: (() -> Unit)?,
-    onBottomHold: () -> Unit,
+    bottomLeftContent: (@Composable () -> Unit)?,
+    bottomRightContent: (@Composable () -> Unit)?,
     onSwipeDown: () -> Unit,
     onSwipeLeft: () -> Unit,
     onSwipeRight: () -> Unit,
     onSwipeUp: () -> Unit,
     onClick: () -> Unit,
-    bottomDecreaseIcon: String,
-    bottomIncreaseIcon: String,
 ) {
     val view = LocalView.current
     Surface(
@@ -94,7 +82,7 @@ fun ControllerSwipePad(
                 }
             }
 //            Bottom controls to be displayed if have bottom increase and decrease
-            if (onBottomIncrease != null && onBottomDecrease != null) {
+            if (bottomLeftContent != null || bottomRightContent != null) {
                 Row(
                     Modifier
                         .align(Alignment.BottomCenter)
@@ -106,54 +94,8 @@ fun ControllerSwipePad(
                         ), horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-//                        Decrease button with hold functionality
-                        Box(
-                            modifier = Modifier
-                                .combinedClickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    onLongClick = {
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                            view.performHapticFeedback(
-                                                HapticFeedbackConstants.REJECT
-                                            )
-                                        } else {
-                                            view.performHapticFeedback(
-                                                HapticFeedbackConstants.LONG_PRESS
-                                            )
-                                        }
-                                        onBottomHold()
-                                    },
-                                    onClick = {
-                                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                                        onBottomDecrease()
-                                    },
-                                    indication = rememberRipple(true, 32.dp)
-                                )
-                                .clip(CircleShape)
-                                .size(64.dp), contentAlignment = Alignment.Center
-                        ) {
-                            OpenControllerIcon(
-                                bottomDecreaseIcon, "Decrease", 1
-                            )
-                        }
-//                        Increase button
-                        Box(
-                            modifier = Modifier
-                                .combinedClickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    onClick = {
-                                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                                        onBottomIncrease()
-                                    },
-                                    indication = rememberRipple(true, 32.dp)
-                                )
-                                .clip(CircleShape)
-                                .size(64.dp), contentAlignment = Alignment.Center
-                        ) {
-                            OpenControllerIcon(
-                                bottomIncreaseIcon, "Increase", 1
-                            )
-                        }
+                        bottomLeftContent?.invoke()
+                        bottomRightContent?.invoke()
                     }
                 }
             }

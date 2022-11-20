@@ -29,10 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +37,14 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import kotlinx.coroutines.launch
+
+sealed interface ControllerButtonContext {
+    object Normal : ControllerButtonContext
+    object SwipePad : ControllerButtonContext
+}
+
+val LocalControllerButtonContext =
+    compositionLocalOf<ControllerButtonContext> { ControllerButtonContext.Normal }
 
 /**
  * A button component for controllers
@@ -59,6 +64,7 @@ fun ControllerButton(
     onClick: () -> Unit
 ) {
     val view = LocalView.current
+    val controllerButtonContext = LocalControllerButtonContext.current
     val scope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -98,9 +104,12 @@ fun ControllerButton(
                 view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                 onClick()
             },
-        color = when (size) {
-            2 -> MaterialTheme.colorScheme.primaryContainer
-            else -> MaterialTheme.colorScheme.surface
+        color = when (controllerButtonContext) {
+            ControllerButtonContext.SwipePad -> MaterialTheme.colorScheme.secondaryContainer
+            ControllerButtonContext.Normal -> when (size) {
+                2 -> MaterialTheme.colorScheme.primaryContainer
+                else -> MaterialTheme.colorScheme.surface
+            }
         },
         tonalElevation = 5.dp,
         shape = CircleShape,
