@@ -80,7 +80,9 @@ var icons = hashMapOf(
     "ROOM" to Icons.Outlined.Room,
     "MENU_ALT" to Icons.Outlined.MoreHoriz,
     "PLUS" to Icons.Outlined.Add,
-    "MINUS" to Icons.Outlined.Remove
+    "MINUS" to Icons.Outlined.Remove,
+    "NUMBER_PAD" to Icons.Outlined.Dialpad,
+    "KEYBOARD" to Icons.Outlined.Keyboard,
 )
 
 var houseIcons = hashMapOf(
