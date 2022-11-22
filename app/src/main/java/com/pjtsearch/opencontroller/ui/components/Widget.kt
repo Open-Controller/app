@@ -22,6 +22,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import com.github.michaelbull.result.Err
 import com.pjtsearch.opencontroller.executor.Fn
 import com.pjtsearch.opencontroller.executor.Widget
@@ -29,7 +30,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-
 
 /**
  * A component to display a [Widget]
@@ -201,6 +201,16 @@ fun ColumnScope.Widget(
             widget.params["text"] as String,
             widget.params["icon"] as String,
             widget.params["size"] as Int
+        ) {
+            println(it)
+            callParam("onInput", it)
+        }
+        "numberinput" -> TextInput(
+            sizedModifier,
+            widget.params["text"] as String,
+            widget.params["icon"] as String,
+            widget.params["size"] as Int,
+            KeyboardType.Number
         ) {
             println(it)
             callParam("onInput", it)

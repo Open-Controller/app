@@ -17,6 +17,7 @@
 
 package com.pjtsearch.opencontroller.ui.components
 
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -48,6 +50,7 @@ fun TextInput(
     text: String,
     icon: String,
     size: Int,
+    keyboardType: KeyboardType = KeyboardType.Text,
     onInput: (Map<String, Any>) -> Unit
 ) {
     var value by remember { mutableStateOf(TextFieldValue()) }
@@ -82,21 +85,35 @@ fun TextInput(
         AlertDialog(
             title = { Text(text) },
             text = {
-                OutlinedTextField(value, {
-                    val comp = StringsComparator(value.text, it.text).script
-                    comp.visit(object : CommandVisitor<Char> {
-                        override fun visitInsertCommand(added: Char?) {
-                            onInput(mapOf(Pair("char", added!!.toString())))
-                        }
+                OutlinedTextField(
+                    value,
+                    {
+                        val comp = StringsComparator(value.text, it.text).script
+                        comp.visit(object : CommandVisitor<Char> {
+                            override fun visitInsertCommand(added: Char?) {
+                                if ("""^[A-Z@~` !@#$%^&*()_=+\\';:\"\/?>.<,\-]$""".toRegex(
+                                        RegexOption.IGNORE_CASE
+                                    ).matches(
+                                        added!!.toString()
+                                    )
+                                ) {
+                                    onInput(mapOf(Pair("char", added.toString())))
+                                } else if ("""\d""".toRegex().matches(added.toString())) {
+                                    onInput(mapOf(Pair("num", added.digitToInt())))
+                                }
+                            }
 
-                        override fun visitKeepCommand(char: Char?) {}
+                            override fun visitKeepCommand(char: Char?) {}
 
-                        override fun visitDeleteCommand(delted: Char?) {
-                            onInput(mapOf(Pair("backspace", true)))
-                        }
-                    })
-                    value = it
-                }, Modifier.focusRequester(focusRequester))
+                            override fun visitDeleteCommand(delted: Char?) {
+                                onInput(mapOf(Pair("backspace", true)))
+                            }
+                        })
+                        value = it
+                    },
+                    Modifier.focusRequester(focusRequester),
+                    keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
+                )
             },
             confirmButton = {
                 Button(onClick = { isOpen = false }) {
