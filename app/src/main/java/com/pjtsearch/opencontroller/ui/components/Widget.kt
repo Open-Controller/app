@@ -24,6 +24,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.get
 import com.pjtsearch.opencontroller.executor.Fn
 import com.pjtsearch.opencontroller.executor.Widget
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +58,7 @@ fun ColumnScope.Widget(
      */
     fun callParam(paramName: String, vararg params: Any) {
         scope.launch(Dispatchers.IO) {
-            val param = widget.params[paramName] as Fn?
+            val param = widget.params[paramName] as? Fn
             if (param != null) {
                 when (val result = param(params.toList())) {
                     is Err -> onError(result.error.asThrowable())
@@ -70,35 +71,39 @@ fun ColumnScope.Widget(
     }
 
 //    Modifier for expanded widgets to set full weight
-    val sizedModifier = if (widget.params["expand"] as Boolean? == true) {
+    val sizedModifier = if (widget.params["expand"] as? Boolean == true) {
         modifier.weight(1f, false)
     } else modifier
     when (widget.widgetType) {
-        "reactive" -> {
-            val state by (widget.params["observe"] as Flow<*>)
-                .collectAsState(initial = null)
+        "reactive" -> (widget.params["observe"] as? Flow<*>)?.let { observe ->
+            val state by observe.collectAsState(initial = null)
             state?.let {
                 Column(sizedModifier, Arrangement.Top) {
-                    this@Widget.Widget(
-                        (widget.params["child"] as Fn)(listOf(it)) as Widget,
-                        onError = onError,
-                        onOpenMenu = onOpenMenu
-                    )
+//                        TODO: Convert to callParam
+                    ((widget.params["child"] as? Fn)?.invoke(listOf(it))
+                        ?.get() as? Widget)?.let { widget ->
+                        this@Widget.Widget(
+                            widget,
+                            onError = onError,
+                            onOpenMenu = onOpenMenu
+                        )
+                    }
                 }
             }
         }
         "buttongroup" ->
             ControllerButtonGroup(
                 modifier = sizedModifier,
-                size = widget.params["size"] as Int?,
+                size = widget.params["size"] as? Int,
                 buttons = widget.children.map { btn ->
+//                    TODO: Use button scope
                     check(btn.widgetType == "button")
                     ButtonItemParams(
-                        btn.params["text"] as String,
-                        btn.params["icon"] as String?,
+                        btn.params["text"] as? String,
+                        btn.params["icon"] as? String,
                     ) {
                         GlobalScope.launch {
-                            (btn.params["onClick"] as Fn)(listOf())
+                            (btn.params["onClick"] as? Fn)?.invoke(listOf())
                         }
                     }
                 }
@@ -106,9 +111,9 @@ fun ColumnScope.Widget(
         "button" ->
             ControllerButton(
                 sizedModifier,
-                widget.params["text"] as String,
-                widget.params["icon"] as String?,
-                widget.params["size"] as Int?
+                widget.params["text"] as? String,
+                widget.params["icon"] as? String,
+                widget.params["size"] as? Int
             ) {
                 callParam("onClick")
             }
@@ -124,41 +129,51 @@ fun ColumnScope.Widget(
         }
         "arrowlayout" -> Column(sizedModifier, Arrangement.Top) {
             Row(Modifier.align(Alignment.CenterHorizontally)) {
-                this@Widget.Widget(
-                    widget.params["top"] as Widget,
-                    onError = onError,
-                    onOpenMenu = onOpenMenu
-                )
+                (widget.params["top"] as? Widget)?.let {
+                    this@Widget.Widget(
+                        it,
+                        onError = onError,
+                        onOpenMenu = onOpenMenu
+                    )
+                }
             }
             Row {
-                this@Widget.Widget(
-                    widget.params["left"] as Widget,
-                    onError = onError,
-                    onOpenMenu = onOpenMenu
-                )
-                this@Widget.Widget(
-                    widget.params["center"] as Widget,
-                    onError = onError,
-                    onOpenMenu = onOpenMenu
-                )
-                this@Widget.Widget(
-                    widget.params["right"] as Widget,
-                    onError = onError,
-                    onOpenMenu = onOpenMenu
-                )
+                (widget.params["left"] as? Widget)?.let {
+                    this@Widget.Widget(
+                        it,
+                        onError = onError,
+                        onOpenMenu = onOpenMenu
+                    )
+                }
+                (widget.params["center"] as? Widget)?.let {
+                    this@Widget.Widget(
+                        it,
+                        onError = onError,
+                        onOpenMenu = onOpenMenu
+                    )
+                }
+                (widget.params["right"] as? Widget)?.let {
+                    this@Widget.Widget(
+                        it,
+                        onError = onError,
+                        onOpenMenu = onOpenMenu
+                    )
+                }
             }
             Row(Modifier.align(Alignment.CenterHorizontally)) {
-                this@Widget.Widget(
-                    widget.params["bottom"] as Widget,
-                    onError = onError,
-                    onOpenMenu = onOpenMenu
-                )
+                (widget.params["bottom"] as? Widget)?.let {
+                    this@Widget.Widget(
+                        it,
+                        onError = onError,
+                        onOpenMenu = onOpenMenu
+                    )
+                }
             }
         }
         "swipepad" -> ControllerSwipePad(
             modifier = sizedModifier.weight(1f, true),
             expand = widget.params["expand"] as Boolean?,
-            bottomLeftContent = (widget.params["bottomLeftContent"] as Widget?)?.let {
+            bottomLeftContent = (widget.params["bottomLeftContent"] as? Widget)?.let {
                 {
                     CompositionLocalProvider(LocalControllerButtonContext provides ControllerButtonContext.SwipePad) {
                         this@Widget.Widget(
@@ -169,7 +184,7 @@ fun ColumnScope.Widget(
                     }
                 }
             },
-            bottomRightContent = (widget.params["bottomRightContent"] as Widget?)?.let {
+            bottomRightContent = (widget.params["bottomRightContent"] as? Widget)?.let {
                 {
                     CompositionLocalProvider(LocalControllerButtonContext provides ControllerButtonContext.SwipePad) {
                         this@Widget.Widget(
@@ -190,26 +205,26 @@ fun ColumnScope.Widget(
         "menubutton" ->
             ControllerButton(
                 sizedModifier,
-                widget.params["text"] as String,
-                widget.params["icon"] as String?,
-                widget.params["size"] as Int?
+                widget.params["text"] as? String,
+                widget.params["icon"] as? String,
+                widget.params["size"] as? Int
             ) {
                 onOpenMenu(widget.children)
             }
         "textinput" -> TextInput(
             sizedModifier,
-            widget.params["text"] as String,
-            widget.params["icon"] as String,
-            widget.params["size"] as Int
+            widget.params["text"] as? String ?: "Text input",
+            widget.params["icon"] as? String,
+            widget.params["size"] as? Int
         ) {
             println(it)
             callParam("onInput", it)
         }
         "numberinput" -> TextInput(
             sizedModifier,
-            widget.params["text"] as String,
-            widget.params["icon"] as String,
-            widget.params["size"] as Int,
+            widget.params["text"] as? String ?: "Number input",
+            widget.params["icon"] as? String,
+            widget.params["size"] as? Int,
             KeyboardType.Number
         ) {
             println(it)

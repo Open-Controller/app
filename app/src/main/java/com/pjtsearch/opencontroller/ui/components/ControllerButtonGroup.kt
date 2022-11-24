@@ -47,7 +47,7 @@ import kotlinx.coroutines.launch
  * @property onClick Function to be called when the button is clicked
  */
 data class ButtonItemParams(
-    val text: String,
+    val text: String?,
     val icon: String?,
     val onClick: () -> Unit,
 )
@@ -93,7 +93,7 @@ fun ControllerButtonGroup(
 
 @Composable
 fun ButtonInside(
-    text: String,
+    text: String?,
     icon: String?,
     size: Int?,
     onClick: () -> Unit,
@@ -141,8 +141,8 @@ fun ButtonInside(
         contentAlignment = Alignment.Center,
     ) {
         if (icon != null) {
-            OpenControllerIcon(icon, text, size)
-        } else {
+            OpenControllerIcon(icon, text ?: icon, size)
+        } else if (text != null) {
             Text(text)
         }
     }

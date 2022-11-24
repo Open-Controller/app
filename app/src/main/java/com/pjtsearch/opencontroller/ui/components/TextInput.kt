@@ -48,8 +48,8 @@ import org.apache.commons.text.diff.StringsComparator
 fun TextInput(
     modifier: Modifier = Modifier,
     text: String,
-    icon: String,
-    size: Int,
+    icon: String?,
+    size: Int?,
     keyboardType: KeyboardType = KeyboardType.Text,
     onInput: (Map<String, Any>) -> Unit
 ) {

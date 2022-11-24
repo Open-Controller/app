@@ -58,7 +58,7 @@ val LocalControllerButtonContext =
 @Composable
 fun ControllerButton(
     modifier: Modifier,
-    text: String,
+    text: String?,
     icon: String?,
     size: Int?,
     onClick: () -> Unit
@@ -116,8 +116,8 @@ fun ControllerButton(
     ) {
         Box(Modifier.padding(3.dp), contentAlignment = Alignment.Center) {
             if (icon != null) {
-                OpenControllerIcon(icon, text, size)
-            } else {
+                OpenControllerIcon(icon, text ?: icon, size)
+            } else if (text != null) {
                 Text(text)
             }
         }
