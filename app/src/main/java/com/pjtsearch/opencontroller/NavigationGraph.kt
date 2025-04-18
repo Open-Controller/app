@@ -17,11 +17,25 @@
 
 package com.pjtsearch.opencontroller
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -39,7 +53,7 @@ import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.welcome.WelcomeRoute
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 
 /**
  * A component that navigates between the destinations
@@ -64,6 +78,29 @@ fun NavigationGraph(
 ) {
     NavHost(
         navController = navController,
+        popExitTransition = {
+            val floatSpec =
+                tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
+            scaleOut(
+                floatSpec,
+                targetScale = 0.95f
+            ) + fadeOut(floatSpec, 0f)
+        },
+        enterTransition = {
+            val intSpec =
+                tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing)
+            val floatSpec =
+                tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
+            slideInHorizontally(intSpec, initialOffsetX = { s -> s / 14 }) + fadeIn(
+                floatSpec,
+                0f
+            )
+        },
+        popEnterTransition = {
+            val floatSpec =
+                tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
+            fadeIn(floatSpec, 0f)
+        },
         startDestination = startDestination,
         modifier = modifier
     ) {
@@ -97,6 +134,7 @@ fun NavigationGraph(
                         style = MaterialTheme.typography.displayLarge
                     )
                 }
+
                 else -> HomeRoute(
                     homeViewModel = homeViewModel,
                     isExpandedScreen = isExpandedScreen,
@@ -176,6 +214,7 @@ fun NavigationGraph(
                         style = MaterialTheme.typography.displayLarge
                     )
                 }
+
                 else -> AddEditHouse(
                     houseRef = ref,
                     onChange = { houseRef = it },
