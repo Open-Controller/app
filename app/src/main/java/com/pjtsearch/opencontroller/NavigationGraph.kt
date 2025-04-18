@@ -46,7 +46,7 @@ import androidx.navigation.navArgument
 import com.pjtsearch.opencontroller.appsettings.AddEditHouse
 import com.pjtsearch.opencontroller.appsettings.ManageHousesRoute
 import com.pjtsearch.opencontroller.appsettings.SettingsRoute
-import com.pjtsearch.opencontroller.home.HomeRoute
+import com.pjtsearch.opencontroller.home.HomeRoute2
 import com.pjtsearch.opencontroller.home.HomeViewModel
 import com.pjtsearch.opencontroller.settings.HouseRef
 import com.pjtsearch.opencontroller.settings.Settings
@@ -126,6 +126,20 @@ fun NavigationGraph(
             } else {
                 null
             }
+//            val fetchResult = resolveHouseRef(houseRef!!)
+//            val house = fetchResult.getOrThrow().get()
+//            val house = when (fetchResult) {
+//                is Ok -> when (val evalResult = fetchResult.value) {
+//                    is Ok -> evalResult.value
+//                    is Err -> {
+//                        null
+//                    }
+//                }
+//
+//                is Err -> {
+//                    null
+//                }
+//            }
 
             when (homeViewModel) {
                 null -> {
@@ -135,23 +149,43 @@ fun NavigationGraph(
                     )
                 }
 
-                else -> HomeRoute(
-                    homeViewModel = homeViewModel,
-                    isExpandedScreen = isExpandedScreen,
-                    onHouseSelected = { h ->
-                        navigationActions.navigateToHome(
-                            h.id,
-                            false,
-                            true
-                        )
-                    },
-                    onOpenSettings = { subRoute ->
-                        navigationActions.navigateToSettings(
-                            subRoute
-                        )
-                    },
-                    onError = onError
-                )
+//                else -> HomeRoute(
+//                    homeViewModel = homeViewModel,
+//                    isExpandedScreen = isExpandedScreen,
+//                    onHouseSelected = { h ->
+//                        navigationActions.navigateToHome(
+//                            h.id,
+//                            false,
+//                            true
+//                        )
+//                    },
+//                    onOpenSettings = { subRoute ->
+//                        navigationActions.navigateToSettings(
+//                            subRoute
+//                        )
+//                    },
+//                    onError = onError
+//                )
+                else -> {
+                    val uiState by homeViewModel.uiState.collectAsState()
+                    HomeRoute2(
+                        houseLoadingState = uiState.houseLoadingState,
+                        isExpandedScreen = isExpandedScreen,
+                        onError = onError,
+                        onOpenSettings = { subRoute ->
+                            navigationActions.navigateToSettings(
+                                subRoute
+                            )
+                        },
+                        onHouseSelected = { h ->
+                            navigationActions.navigateToHome(
+                                h.id,
+                                false,
+                                true
+                            )
+                        },
+                    )
+                }
             }
         }
 
