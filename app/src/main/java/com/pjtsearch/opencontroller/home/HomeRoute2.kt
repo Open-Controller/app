@@ -23,8 +23,22 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -32,7 +46,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.pjtsearch.opencontroller.SettingsDestinations
 import com.pjtsearch.opencontroller.settings.HouseRef
+import com.pjtsearch.opencontroller.settings.Settings
+import com.pjtsearch.opencontroller.settingsDataStore
+import kotlinx.coroutines.launch
 
 /**
  * The destinations for the navigation
@@ -110,6 +128,19 @@ fun HomeRoute2(
     onOpenSettings: (String?) -> Unit,
     onHouseSelected: (HouseRef) -> Unit,
 ) {
+    var houseSelectorOpened by remember { mutableStateOf(false) }
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val settings by ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
+    val beforeHouseSelected = { houseRef: HouseRef ->
+        houseSelectorOpened = false
+        scope.launch {
+            ctx.settingsDataStore.updateData { oldSettings ->
+                oldSettings.toBuilder().clone().setLastHouse(houseRef.id).build()
+            }
+        }
+        onHouseSelected(houseRef)
+    }
     NavHost(
         navController = navController,
         popExitTransition = {
@@ -138,18 +169,20 @@ fun HomeRoute2(
         startDestination = "base",
     ) {
         composable(Destinations.BASE_ROUTE) {
-            HomeRoomsScreen(
-                houseLoadingState = houseLoadingState,
-                onHouseSelected = onHouseSelected,
-                onSelectController = {
-                    navigationActions.navigateToController(
-                        it.first,
-                        it.second
-                    )
-                },
-                onReload = {},
-                onOpenSettings = onOpenSettings
-            )
+            if (!isExpandedScreen) {
+                HomeRoomsScreen(
+                    houseLoadingState = houseLoadingState,
+                    onOpenHouseSelector = { houseSelectorOpened = true },
+                    onSelectController = {
+                        navigationActions.navigateToController(
+                            it.first,
+                            it.second
+                        )
+                    },
+                    onReload = {},
+                    onOpenSettings = onOpenSettings
+                )
+            }
         }
         composable(
             Destinations.CONTROLLER_ROUTE + "/{room}/{controller}",
@@ -171,6 +204,30 @@ fun HomeRoute2(
                 controllerMenuState = ControllerMenuState.Closed(listOf())
             )
         }
+    }
+
+    if (houseSelectorOpened) {
+        AlertDialog(
+            onDismissRequest = { houseSelectorOpened = false },
+            title = { Text("Choose house") },
+            modifier = Modifier.height(500.dp),
+            text = {
+                HouseSelector(
+                    modifier = Modifier.fillMaxHeight(),
+                    houseRefsList = remember(settings) { settings.houseRefsList },
+                    onHouseSelected = beforeHouseSelected,
+                    currentHouse = houseLoadingState.houseRef.id
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    houseSelectorOpened = false; onOpenSettings(
+                    SettingsDestinations.MANAGE_HOUSES_ROUTE
+                )
+                }) {
+                    Text("Manage")
+                }
+            })
     }
 
 }

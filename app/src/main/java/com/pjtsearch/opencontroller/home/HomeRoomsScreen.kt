@@ -18,45 +18,38 @@
 package com.pjtsearch.opencontroller.home
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.OtherHouses
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.pjtsearch.opencontroller.SettingsDestinations
-import com.pjtsearch.opencontroller.settings.HouseRef
-import com.pjtsearch.opencontroller.settings.Settings
-import com.pjtsearch.opencontroller.settingsDataStore
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeRoomsScreen(
     houseLoadingState: HouseLoadingState,
-    onHouseSelected: (HouseRef) -> Unit,
+    onOpenHouseSelector: () -> Unit,
     onSelectController: (Pair<String, String>) -> Unit,
     onReload: () -> Unit,
     onOpenSettings: (String?) -> Unit,
 ) {
-    var houseSelectorOpened by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val ctx = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val settings by ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
-    val beforeHouseSelected = { houseRef: HouseRef ->
-        houseSelectorOpened = false
-        scope.launch {
-            ctx.settingsDataStore.updateData { oldSettings ->
-                oldSettings.toBuilder().clone().setLastHouse(houseRef.id).build()
-            }
-        }
-        onHouseSelected(houseRef)
-    }
     Scaffold(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -72,7 +65,7 @@ fun HomeRoomsScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { houseSelectorOpened = true }) {
+                    IconButton(onClick = onOpenHouseSelector) {
                         Icon(
                             imageVector = Icons.Outlined.OtherHouses,
                             contentDescription = "Exit house"
@@ -110,12 +103,14 @@ fun HomeRoomsScreen(
                         contentPadding = paddingValues,
                         onReload = onReload
                     )
+
                 is HouseLoadingState.Loaded -> RoomControllerPicker(
                     houseLoadingState.house.rooms,
                     modifier = Modifier.fillMaxHeight(),
                     contentPadding = paddingValues,
                     onSelectController = onSelectController
                 )
+
                 is HouseLoadingState.Loading -> RoomsLoading(
                     modifier = Modifier.fillMaxHeight(),
                     contentPadding = paddingValues,
@@ -123,27 +118,4 @@ fun HomeRoomsScreen(
             }
         }
     )
-    if (houseSelectorOpened) {
-        AlertDialog(
-            onDismissRequest = { houseSelectorOpened = false },
-            title = { Text("Choose house") },
-            modifier = Modifier.height(500.dp),
-            text = {
-                HouseSelector(
-                    modifier = Modifier.fillMaxHeight(),
-                    houseRefsList = remember(settings) { settings.houseRefsList },
-                    onHouseSelected = beforeHouseSelected,
-                    currentHouse = houseLoadingState.houseRef.id
-                )
-            },
-            confirmButton = {
-                Button(onClick = {
-                    houseSelectorOpened = false; onOpenSettings(
-                    SettingsDestinations.MANAGE_HOUSES_ROUTE
-                )
-                }) {
-                    Text("Manage")
-                }
-            })
-    }
 }

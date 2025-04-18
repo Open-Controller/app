@@ -108,15 +108,17 @@ fun HomeRoute(
                     onOpenSettings = onOpenSettings
                 )
             }
+
             HomeScreenType.Rooms -> {
-                HomeRoomsScreen(
-                    houseLoadingState = uiState.houseLoadingState,
-                    onSelectController = onSelectController,
-                    onHouseSelected = onHouseSelected,
-                    onReload = onReload,
-                    onOpenSettings = onOpenSettings
-                )
+//                HomeRoomsScreen(
+//                    houseLoadingState = uiState.houseLoadingState,
+//                    onSelectController = onSelectController,
+//                    onHouseSelected = onHouseSelected,
+//                    onReload = onReload,
+//                    onOpenSettings = onOpenSettings
+//                )
             }
+
             HomeScreenType.Controller -> {
                 // Guaranteed by above condition for home screen type
                 check(uiState is HomeUiState.HasController)
@@ -173,8 +175,10 @@ private fun getHomeScreenType(
                     HomeScreenType.Rooms
                 }
             }
+
             is HomeUiState.NoController -> HomeScreenType.Rooms
         }
     }
+
     true -> HomeScreenType.RoomsWithController
 }
