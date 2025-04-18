@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'org.jetbrains.kotlin.plugin.compose'
     id 'com.google.protobuf'
 }
 
@@ -31,7 +32,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
 //        useIR = true
-        freeCompilerArgs = ['-Xjvm-default=compatibility']
+        freeCompilerArgs = ['-Xjvm-default=all-compatibility']
     }
     buildFeatures {
         compose true

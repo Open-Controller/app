@@ -17,13 +17,22 @@
 
 package com.pjtsearch.opencontroller.executor
 
-import com.github.michaelbull.result.*
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.binding
+import com.github.michaelbull.result.flatMap
+import com.github.michaelbull.result.getOr
+import com.github.michaelbull.result.map
+import com.github.michaelbull.result.mapBoth
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.mapOr
+import com.github.michaelbull.result.mapOrElse
 import com.pjtsearch.opencontroller.extensions.mapOr
 import com.pjtsearch.opencontroller.extensions.mapOrElse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.util.*
-import kotlin.collections.fold
+import java.util.Optional
 
 
 fun asString(item: Any): Result<String, Panic> = fnCtx("asString", listOf(item)) {
@@ -41,12 +50,14 @@ fun asString(item: Any): Result<String, Panic> = fnCtx("asString", listOf(item))
                 }
             }}"
         }
+
         is List<*> -> binding { "[${item.map { "${asString(it!!).bind()}, " }}]" }
         is Result<*, *> -> binding {
             item.mapBoth(
                 { "Ok(${asString(it!!).bind()})" },
                 { "Err(${asString(it!!).bind()})" })
         }
+
         is Optional<*> -> binding { if (item.isPresent) "Some(${asString(item.get()).bind()})" else "None" }
         is Flow<*> -> Ok("Observable")
         is Function<*> -> Ok("Fn")
@@ -59,6 +70,7 @@ fun asString(item: Any): Result<String, Panic> = fnCtx("asString", listOf(item))
                 }
             }"
         }
+
         is StackCtx -> when (item) {
             is StackCtx.Fn -> binding {
                 "at ${item.lambdaName}(${
@@ -69,6 +81,7 @@ fun asString(item: Any): Result<String, Panic> = fnCtx("asString", listOf(item))
                     }
                 })"
             }
+
             is StackCtx.Syntax -> binding {
                 "in ${item.name}(${
                     item.params.joinToString(", ") {
@@ -79,6 +92,7 @@ fun asString(item: Any): Result<String, Panic> = fnCtx("asString", listOf(item))
                 }) ${item.position.file} ${item.position.line}:${item.position.column}"
             }
         }
+
         is House -> binding {
             "House { id: ${asString(item.id).bind()} displayName: ${asString(item.displayName).bind()} rooms: ${
                 asString(
@@ -86,6 +100,7 @@ fun asString(item: Any): Result<String, Panic> = fnCtx("asString", listOf(item))
                 ).bind()
             } }"
         }
+
         is Room -> binding {
             "Room { icon: ${asString(item.icon).bind()} displayName: ${asString(item.displayName).bind()} controllers: ${
                 asString(
@@ -93,6 +108,7 @@ fun asString(item: Any): Result<String, Panic> = fnCtx("asString", listOf(item))
                 ).bind()
             } }"
         }
+
         is Controller -> binding {
             "Controller { brandColor: ${asString(Optional.ofNullable(item.brandColor)).bind()} displayName: ${
                 asString(
@@ -100,6 +116,7 @@ fun asString(item: Any): Result<String, Panic> = fnCtx("asString", listOf(item))
                 ).bind()
             } displayInterface: ${asString(Optional.ofNullable(item.displayInterface)).bind()} }"
         }
+
         is DisplayInterface -> binding { "DisplayInterface { widgets: ${asString(item.widgets).bind()} }" }
         is Device -> binding { "Device { lambdas: ${asString(item.lambdas).bind()} }" }
         is Widget -> binding {
@@ -121,18 +138,23 @@ fun StackCtx.Fn.eq(args: List<Any>): Result<Boolean, Panic> {
         is String -> tryCast<String>(second).map {
             first == second
         }
+
         is Number -> tryCast<Number>(second).map {
             first == second
         }
+
         is Boolean -> tryCast<Boolean>(second).map {
             first == second
         }
+
         is List<*> -> tryCast<List<*>>(second).map {
             first == second
         }
+
         is Map<*, *> -> tryCast<Map<*, *>>(second).map {
             first == second
         }
+
         is Optional<*> -> tryCast<Optional<*>>(second).flatMap {
             when (first.isPresent to it.isPresent) {
                 true to true -> eq(listOf(first.get(), it.get()))
@@ -140,6 +162,7 @@ fun StackCtx.Fn.eq(args: List<Any>): Result<Boolean, Panic> {
                 else -> Ok(false)
             }
         }
+
         else -> Err(typePanic())
     }
 }
@@ -174,6 +197,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Float -> {
                     when (second) {
                         is Int -> Ok(first <= second)
@@ -183,6 +207,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Long -> {
                     when (second) {
                         is Int -> Ok(first <= second)
@@ -192,6 +217,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Double -> {
                     when (second) {
                         is Int -> Ok(first <= second)
@@ -201,6 +227,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 else -> {
                     Err(typePanic())
                 }
@@ -221,6 +248,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Float -> {
                     when (second) {
                         is Int -> Ok(first < second)
@@ -230,6 +258,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Long -> {
                     when (second) {
                         is Int -> Ok(first < second)
@@ -239,6 +268,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Double -> {
                     when (second) {
                         is Int -> Ok(first < second)
@@ -248,6 +278,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 else -> {
                     Err(typePanic())
                 }
@@ -268,6 +299,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Float -> {
                     when (second) {
                         is Int -> Ok(first > second)
@@ -277,6 +309,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Long -> {
                     when (second) {
                         is Int -> Ok(first > second)
@@ -286,6 +319,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Double -> {
                     when (second) {
                         is Int -> Ok(first > second)
@@ -295,6 +329,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 else -> {
                     Err(typePanic())
                 }
@@ -315,6 +350,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Float -> {
                     when (second) {
                         is Int -> Ok(first >= second)
@@ -324,6 +360,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Long -> {
                     when (second) {
                         is Int -> Ok(first >= second)
@@ -333,6 +370,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Double -> {
                     when (second) {
                         is Int -> Ok(first >= second)
@@ -342,6 +380,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 else -> {
                     Err(typePanic())
                 }
@@ -362,6 +401,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                     is Boolean -> Ok(first || second)
                     else -> Err(typePanic())
                 }
+
                 is Optional<*> -> Ok(if (first.isPresent) first.get() else second)
                 is Result<*, *> -> Ok(first.getOr(second)!!)
                 else -> Err(typePanic())
@@ -372,7 +412,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
         fnCtx("unwrap", args) {
             when (val item = args[0]) {
                 is Optional<*> -> if (item.isPresent) Ok(item.get()) else Err(typePanic())
-                is Result<*, *> -> item.mapError { typePanic() }
+                is Result<*, *> -> item.mapError { typePanic() } as Result<Any, Panic>
                 else -> Err(typePanic())
             }
         }
@@ -387,11 +427,13 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         is String, is Number -> {
                             Ok(first + second)
                         }
+
                         else -> {
                             Err(typePanic())
                         }
                     }
                 }
+
                 is Int -> {
                     when (second) {
                         is Int -> Ok(first + second)
@@ -402,6 +444,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Float -> {
                     when (second) {
                         is Int -> Ok(first + second)
@@ -412,6 +455,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Long -> {
                     when (second) {
                         is Int -> Ok(first + second)
@@ -422,6 +466,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Double -> {
                     when (second) {
                         is Int -> Ok(first + second)
@@ -432,9 +477,11 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is List<*> -> {
                     Ok(first + second)
                 }
+
                 is Map<*, *> -> {
                     when (second) {
                         is Map<*, *> -> Ok(first + second)
@@ -442,6 +489,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 else -> {
                     Err(typePanic())
                 }
@@ -462,6 +510,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Float -> {
                     when (second) {
                         is Int -> Ok(first - second)
@@ -471,6 +520,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Long -> {
                     when (second) {
                         is Int -> Ok(first - second)
@@ -480,6 +530,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Double -> {
                     when (second) {
                         is Int -> Ok(first - second)
@@ -489,6 +540,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 else -> {
                     Err(typePanic())
                 }
@@ -509,6 +561,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Float -> {
                     when (second) {
                         is Int -> Ok(first * second)
@@ -518,6 +571,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Long -> {
                     when (second) {
                         is Int -> Ok(first * second)
@@ -527,6 +581,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Double -> {
                     when (second) {
                         is Int -> Ok(first * second)
@@ -536,6 +591,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 else -> {
                     Err(typePanic())
                 }
@@ -556,6 +612,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Float -> {
                     when (second) {
                         is Int -> Ok(first / second)
@@ -565,6 +622,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Long -> {
                     when (second) {
                         is Int -> Ok(first / second)
@@ -574,6 +632,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Double -> {
                     when (second) {
                         is Int -> Ok(first / second)
@@ -583,6 +642,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 else -> {
                     Err(typePanic())
                 }
@@ -603,6 +663,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Float -> {
                     when (second) {
                         is Int -> Ok(first % second)
@@ -612,6 +673,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Long -> {
                     when (second) {
                         is Int -> Ok(first % second)
@@ -621,6 +683,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 is Double -> {
                     when (second) {
                         is Int -> Ok(first % second)
@@ -630,6 +693,7 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                         else -> Err(typePanic())
                     }
                 }
+
                 else -> {
                     Err(typePanic())
                 }
@@ -713,24 +777,28 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                                     ?: Err(typePanic()).bind()
                             }
                         }
+
                         is List<*> -> binding {
                             input.map {
                                 it?.let { transformer(listOf(it)).bind() }
                                     ?: Err(typePanic()).bind()
                             }
                         }
+
                         is Result<*, *> -> binding<Result<*, *>, Panic> {
                             input.map {
                                 it?.let { transformer(listOf(it)).bind() }
                                     ?: Err(typePanic()).bind()
                             }
                         }
+
                         is Optional<*> -> binding<Optional<*>, Panic> {
                             input.map {
                                 it?.let { transformer(listOf(it)).bind() }
                                     ?: Err(typePanic()).bind()
                             }
                         }
+
                         else -> Err(typePanic())
                     }
                 }
@@ -750,12 +818,14 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                                     ?: Err(typePanic()).bind()
                             }
                         }
+
                         is Optional<*> -> binding<Any, Panic> {
                             input.mapOr(default) {
                                 it?.let { transformer(listOf(it)).bind() }
                                     ?: Err(typePanic()).bind()
                             }
                         }
+
                         else -> Err(typePanic())
                     }
                 }
@@ -775,12 +845,14 @@ val builtinFns: Map<String, Fn> = mapOf<String, Fn>(
                                     ?: Err(typePanic()).bind()
                             }
                         }
+
                         is Optional<*> -> binding<Any, Panic> {
                             input.mapOrElse({ getDefault(kotlin.collections.listOf()) }) {
                                 it?.let { transformer(listOf(it)).bind() }
                                     ?: Err(typePanic()).bind()
                             }
                         }
+
                         else -> Err(typePanic())
                     }
                 }
