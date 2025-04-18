@@ -26,8 +26,21 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -37,7 +50,6 @@ import com.pjtsearch.opencontroller.extensions.OpenControllerIcon
 import com.pjtsearch.opencontroller.extensions.houseIcons
 import com.pjtsearch.opencontroller.settings.Settings
 import com.pjtsearch.opencontroller.settingsDataStore
-import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,7 +59,8 @@ fun ManageHousesRoute(onOpenSettings: (String?) -> Unit, onExit: () -> Unit) {
     val settings by ctx.settingsDataStore.data.collectAsState(initial = Settings.getDefaultInstance())
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-    Scaffold(modifier = Modifier
+    Scaffold(
+        modifier = Modifier
         .nestedScroll(scrollBehavior.nestedScrollConnection), topBar = {
         LargeTopAppBar(title = { Text("Manage houses") }, navigationIcon = {
             IconButton(
@@ -76,7 +89,7 @@ fun ManageHousesRoute(onOpenSettings: (String?) -> Unit, onExit: () -> Unit) {
         ) {
             items(settings.houseRefsList, { it.id }) {
                 ListItem(
-                    headlineText = { Text(it.displayName) },
+                    headlineContent = { Text(it.displayName) },
                     modifier = Modifier
                         .clickable {
                             onOpenSettings(
