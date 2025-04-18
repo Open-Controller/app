@@ -11,14 +11,14 @@ protobuf {
     generateProtoTasks {
         all().each { task ->
             task.builtins {
-                java { }
+                java {}
             }
         }
     }
 }
 
 dependencies {
-    implementation 'com.google.protobuf:protobuf-java:3.19.1'
+    implementation 'com.google.protobuf:protobuf-java:3.24.4'
 }
 
 sourceSets {
