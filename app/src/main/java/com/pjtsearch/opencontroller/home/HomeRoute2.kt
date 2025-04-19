@@ -23,10 +23,17 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -118,16 +125,18 @@ class NavigationActions(navController: NavHostController) {
         }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeRoute2(
-    navController: NavHostController = rememberNavController(),
-    navigationActions: NavigationActions = NavigationActions(navController),
     houseLoadingState: HouseLoadingState,
     isExpandedScreen: Boolean,
     onError: (Throwable) -> Unit,
+    onReload: () -> Unit,
     onOpenSettings: (String?) -> Unit,
     onHouseSelected: (HouseRef) -> Unit,
 ) {
+    val navController = rememberNavController()
+    val navigationActions = NavigationActions(navController)
     var houseSelectorOpened by remember { mutableStateOf(false) }
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -141,6 +150,89 @@ fun HomeRoute2(
         }
         onHouseSelected(houseRef)
     }
+
+    if (isExpandedScreen) {
+        Row(
+            Modifier.padding(
+                WindowInsets.systemBars.asPaddingValues()
+            )
+        ) {
+            HomeRoomsSidebar(
+                houseLoadingState = houseLoadingState,
+                onOpenHouseSelector = { houseSelectorOpened = true },
+                onSelectController = {
+                    navigationActions.navigateToController(
+                        it.first,
+                        it.second
+                    )
+                },
+                onReload = onReload,
+                modifier = Modifier.weight(3f)
+            )
+            Column(
+                Modifier
+                    .weight(5f)
+                    .padding(horizontal = 15.dp)
+            ) {
+                HomeRouteNavigator(
+                    navController = navController,
+                    navigationActions = navigationActions,
+                    houseLoadingState = houseLoadingState,
+                    isExpandedScreen = isExpandedScreen,
+                    onError = onError,
+                    onOpenSettings = onOpenSettings,
+                    onOpenHouseSelector = { houseSelectorOpened = true }
+                )
+            }
+        }
+    } else {
+        HomeRouteNavigator(
+            navController = navController,
+            navigationActions = navigationActions,
+            houseLoadingState = houseLoadingState,
+            isExpandedScreen = isExpandedScreen,
+            onError = onError,
+            onOpenSettings = onOpenSettings,
+            onOpenHouseSelector = { houseSelectorOpened = true }
+        )
+    }
+
+    if (houseSelectorOpened) {
+        AlertDialog(
+            onDismissRequest = { houseSelectorOpened = false },
+            title = { Text("Choose house") },
+            modifier = Modifier.height(500.dp),
+            text = {
+                HouseSelector(
+                    modifier = Modifier.fillMaxHeight(),
+                    houseRefsList = remember(settings) { settings.houseRefsList },
+                    onHouseSelected = beforeHouseSelected,
+                    currentHouse = houseLoadingState.houseRef.id
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    houseSelectorOpened = false; onOpenSettings(
+                    SettingsDestinations.MANAGE_HOUSES_ROUTE
+                )
+                }) {
+                    Text("Manage")
+                }
+            })
+    }
+
+}
+
+@Composable
+fun HomeRouteNavigator(
+    navController: NavHostController = rememberNavController(),
+    navigationActions: NavigationActions = NavigationActions(navController),
+    houseLoadingState: HouseLoadingState,
+    isExpandedScreen: Boolean,
+    onError: (Throwable) -> Unit,
+    onOpenSettings: (String?) -> Unit,
+    onOpenHouseSelector: () -> Unit,
+) {
     NavHost(
         navController = navController,
         popExitTransition = {
@@ -172,7 +264,7 @@ fun HomeRoute2(
             if (!isExpandedScreen) {
                 HomeRoomsScreen(
                     houseLoadingState = houseLoadingState,
-                    onOpenHouseSelector = { houseSelectorOpened = true },
+                    onOpenHouseSelector = onOpenHouseSelector,
                     onSelectController = {
                         navigationActions.navigateToController(
                             it.first,
@@ -182,6 +274,8 @@ fun HomeRoute2(
                     onReload = {},
                     onOpenSettings = onOpenSettings
                 )
+            } else {
+                HomeEmptyBase()
             }
         }
         composable(
@@ -195,6 +289,7 @@ fun HomeRoute2(
             val room = it.arguments?.getString("room")!!
             val controller = it.arguments?.getString("controller")!!
             check(houseLoadingState is HouseLoadingState.Loaded)
+//            TODO: need different appearance if is expanded screen
             HomeControllerScreen(
                 roomDisplayName = houseLoadingState.house.rooms.find { it.id == room }!!.displayName,
                 controller = houseLoadingState.house.rooms.find { it.id == room }!!.controllers.find { it.id == controller }!!,
@@ -204,30 +299,6 @@ fun HomeRoute2(
                 controllerMenuState = ControllerMenuState.Closed(listOf())
             )
         }
-    }
-
-    if (houseSelectorOpened) {
-        AlertDialog(
-            onDismissRequest = { houseSelectorOpened = false },
-            title = { Text("Choose house") },
-            modifier = Modifier.height(500.dp),
-            text = {
-                HouseSelector(
-                    modifier = Modifier.fillMaxHeight(),
-                    houseRefsList = remember(settings) { settings.houseRefsList },
-                    onHouseSelected = beforeHouseSelected,
-                    currentHouse = houseLoadingState.houseRef.id
-                )
-            },
-            confirmButton = {
-                Button(onClick = {
-                    houseSelectorOpened = false; onOpenSettings(
-                    SettingsDestinations.MANAGE_HOUSES_ROUTE
-                )
-                }) {
-                    Text("Manage")
-                }
-            })
     }
 
 }

@@ -184,6 +184,7 @@ fun NavigationGraph(
                                 true
                             )
                         },
+                        onReload = { homeViewModel.refreshHouse() }
                     )
                 }
             }
