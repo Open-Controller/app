@@ -138,9 +138,9 @@ fun NavigationGraph(
                 }
 
                 else -> {
-                    val uiState by homeViewModel.uiState.collectAsState()
+                    val houseLoadingState by homeViewModel.houseLoadingState.collectAsState()
                     HomeRoute(
-                        houseLoadingState = uiState.houseLoadingState,
+                        houseLoadingState = houseLoadingState,
                         isExpandedScreen = isExpandedScreen,
                         onError = onError,
                         onOpenSettings = { subRoute ->
