@@ -179,7 +179,8 @@ fun HomeRoute(
                     isExpandedScreen = isExpandedScreen,
                     onError = onError,
                     onOpenSettings = onOpenSettings,
-                    onOpenHouseSelector = { houseSelectorOpened = true }
+                    onOpenHouseSelector = { houseSelectorOpened = true },
+                    onReload = onReload
                 )
             }
         }
@@ -191,7 +192,8 @@ fun HomeRoute(
             isExpandedScreen = isExpandedScreen,
             onError = onError,
             onOpenSettings = onOpenSettings,
-            onOpenHouseSelector = { houseSelectorOpened = true }
+            onOpenHouseSelector = { houseSelectorOpened = true },
+            onReload = onReload
         )
     }
 
@@ -230,6 +232,7 @@ fun HomeRouteNavigator(
     onError: (Throwable) -> Unit,
     onOpenSettings: (String?) -> Unit,
     onOpenHouseSelector: () -> Unit,
+    onReload: () -> Unit,
 ) {
     NavHost(
         navController = navController,
@@ -269,7 +272,7 @@ fun HomeRouteNavigator(
                             it.second
                         )
                     },
-                    onReload = {},
+                    onReload = onReload,
                     onOpenSettings = onOpenSettings
                 )
             } else {
