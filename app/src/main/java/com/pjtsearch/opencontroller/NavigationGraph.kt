@@ -21,8 +21,8 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -79,12 +79,14 @@ fun NavigationGraph(
     NavHost(
         navController = navController,
         popExitTransition = {
+            val intSpec =
+                tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing)
             val floatSpec =
                 tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
-            scaleOut(
+            slideOutHorizontally(intSpec, targetOffsetX = { s -> s / 14 }) + fadeOut(
                 floatSpec,
-                targetScale = 0.95f
-            ) + fadeOut(floatSpec, 0f)
+                0f
+            )
         },
         enterTransition = {
             val intSpec =
