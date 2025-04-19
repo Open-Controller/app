@@ -107,20 +107,20 @@ class NavigationActions(navController: NavHostController) {
 
     val navigateToController: (room: String, controller: String) -> Unit =
         { room, controller ->
-            navController.navigate(
-                Destinations.CONTROLLER_ROUTE + "/$room/$controller"
-            ) {
-                // Pop up to the start destination of the graph to
-                // avoid building up a large stack of destinations
-                // on the back stack as users select items
-                popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = false
+            val oldRoute = navController.currentBackStackEntry?.destination?.route
+            val oldRoom =
+                navController.currentBackStackEntry?.arguments?.getString("room")
+            val oldController =
+                navController.currentBackStackEntry?.arguments?.getString("controller")
+//            Prevent from navigating to the same route. Need to do this because singletop doesn't check arguments
+//            (see https://stackoverflow.com/a/68903458/22641520 and https://stackoverflow.com/q/75795737/22641520)
+            if (oldRoute != Destinations.CONTROLLER_ROUTE + "/{room}/{controller}" || oldRoom != room || oldController != controller) {
+                navController.navigate(
+                    Destinations.CONTROLLER_ROUTE + "/$room/$controller"
+                ) {
+                    // Restore state when reselecting a previously selected item
+                    restoreState = false
                 }
-                // Avoid multiple copies of the same destination when
-                // reselecting the same item
-                launchSingleTop = true
-                // Restore state when reselecting a previously selected item
-                restoreState = false
             }
         }
 }
