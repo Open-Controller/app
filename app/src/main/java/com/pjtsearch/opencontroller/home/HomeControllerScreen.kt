@@ -17,15 +17,28 @@
 
 package com.pjtsearch.opencontroller.home
 
-import androidx.compose.foundation.layout.*
+//import com.pjtsearch.opencontroller.components.CenterAlignedTopAppBarWithPadding
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.*
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-//import com.pjtsearch.opencontroller.components.CenterAlignedTopAppBarWithPadding
 import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.executor.Widget
 import com.pjtsearch.opencontroller.ui.components.ControllerView
@@ -37,6 +50,7 @@ import com.pjtsearch.opencontroller.ui.components.ControllerView
 @Composable
 fun HomeControllerScreen(
     roomDisplayName: String,
+    isExpandedScreen: Boolean,
     controller: Controller,
     onBack: () -> Unit,
     onError: (Throwable) -> Unit,
@@ -48,23 +62,23 @@ fun HomeControllerScreen(
             CenterAlignedTopAppBar(
                 title = { Text(roomDisplayName + " " + controller.displayName) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    if (!isExpandedScreen) IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Filled.Close,
                             contentDescription = "Exit house"
                         )
                     }
                 },
-                windowInsets = WindowInsets.statusBars.exclude(
+                windowInsets = if (!isExpandedScreen) WindowInsets.statusBars.exclude(
                     WindowInsets.statusBars.only(
                         WindowInsetsSides.Bottom
                     )
-                )
+                ) else TopAppBarDefaults.windowInsets
             )
         },
         content = { innerPadding ->
             Column(
-                Modifier
+                if (!isExpandedScreen) Modifier
                     .padding(innerPadding)
                     .padding(start = 15.dp, end = 15.dp)
                     .padding(
@@ -73,6 +87,9 @@ fun HomeControllerScreen(
                             .asPaddingValues()
                             .calculateBottomPadding()
                     )
+                else
+                    Modifier
+                        .padding(innerPadding)
             ) {
                 ControllerView(
                     controller,

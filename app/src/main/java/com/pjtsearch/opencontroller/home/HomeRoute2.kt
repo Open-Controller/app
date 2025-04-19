@@ -289,10 +289,10 @@ fun HomeRouteNavigator(
             val room = it.arguments?.getString("room")!!
             val controller = it.arguments?.getString("controller")!!
             check(houseLoadingState is HouseLoadingState.Loaded)
-//            TODO: need different appearance if is expanded screen
             HomeControllerScreen(
                 roomDisplayName = houseLoadingState.house.rooms.find { it.id == room }!!.displayName,
                 controller = houseLoadingState.house.rooms.find { it.id == room }!!.controllers.find { it.id == controller }!!,
+                isExpandedScreen = isExpandedScreen,
                 onBack = { navigationActions.navigateToBase() },
                 onError = onError,
                 onInteractWithControllerMenu = { _, _ -> },

@@ -123,14 +123,14 @@ fun HomeRoute(
                 // Guaranteed by above condition for home screen type
                 check(uiState is HomeUiState.HasController)
 
-                HomeControllerScreen(
-                    controller = uiState.selectedController,
-                    controllerMenuState = uiState.controllerMenuState,
-                    roomDisplayName = uiState.roomDisplayName,
-                    onInteractWithControllerMenu = onInteractWithControllerMenu,
-                    onBack = onInteractWithRooms,
-                    onError = onError
-                )
+//                HomeControllerScreen(
+//                    controller = uiState.selectedController,
+//                    controllerMenuState = uiState.controllerMenuState,
+//                    roomDisplayName = uiState.roomDisplayName,
+//                    onInteractWithControllerMenu = onInteractWithControllerMenu,
+//                    onBack = onInteractWithRooms,
+//                    onError = onError
+//                )
 
                 // If we are just showing the detail, have a back press switch to the list.
                 // This doesn't take anything more than notifying that we "interacted with the list"
