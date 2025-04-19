@@ -289,14 +289,23 @@ fun HomeRouteNavigator(
             val room = it.arguments?.getString("room")!!
             val controller = it.arguments?.getString("controller")!!
             check(houseLoadingState is HouseLoadingState.Loaded)
+            var menuState: ControllerMenuState by remember {
+                mutableStateOf(
+                    ControllerMenuState.Closed(listOf())
+                )
+            }
             HomeControllerScreen(
                 roomDisplayName = houseLoadingState.house.rooms.find { it.id == room }!!.displayName,
                 controller = houseLoadingState.house.rooms.find { it.id == room }!!.controllers.find { it.id == controller }!!,
                 isExpandedScreen = isExpandedScreen,
                 onBack = { navigationActions.navigateToBase() },
                 onError = onError,
-                onInteractWithControllerMenu = { _, _ -> },
-                controllerMenuState = ControllerMenuState.Closed(listOf())
+                onInteractWithControllerMenu = { open, widgets ->
+                    menuState = if (open) ControllerMenuState.Open(
+                        widgets
+                    ) else ControllerMenuState.Closed(widgets)
+                },
+                controllerMenuState = menuState
             )
         }
     }
