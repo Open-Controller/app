@@ -17,13 +17,18 @@
 
 package com.pjtsearch.opencontroller
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import com.pjtsearch.opencontroller.executor.Controller
 import com.pjtsearch.opencontroller.executor.House
 import com.pjtsearch.opencontroller.executor.Room
 import com.pjtsearch.opencontroller.home.HomeRoomsScreen
 import com.pjtsearch.opencontroller.home.HouseLoadingState
+import com.pjtsearch.opencontroller.settings.HouseRef
 import junit.framework.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -42,13 +47,17 @@ class HomeRoomsScreenInstrumentedTest {
     fun shouldLoad() {
         composeTestRule.setContent {
             HomeRoomsScreen(
-                houseLoadingState = HouseLoadingState.Loading(null),
-                onExit = {},
+                houseLoadingState = HouseLoadingState.Loading(
+                    null,
+                    HouseRef.getDefaultInstance()
+                ),
+                onOpenHouseSelector = {},
                 onReload = {},
-                onSelectController = {}
+                onSelectController = {},
+                onOpenSettings = {}
             )
         }
-        composeTestRule.onAllNodesWithText("Loading").assertCountEquals(5)
+        composeTestRule.onAllNodesWithText("Loading").assertCountEquals(6)
     }
 
     @Test
@@ -56,10 +65,15 @@ class HomeRoomsScreenInstrumentedTest {
         var reloadedTimes = 0
         composeTestRule.setContent {
             HomeRoomsScreen(
-                houseLoadingState = HouseLoadingState.Error(Error("Test Error"), null),
-                onExit = {},
+                houseLoadingState = HouseLoadingState.Error(
+                    Error("Test Error"),
+                    null,
+                    HouseRef.getDefaultInstance()
+                ),
+                onOpenHouseSelector = {},
                 onReload = { reloadedTimes++ },
-                onSelectController = {}
+                onSelectController = {},
+                onOpenSettings = {}
             )
         }
         composeTestRule.onNodeWithText("Error Loading: Test Error").assertIsDisplayed()
@@ -98,10 +112,12 @@ class HomeRoomsScreenInstrumentedTest {
                                 )
                             )
                         )
-                    )
+                    ),
+                    HouseRef.getDefaultInstance()
                 ),
-                onExit = {},
+                onOpenHouseSelector = {},
                 onReload = {},
+                onOpenSettings = {},
                 onSelectController = { selected = selected + it }
             )
         }
@@ -110,6 +126,9 @@ class HomeRoomsScreenInstrumentedTest {
         composeTestRule.onNodeWithText("Controller 1").performClick()
         Thread.sleep(300)
         assertEquals(listOf("testRoom" to "controller1"), selected)
+        Thread.sleep(300)
+        composeTestRule.onNodeWithText("Test Room").performClick()
+        Thread.sleep(300)
         composeTestRule.onNodeWithText("Controller 2").performClick()
         Thread.sleep(300)
         assertEquals(
