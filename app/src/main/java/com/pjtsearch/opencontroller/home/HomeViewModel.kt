@@ -27,12 +27,13 @@ import com.pjtsearch.opencontroller.executor.Panic
 import com.pjtsearch.opencontroller.executor.Widget
 import com.pjtsearch.opencontroller.extensions.resolveHouseRef
 import com.pjtsearch.opencontroller.settings.HouseRef
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 sealed interface ControllerMenuState {
     val items: List<Widget>
@@ -88,8 +89,10 @@ class HomeViewModel(
         // Ui state is refreshing
         viewModelState.update { HouseLoadingState.Loading(it.house, it.houseRef) }
 
-        GlobalScope.launch {
-            val fetchResult = resolveHouseRef(houseRef)
+        viewModelScope.launch {
+            val fetchResult = withContext(Dispatchers.IO) {
+                resolveHouseRef(houseRef)
+            }
             viewModelState.update {
                 when (fetchResult) {
                     is Ok -> when (val evalResult = fetchResult.value) {
