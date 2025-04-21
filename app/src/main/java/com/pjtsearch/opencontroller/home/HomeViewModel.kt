@@ -34,8 +34,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.Serializable
 
-sealed interface ControllerMenuState {
+sealed interface ControllerMenuState : Serializable {
     val items: List<Widget>
 
     data class Open(override val items: List<Widget>) : ControllerMenuState
