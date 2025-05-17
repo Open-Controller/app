@@ -40,7 +40,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -291,7 +290,7 @@ fun HomeRouteNavigator(
             val room = it.arguments?.getString("room")!!
             val controller = it.arguments?.getString("controller")!!
             check(houseLoadingState is HouseLoadingState.Loaded)
-            var menuState: ControllerMenuState by rememberSaveable {
+            var menuState: ControllerMenuState by remember {
                 mutableStateOf(
                     ControllerMenuState.Closed(listOf())
                 )
